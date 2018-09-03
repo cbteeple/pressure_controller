@@ -3,7 +3,6 @@
 #include "handleSerialCommands.h"
 #include "sensorSettings.h"
 #include "valvePair.h"
-#include "pressureController.h"
 
 
 long lastTime=0;
@@ -19,7 +18,6 @@ long currTime=0;
   
   float pressures[numSensors];
 
-pressureController controller[numSensors];
 
 
 //Create a new settings object
@@ -43,9 +41,9 @@ void setup() {
   //Set up valves
     valves.initialize();
   
-  //Initialize the pressure sensor and control objects
+  //Initialize the pressure sensor objects
     for (int i=0; i<numSensors; i++){
-      controller[i].initialize(mux, i, *(new i2c_PressureSensor()), 1, *(new valvePair(3,4)));
+      sensors[i].initialize(SENSOR_CHIP);
     }
 
   //Initialize control settings
@@ -64,16 +62,11 @@ void setup() {
 
 void loop() {
   //Handle serial commands
-   bool newSettings=handleCommands.go(settings);
+    handleCommands.go(settings);
   
   //Get pressure readings
-    for (int i=0; i<numSensors; i++){
-      if (newSettings){
-        controller[i].setSetpoint(settings.setpoints[i]);
-        controller[i].setDeadWindow(settings.deadzones[i]);
-      }
-      pressures[i]=controller[i].go();
-    }
+    getPressures(pressures);
+    controlPressures(pressures,settings);
 
   //Print out data
     currTime=millis();

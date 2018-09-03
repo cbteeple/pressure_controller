@@ -13,12 +13,12 @@ class handleSerialCommands
     String command;
     bool broadcast = true;
     bool getCommand();
-    bool processCommand(sensorSettings &);
+    void processCommand(sensorSettings &);
     String getStringValue(String, char, int);
   
   public:
     void initialize(int);
-    bool go(sensorSettings &);
+    void go(sensorSettings &);
     void startBroadcast();
     void stopBroadcast();
 };

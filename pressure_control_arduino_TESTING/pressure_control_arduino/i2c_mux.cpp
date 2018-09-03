@@ -5,7 +5,6 @@
 #include "i2c_Mux.h"
 
 
-
 i2c_Mux::i2c_Mux(int mux_addr_in){
   mux_addr=mux_addr_in;
   //Start i2c stuff
