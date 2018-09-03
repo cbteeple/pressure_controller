@@ -5,13 +5,11 @@
 
 //_________________________________________________________
 //PUBLIC FUNCTIONS
-bool handleSerialCommands::go(sensorSettings &settings){
+void handleSerialCommands::go(sensorSettings &settings){
   bool newCommand = getCommand();
-  bool newSettings = false;
   if (newCommand){
-    newSettings=processCommand(settings);
+    processCommand(settings);
   }
-  return newSettings;
 }
 
 void handleSerialCommands::startBroadcast(){
@@ -44,8 +42,7 @@ bool handleSerialCommands::getCommand(){
 
 
 
-bool handleSerialCommands::processCommand(sensorSettings &settings){
-  bool newSettings=false;
+void handleSerialCommands::processCommand(sensorSettings &settings){
   if (broadcast){
     Serial.print("_");
   }
@@ -64,7 +61,6 @@ bool handleSerialCommands::processCommand(sensorSettings &settings){
   else if (command.startsWith("TIME")){
     if(getStringValue(command,';',1).length()){
       settings.looptime = getStringValue(command,';',1).toInt();
-      newSettings=true;
       if (broadcast){
         Serial.print("NEW ");
       }
@@ -79,7 +75,6 @@ bool handleSerialCommands::processCommand(sensorSettings &settings){
       for (int i=0; i<numSensors; i++){
         settings.setpoints[i]= getStringValue(command,';',i+1).toFloat();
       }
-      newSettings=true;
       if (broadcast){
         Serial.print("NEW ");
       }
@@ -97,7 +92,6 @@ bool handleSerialCommands::processCommand(sensorSettings &settings){
       for (int i=0; i<numSensors; i++){
         settings.deadzones[i]=getStringValue(command,';',i+1).toFloat();
       }
-      newSettings=true;
       if (broadcast){
         Serial.print("NEW ");
       }
@@ -113,7 +107,6 @@ bool handleSerialCommands::processCommand(sensorSettings &settings){
      
   }
   else {
-    newSettings=false;
     if (broadcast){
       Serial.print("Unrecognized Command");
     }
@@ -123,7 +116,6 @@ bool handleSerialCommands::processCommand(sensorSettings &settings){
     Serial.print("\n");
   }
 
-  return newSettings;
 }
 
 

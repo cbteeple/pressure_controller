@@ -12,7 +12,6 @@ class i2c_Mux
     //int active_channel; //Channel being used
   
   public:
-    i2c_Mux(){};
     i2c_Mux(int);
     void setActiveChannel(int);   
 };
