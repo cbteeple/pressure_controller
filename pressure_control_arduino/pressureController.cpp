@@ -8,16 +8,19 @@
 #include "valvePair.h"
 
 
+pressureController::pressureController(){
+  sensor=*(new i2c_PressureSensor());
+  valves=*(new valvePair());
+}
 
 
 
-void pressureController::initialize(i2c_Mux &mux_in, int muxChannel_in, i2c_PressureSensor &sensor_in, int sensorChip_in, valvePair &valves_in){
+void pressureController::initialize(i2c_Mux &mux_in, int muxChannel_in, int sensorChip_in, int valveArray[2]){
   mux=mux_in;
   muxChannel=muxChannel_in;
-  sensor=sensor_in;
-  valves=valves_in;
   sensorChip=sensorChip_in;
   sensor.initialize(sensorChip);
+  valves.initialize(valveArray[0],valveArray[1]);
 }
 
 void pressureController::setSetpoint(float setpoint_in){
@@ -31,7 +34,7 @@ void pressureController::setDeadWindow(float deadWindow_in){
 
 float pressureController::go(){
   //For the future if we decide to run a PD controller or something
-  //int lastPressure=pressure;
+  int lastPressure=pressure;
 
   //Get the pressure
   mux.setActiveChannel(muxChannel);

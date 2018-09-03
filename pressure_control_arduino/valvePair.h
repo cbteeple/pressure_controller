@@ -13,6 +13,7 @@ class valvePair
     valvePair(){};
     valvePair(int, int);
     void initialize();
+    void initialize(int, int);
     void pressureValveOn();
     void pressureValveOff();
     void ventValveOn();

@@ -73,12 +73,19 @@ void i2c_PressureSensor::setCalibration(int a, int b, int c, int d){
 }
 
 
+void i2c_PressureSensor::setSmoothing(float alpha_in){
+  alpha=alpha_in;
+}
+
+
 
 void i2c_PressureSensor::getData(void){
   //Get the data
   //Wire.beginTransmission(sensor_addr); // transmit to device
   //Wire.write(byte(data_reg));      
   //Wire.endTransmission();      // stop transmitting
+
+  pressureLast=pressure;
                   
   Wire.requestFrom(sensor_addr, 2, true);    // request 2 bytes from slave device #112
   int pressure1 = Wire.read();
@@ -91,13 +98,22 @@ void i2c_PressureSensor::getData(void){
   long p_comb = pressure1<<8 | pressure0;
   pressure = long((p_comb - output_min)*(pressure_max-pressure_min))/float(output_max-output_min)+pressure_min;
 
-
+  if (!firstCall){
+    pressureSmooth=alpha*pressure+ (1-alpha)*pressureLast;
+  }
+  else{
+    firstCall=false;
+  }
   
 }
 
 
 float i2c_PressureSensor::getPressure(void){
   return pressure;
+}
+
+float i2c_PressureSensor::getPressureSmoothed(void){
+  return pressureSmooth;
 }
 
 

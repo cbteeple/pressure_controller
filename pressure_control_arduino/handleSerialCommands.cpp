@@ -34,6 +34,7 @@ void handleSerialCommands::initialize(int num){
 bool handleSerialCommands::getCommand(){
   if (Serial.available() > 0) {
     command = Serial.readStringUntil('\n');
+    command.toUpperCase();
     return true;
   }
   else{
@@ -78,6 +79,16 @@ bool handleSerialCommands::processCommand(sensorSettings &settings){
     if(getStringValue(command,';',numSensors).length()){
       for (int i=0; i<numSensors; i++){
         settings.setpoints[i]= getStringValue(command,';',i+1).toFloat();
+      }
+      newSettings=true;
+      if (broadcast){
+        Serial.print("NEW ");
+      }
+    }
+    else if(getStringValue(command,';',1).length()){
+      float allset=getStringValue(command,';',1).toFloat();
+      for (int i=0; i<numSensors; i++){
+        settings.setpoints[i]= allset;
       }
       newSettings=true;
       if (broadcast){

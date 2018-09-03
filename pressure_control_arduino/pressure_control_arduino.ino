@@ -15,8 +15,9 @@ long currTime=0;
 //Create an array of pressure sensor objects
   #define SENSOR_CHIP 1
   #define numSensors 4
-  i2c_PressureSensor sensors[numSensors];
-  
+  //i2c_PressureSensor sensors[numSensors];
+
+  int ave_len=10;
   float pressures[numSensors];
 
 pressureController controller[numSensors];
@@ -29,7 +30,8 @@ pressureController controller[numSensors];
   handleSerialCommands handleCommands;
 
 //Create valvepair objects (right now only 1)
-  valvePair valves(3,4);
+  //valvePair valves(3,4);
+  int valvePins[][2]= {{2,3},{4,5},{6,7},{8,9},{10,11}};
 
 //Create controller objects for pressure control (right now only 1)
 float deadzone_start=0.25;
@@ -39,13 +41,10 @@ void setup() {
   //Start serial
     Serial.begin(115200);
     Serial.setTimeout(20);
-
-  //Set up valves
-    valves.initialize();
-  
+ 
   //Initialize the pressure sensor and control objects
     for (int i=0; i<numSensors; i++){
-      controller[i].initialize(mux, i, *(new i2c_PressureSensor()), 1, *(new valvePair(3,4)));
+      controller[i].initialize(mux, i, 1, valvePins[i]);
     }
 
   //Initialize control settings
@@ -55,7 +54,7 @@ void setup() {
       settings.deadzones[i]={deadzone_start};
       settings.setpoints[i]=0;
     }
-    settings.looptime =100;
+    settings.looptime =0;
     settings.outputsOn=true;
 }
 
@@ -68,14 +67,14 @@ void loop() {
   
   //Get pressure readings
     for (int i=0; i<numSensors; i++){
-      if (newSettings){
+      //if (newSettings){
         controller[i].setSetpoint(settings.setpoints[i]);
         controller[i].setDeadWindow(settings.deadzones[i]);
-      }
-      pressures[i]=controller[i].go();
+      //}
+      pressures[i] = controller[i].go();
     }
 
-  //Print out data
+  //Print out data at close to the correct rate
     currTime=millis();
     if (settings.outputsOn && (currTime-lastTime>= settings.looptime)){
       printData();
@@ -86,52 +85,12 @@ void loop() {
 
 
 
-
-//PRESSURE ARRAY FUNCTION
-void getPressures(float pressures[]){
-  for(int i=0; i<numSensors; i++){
-    mux.setActiveChannel(i);
-    sensors[i].getData();
-    pressures[i]=sensors[i].getPressure();
-  }
-}
-
-
-
-
-
-//PRESSURE CONTROL FUNCTION
-void controlPressures(float pressures[],sensorSettings settings){
-  for (int i=0; i<numSensors;i++){
-    float lowset=settings.setpoints[i]-settings.deadzones[i];
-    float highset=settings.setpoints[i]+settings.deadzones[i];
-    if(settings.setpoints[i]==0){
-      valves.vent();
-    }
-    else{
-      if (pressures[i] < lowset){
-        valves.pressurize();
-      }
-      else if(pressures[i] > highset){
-        valves.vent();
-      }
-      else{
-        valves.idle();
-      }
-    }
-  }
-}
-
-
-
-
-
 //PRINT DATA OUT FUNCTION
 void printData(){
   //Serial.print(currTime);
   //Serial.print('\t');
-  Serial.print(currTime-lastTime);
-  Serial.print('\t');
+  //Serial.print(currTime-lastTime);
+  //Serial.print('\t');
   for (int i=0;i<numSensors;i++){
     Serial.print(pressures[i],5);
     Serial.print('\t');  
