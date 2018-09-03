@@ -8,6 +8,19 @@ valvePair::valvePair(int pin1, int pin2){
 }
 
 
+
+
+void valvePair::initialize(int pin1, int pin2){
+  pinPressure=pin1;
+  pinVent=pin2;
+  pinMode(pinPressure, OUTPUT);
+  digitalWrite(pinPressure, LOW);
+  pinMode(pinVent, OUTPUT);
+  digitalWrite(pinVent, LOW);
+}
+
+
+
 void valvePair::initialize(){
   pinMode(pinPressure, OUTPUT);
   digitalWrite(pinPressure, LOW);

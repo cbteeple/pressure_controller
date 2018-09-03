@@ -16,13 +16,14 @@ class pressureController
     int muxChannel;
     int sensorChip;
     float pressure;
+    float pressureSmooth;
 
     float deadWindow;
     float setpoint;
   
   public:
-    pressureController(){};
-    void initialize(i2c_Mux &, int, i2c_PressureSensor &, int, valvePair &);
+    pressureController();
+    void initialize(i2c_Mux &, int, int, int[]);
     void setSetpoint(float);
     void setDeadWindow(float);
     float go();
