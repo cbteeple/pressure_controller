@@ -29,6 +29,7 @@ class valvePair
     void vent();
     void ventProportional(float);
     void idle();
+    void go(float);
 };
 
 #endif
