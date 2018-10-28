@@ -1,23 +1,26 @@
 #include <stdlib.h>
+
+#ifndef __i2c_PressureSensor_H__
+#define __i2c_PressureSensor_H__
+
 #include "allSettings.h"
 
-#ifndef __analog_PressureSensor_H__
-#define __analog_PressureSensor_H__
-
-
-class analog_PressureSensor
+class i2c_PressureSensor
 {
   private:
-    int sensePin;
-    int sensorType;
-        
+    int sensor_addr; //address of the sensor
+    bool mux_addr;
+    bool use_mux;
+    int mux_channel;
+
+    
     //Calibration settings
-    float output_max;
-    float  output_min;
-    float output_offset;
-    float pressure_max;
-    float pressure_min;
+    int output_max;
+    int output_min;
+    int pressure_max;
+    int pressure_min;
     void setCalibration(int);
+    void setMuxChannel(int);
     bool firstCall=true;
     float alpha = 0.01;
     
@@ -28,7 +31,7 @@ class analog_PressureSensor
     float pressureSmooth;
   
   public:
-    analog_PressureSensor(){};
+    i2c_PressureSensor(){};
     void initialize(sensorSettings &);
     void initialize(sensorSettings &,int,int,int,int);
     void setCalibration(int, int, int, int);

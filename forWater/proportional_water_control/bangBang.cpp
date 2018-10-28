@@ -1,12 +1,8 @@
 
 #include "bangBang.h"
 
-
-
-#include "analog_PressureSensor.h"
-#include "valvePair.h"
 #include <Arduino.h>
-#include "sensorSettings.h"
+#include "allSettings.h"
 
 
 //Initialize the controller with relevant information

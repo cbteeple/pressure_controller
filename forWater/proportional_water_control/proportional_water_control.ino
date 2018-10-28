@@ -1,34 +1,64 @@
 #include "analog_PressureSensor.h"
-//#include "i2c_PressureSensor.h"
+#include "i2c_PressureSensor.h"
 #include "handleSerialCommands.h"
-#include "sensorSettings.h"
+#include "allSettings.h"
 #include "valvePair.h"
-#include "bangBang.h"
+//#include "bangBang.h"
+#include "proportional.h"
 
-
-//Create an array of pressure sensor objects (Uncomment the one you want)
-#define SENSOR_ANALOG true
-//#define SENSOR_I2C true
-
-#define SENSOR_MODEL 1
-#define NUM_SENSORS 1
-
-
-//Create a new settings object
-globalSettings settings;
-controlSettings ctrlSettings[NUM_SENSORS];
-
-//Create an object to handle serial commands
-handleSerialCommands handleCommands;
-
-//Set up sensing
+//SENSING:
   //Arduino ADC pins:
     //Mega:  A0-A15                        (all pins work fine)
     //Uno:   A0-A5                         (all pins work fine)
     //Micro: A0, A1, A4 - A8, A11          (A9, A10, A12, A13 all conflict with PWM pins)
     //Nano:  A0-A7                         (A4, A5 are i2c pins)
 
+//VALVES:
+  //Arduino PWM pins:
+    //Mega:  2 - 13, 44, 45, 46            (all pins work fine)
+    //Uno:   3, 5, 6, 9, 10, 11            (all pins work fine)
+    //Micro: 3, 5, 6, 9, 10, 11, 12, 13    (all pins work fine)
+    //Nano:  3, 6, 9, 10, 11               (pin 5 fails consistently, no idea why)
 
+
+
+
+//Define the type of sensor to use (only one can be true)
+#define SENSOR_ANALOG true
+#define SENSOR_I2C false
+
+#define SENSOR_MODEL 1
+#define NUM_SENSORS 1
+
+//Define the type of controller to use (only one can be true)
+#define CONTROL_BANGBANG false
+#define CONTROL_P true
+
+
+//Set default settings for things
+//If using i2c sensors...
+  int sensorAddr=0x58;
+  bool useMux=true;
+  int muxAddr=0x70;
+
+//Set valve pins
+  int valvePins[][2]= { {6,9}, {10,11} };
+
+//Default controller settings
+  float deadzone_start=0.25;
+  float setpoint_start=0;
+  float pid_start[]={0.2,0,0}; 
+
+
+//Create a new settings object
+globalSettings settings;
+controlSettings ctrlSettings[NUM_SENSORS];
+sensorSettings senseSettings[NUM_SENSORS];
+
+//Create an object to handle serial commands
+handleSerialCommands handleCommands;
+
+//Set up sensing
 #if(SENSOR_ANALOG)
   int senseChannels[]={A0,A1,A2,A3};
   analog_PressureSensor sensors[NUM_SENSORS];
@@ -42,27 +72,16 @@ float pressures[NUM_SENSORS];
 float valveSets[NUM_SENSORS];
 
 
-
-//Set up valve pairs in an array
-  //Arduino PWM pins:
-    //Mega:  2 - 13, 44, 45, 46            (all pins work fine)
-    //Uno:   3, 5, 6, 9, 10, 11            (all pins work fine)
-    //Micro: 3, 5, 6, 9, 10, 11, 12, 13    (all pins work fine)
-    //Nano:  3, 6, 9, 10, 11               (pin 5 fails consistently, no idea why)
-
-  
+//Set up valve pairs  
 valvePair valves[NUM_SENSORS];
-int valvePins[][2]= { {6,9}, {10,11} };
 
 
 //Create an array of controller objects for pressure control
-bangBang controllers[NUM_SENSORS];
-
-
-float deadzone_start=0.25;
-float setpoint_start=0;
-//float pid_start[]={0.2,0,0};
-//int mode_start = 1;      
+#if CONTROL_BANGBANG
+  bangBang controllers[NUM_SENSORS];
+#elif CONTROL_P
+  proportional controllers[NUM_SENSORS];
+#endif 
 
 
 
@@ -83,22 +102,39 @@ void setup() {
     handleCommands.initialize(NUM_SENSORS);
     handleCommands.startBroadcast();
     for (int i=0; i<NUM_SENSORS; i++){
-      ctrlSettings[i].deadzone=deadzone_start;
+      
+      //Initialize control settings
       ctrlSettings[i].setpoint=setpoint_start;
       
-      /*ctrlSettings[i].controlMode = mode_start;
-
-      for (int j=0; j<3; j++){
-        ctrlSettings[i].pidGains[j]=pid_start[j];
+      if(CONTROL_BANGBANG){
+        ctrlSettings[i].deadzone=deadzone_start;
       }
-      */
+      else if (CONTROL_P){
+        for (int j=0; j<3; j++){
+          ctrlSettings[i].pidGains[j]=pid_start[j];
+        }
+      }
+
+
+      //Initialize sensor settings
+      senseSettings[i].sensorModel=SENSOR_MODEL;
+
+      if(SENSOR_ANALOG){
+        senseSettings[i].sensorPin=senseChannels[i];
+      }
+      else if(SENSOR_I2C){
+        senseSettings[i].sensorAddr= sensorAddr;
+        senseSettings[i].useMux     = useMux;
+        senseSettings[i].muxAddr    = muxAddr;
+        senseSettings[i].muxChannel = senseChannels[i];
+      }
       
     }
 
 
   //Initialize the pressure sensor and control objects
     for (int i=0; i<NUM_SENSORS; i++){
-      sensors[i].initialize(SENSOR_MODEL,senseChannels[i]);
+      sensors[i].initialize(senseSettings[i]);
       valves[i].initialize(valvePins[i][0],valvePins[i][1]);
       controllers[i].initialize(ctrlSettings[i]);
     }

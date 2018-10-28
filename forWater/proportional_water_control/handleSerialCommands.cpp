@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "Arduino.h"
 #include "handleSerialCommands.h"
-#include "sensorSettings.h"
+#include "allSettings.h"
 
 //_________________________________________________________
 //PUBLIC FUNCTIONS
