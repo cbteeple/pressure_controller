@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "sensorSettings.h"
+#include "allSettings.h"
 
 
 #ifndef __handleSerialCommands_H__

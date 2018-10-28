@@ -2,28 +2,21 @@
 #include "Arduino.h"
 
 #include "analog_PressureSensor.h"
+#include "allSettings.h"
 
 //analog_PressureSensor::analog_PressureSensor(){}
 
 
-
-void analog_PressureSensor::initialize(int sensePin_in){
-  sensePin=sensePin_in;
-  sensorType = 1;
-}
-
-
-
-void analog_PressureSensor::initialize(int sensorType_in, int sensePin_in){
-  sensorType=sensorType_in;
-  sensePin=sensePin_in; 
+void analog_PressureSensor::initialize(sensorSettings &senseSet){
+  sensorType=senseSet.sensorModel;
+  sensePin=senseSet.sensorPin; 
   setCalibration(sensorType);
 }
 
 
 
-void analog_PressureSensor::initialize(int sensePin_in,int a, int b, int c, int d){
-  sensePin=sensePin_in;
+void analog_PressureSensor::initialize(sensorSettings &senseSet,int a, int b, int c, int d){
+  sensePin=senseSet.sensorPin; 
   setCalibration(a,b,c,d);
 }
 

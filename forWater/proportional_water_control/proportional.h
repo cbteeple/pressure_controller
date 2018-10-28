@@ -1,21 +1,21 @@
 #include <stdlib.h>
 
-#ifndef __bangBang_H__
-#define __bangBang_H__
+#ifndef __proportional_H__
+#define __proportional_H__
 
 #include "allSettings.h"
 
-class bangBang
+class proportional
 {
   private:
     float pressureLast;
     float pressureSmooth;
 
-    float deadWindow;
     float setpoint;
+    float pidGains[3];
   
   public:
-    bangBang(){};
+    proportional(){};
     void initialize(controlSettings &);
     void updateSettings(controlSettings &);
     void setSetpoint(float);
