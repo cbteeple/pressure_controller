@@ -113,3 +113,28 @@ float valvePair::mapFloat(float x, float in_min, float in_max, float out_min, fl
 
 
 
+//Update controller settings
+void valvePair::go(float act_in){
+
+  //Check for saturation
+  if (act_in == 0.0 || act_in == -1.0){
+    vent();
+  }
+  else if (act_in == 1.0){
+    pressurize();
+  }
+  //Otherwise, vent proportionally
+  else{
+    if (act_in <0.0){
+      ventProportional(abs(act_in));
+    }
+    else{
+      pressurizeProportional(abs(act_in));
+    }  
+  }  
+}
+
+
+
+
+

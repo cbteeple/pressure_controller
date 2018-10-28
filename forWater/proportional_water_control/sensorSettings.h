@@ -14,10 +14,10 @@ class globalSettings
 class controlSettings
 {
   public:
-    float deadzone;
     float setpoint;
-    float pidGains [3];
+    float deadzone;
     int controlMode;
+    float pidGains [3];
 };
 
 #endif
