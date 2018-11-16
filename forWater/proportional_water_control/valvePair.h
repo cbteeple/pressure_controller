@@ -8,7 +8,7 @@ class valvePair
   private:
     int pinPressure;
     int pinVent;
-    int offset = 230;
+    int offset = 220;
     int outRange=255-offset;
     float mapFloat(float, float, float, float, float);
   

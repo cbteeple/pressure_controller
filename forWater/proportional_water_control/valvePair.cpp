@@ -35,7 +35,7 @@ void valvePair::setSettings(int offset_in, int range_in){
 }
 
 
-
+//Digital valves
 
 void valvePair::pressureValveOn(){
   digitalWrite(pinPressure, HIGH);  
@@ -43,10 +43,6 @@ void valvePair::pressureValveOn(){
 
 void valvePair::pressureValveOff(){
   digitalWrite(pinPressure, LOW);  
-}
-
-void valvePair::pressureValveAnalog(int val){
-  analogWrite(pinPressure, val);  
 }
 
 void valvePair::ventValveOn(){
@@ -57,8 +53,14 @@ void valvePair::ventValveOff(){
   digitalWrite(pinVent, LOW);  
 }
 
+
+//Analog valves
+void valvePair::pressureValveAnalog(int val){
+   analogWrite(pinPressure, val); 
+}
+
 void valvePair::ventValveAnalog(int val){
-  analogWrite(pinVent, val);  
+  analogWrite(pinVent, val); 
 }
 
 
@@ -68,14 +70,16 @@ void valvePair::pressurize(){
 }
 
 void valvePair::pressurizeProportional(float val){
-  ventValveOff();
+  ventValveAnalog(0);
   float set1=mapFloat(val,0.0,1.0,0.0,float(outRange));
   int set = constrain(set1+ offset, 0, 255);
   pressureValveAnalog(set);
-  Serial.print('\t');
-  Serial.print(set1,6);
-  Serial.print('\t');
-  Serial.print(set);
+  //Serial.print("Pres_P");
+  //Serial.print('\t');
+  //Serial.print('\t');
+  //Serial.print(set1,6);
+  //Serial.print('\t');
+  //Serial.print(set);
 }
 
 void valvePair::vent(){
@@ -85,14 +89,16 @@ void valvePair::vent(){
 
 
 void valvePair::ventProportional(float val){
-  pressureValveOff();
+  pressureValveAnalog(0);
   float set1=mapFloat(val,0.0,1.0,0.0,float(outRange));
   int set = constrain(set1+ offset, 0, 255);
   ventValveAnalog(set);
-  Serial.print('\t');
-  Serial.print(set1,6);
-  Serial.print('\t');
-  Serial.print(set);
+  //Serial.print("Vent_P");
+  //Serial.print('\t');
+  //Serial.print('\t');
+  //Serial.print(set1,6);
+  //Serial.print('\t');
+  //Serial.print(set);
 }
 
 
@@ -117,7 +123,7 @@ float valvePair::mapFloat(float x, float in_min, float in_max, float out_min, fl
 void valvePair::go(float act_in){
 
   //Check for saturation
-  if (act_in == 0.0 || act_in == -1.0){
+ /* if (act_in == 0.0 || act_in == -1.0){
     vent();
   }
   else if (act_in == 1.0){
@@ -125,13 +131,19 @@ void valvePair::go(float act_in){
   }
   //Otherwise, vent proportionally
   else{
+  */
+  Serial.print(act_in);
+  Serial.print('\t');
     if (act_in <0.0){
       ventProportional(abs(act_in));
+    }
+    else if(act_in ==0.0){
+      idle();
     }
     else{
       pressurizeProportional(abs(act_in));
     }  
-  }  
+    
 }
 
 

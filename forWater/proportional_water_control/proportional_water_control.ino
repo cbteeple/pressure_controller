@@ -3,8 +3,9 @@
 #include "handleSerialCommands.h"
 #include "allSettings.h"
 #include "valvePair.h"
-//#include "bangBang.h"
+#include "bangBang.h"
 #include "proportional.h"
+#include "pidFull.h"
 
 //SENSING:
   //Arduino ADC pins:
@@ -32,7 +33,8 @@
 
 //Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
-#define CONTROL_P true
+#define CONTROL_P false
+#define CONTROL_PID true
 
 
 //Set default settings for things
@@ -45,9 +47,10 @@
   int valvePins[][2]= { {6,9}, {10,11} };
 
 //Default controller settings
-  float deadzone_start=0.25;
+  float deadzone_start=0.0;
   float setpoint_start=0;
-  float pid_start[]={0.2,0,0}; 
+  float pid_start[]={1.0,0.01,0.0}; 
+  float integratorResetTime_start = 50;
 
 
 //Create a new settings object
@@ -81,13 +84,15 @@ valvePair valves[NUM_SENSORS];
   bangBang controllers[NUM_SENSORS];
 #elif CONTROL_P
   proportional controllers[NUM_SENSORS];
+#elif CONTROL_PID
+  pidFull controllers[NUM_SENSORS];
 #endif 
 
 
 
 //Set up output task manager variables
-long lastTime=0;
-long currTime=0;
+unsigned long previousTime=0;
+unsigned long currentTime=0;
 
 
 
@@ -96,7 +101,8 @@ long currTime=0;
 void setup() {
   //Start serial
     Serial.begin(115200);
-    Serial.setTimeout(20);
+    //Serial.flush();
+    Serial.setTimeout(10);
  
   //Initialize control settings
     handleCommands.initialize(NUM_SENSORS);
@@ -109,9 +115,11 @@ void setup() {
       if(CONTROL_BANGBANG){
         ctrlSettings[i].deadzone=deadzone_start;
       }
-      else if (CONTROL_P){
+      else if (CONTROL_P || CONTROL_PID){
         for (int j=0; j<3; j++){
           ctrlSettings[i].pidGains[j]=pid_start[j];
+          ctrlSettings[i].deadzone=deadzone_start;
+          ctrlSettings[i].integratorResetTime=integratorResetTime_start;
         }
       }
 
@@ -150,40 +158,39 @@ void setup() {
 
 //______________________________________________________________________
 void loop() {
+  //Serial.println("_words need to be here (for some reason)");
   //Handle serial commands
    bool newSettings=handleCommands.go(settings, ctrlSettings);
   
   //Get pressure readings
     for (int i=0; i<NUM_SENSORS; i++){
+      //Serial.println("Inside the for loop");
       //Get the new pressures
       sensors[i].getData();
       pressures[i] = sensors[i].getPressure();
       
       //Update controller settings
-      //if (newSettings){
+      if (newSettings){
         controllers[i].updateSettings(ctrlSettings[i]);
         controllers[i].setSetpoint(ctrlSettings[i].setpoint);
-        //controllers[i].setPID(ctrlSettings[i].pidGains);
-        //controllers[i].setMode(ctrlSettings[i].controlMode);
-      //}
+      }
 
       //Run 1 step of the controller
       valveSets[i] = controllers[i].go(pressures[i]);
 
-
       //Send new actuation signal to the valves
       valves[i].go( valveSets[i] );
-
       
-      Serial.print('\n');
+      //Serial.print('\n');
     }
 
   //Print out data at close to the correct rate
-    currTime=millis();
-    if (settings.outputsOn && (currTime-lastTime>= settings.looptime)){
-      printData();
-      lastTime=currTime;
-    }
+  currentTime=millis();
+  if (settings.outputsOn && (currentTime-previousTime>= settings.looptime)){
+    printData();
+    previousTime=currentTime;
+  }
+    
   
 }
 
@@ -193,9 +200,9 @@ void loop() {
 
 //PRINT DATA OUT FUNCTION
 void printData(){
-  //Serial.print(currTime);
+  //Serial.print(currentTime);
   //Serial.print('\t');
-  //Serial.print(currTime-lastTime);
+  //Serial.print(currentTime-previousTime);
   //Serial.print('\t');
   for (int i=0;i<NUM_SENSORS;i++){
     Serial.print(pressures[i],5);
