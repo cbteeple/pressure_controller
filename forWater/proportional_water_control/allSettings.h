@@ -38,6 +38,7 @@ class controlSettings
     float deadzone;
     int controlMode;
     float pidGains [3];
+    float integratorResetTime;
 };
 
 
