@@ -49,7 +49,7 @@
 //Default controller settings
   float deadzone_start=0.0;
   float setpoint_start=0;
-  float pid_start[]={1.0,0.01,0.0}; 
+  float pid_start[]={1.0,0.1,0.1}; 
   float integratorResetTime_start = 50;
 
 
