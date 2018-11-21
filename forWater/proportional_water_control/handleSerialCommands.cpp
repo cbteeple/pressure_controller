@@ -2,6 +2,7 @@
 #include "Arduino.h"
 #include "handleSerialCommands.h"
 #include "allSettings.h"
+#include "eeprom_handler.h"
 
 //_________________________________________________________
 //PUBLIC FUNCTIONS
@@ -178,6 +179,54 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       }
     }
   }
+
+
+  else if(command.startsWith("SAVE")){
+    for (int i=0; i<numSensors; i++){
+      saveHandler.saveCtrl(ctrlSettings, i);
+    }
+    saveHandler.saveGlobal(settings);
+
+    if (broadcast){
+      Serial.print("Settings saved to onboard storage");
+    }
+  }
+
+
+  else if(command.startsWith("LOAD")){
+    for (int i=0; i<numSensors; i++){
+      saveHandler.loadCtrl(ctrlSettings, i);
+    }
+    saveHandler.loadGlobal(settings);
+
+    if (broadcast){
+      Serial.print("Settings retrieved from onboard storage");
+    }
+  }
+
+
+  else if(command.startsWith("SAVEDEF")){
+    for (int i=0; i<numSensors; i++){
+      saveHandler.saveDefaultCtrl(ctrlSettings, i);
+    }
+    saveHandler.saveDefaultGlobal(settings);
+    if (broadcast){
+      Serial.print("Settings saved to onboard storage");
+    }
+  }
+
+  
+  else if(command.startsWith("LOADDEF")){
+    for (int i=0; i<numSensors; i++){
+      saveHandler.loadDefaultCtrl(ctrlSettings, i);
+    }
+    saveHandler.loadDefaultGlobal(settings);
+    if (broadcast){
+      Serial.print("Settings retrieved from onboard storage");
+    }
+  }
+
+
   else {
     newSettings=false;
     if (broadcast){
@@ -211,6 +260,4 @@ String handleSerialCommands::getStringValue(String data, char separator, int ind
 
   return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
-
-
 
