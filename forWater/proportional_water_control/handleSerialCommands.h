@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "allSettings.h"
+#include "eeprom_handler.h"
 
 
 #ifndef __handleSerialCommands_H__
@@ -12,6 +13,8 @@ class handleSerialCommands
     int numSensors;
     String command;
     bool broadcast = true;
+    eepromHandler saveHandler;
+
     bool getCommand();
     bool processCommand(globalSettings &, controlSettings *);
     String getStringValue(String, char, int);
