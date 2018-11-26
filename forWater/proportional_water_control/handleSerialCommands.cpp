@@ -183,7 +183,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
 
   else if(command.startsWith("SAVE")){
     for (int i=0; i<numSensors; i++){
-      saveHandler.saveCtrl(ctrlSettings, i);
+      saveHandler.saveCtrl(ctrlSettings[i], i);
     }
     saveHandler.saveGlobal(settings);
 
@@ -195,9 +195,10 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
 
   else if(command.startsWith("LOAD")){
     for (int i=0; i<numSensors; i++){
-      saveHandler.loadCtrl(ctrlSettings, i);
+      saveHandler.loadCtrl(ctrlSettings[i], i);
     }
     saveHandler.loadGlobal(settings);
+    newSettings=true;
 
     if (broadcast){
       Serial.print("Settings retrieved from onboard storage");
@@ -207,7 +208,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
 
   else if(command.startsWith("SAVEDEF")){
     for (int i=0; i<numSensors; i++){
-      saveHandler.saveDefaultCtrl(ctrlSettings, i);
+      saveHandler.saveDefaultCtrl(ctrlSettings[i], i);
     }
     saveHandler.saveDefaultGlobal(settings);
     if (broadcast){
@@ -218,9 +219,10 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   
   else if(command.startsWith("LOADDEF")){
     for (int i=0; i<numSensors; i++){
-      saveHandler.loadDefaultCtrl(ctrlSettings, i);
+      saveHandler.loadDefaultCtrl(ctrlSettings[i], i);
     }
     saveHandler.loadDefaultGlobal(settings);
+    newSettings=true;
     if (broadcast){
       Serial.print("Settings retrieved from onboard storage");
     }

@@ -22,10 +22,10 @@ class eepromHandler
     void saveGlobal(globalSettings &);
     void loadDefaultGlobal(globalSettings &);
     void saveDefaultGlobal(globalSettings &);
-    void loadCtrl(controlSettings *, int);
-    void saveCtrl(controlSettings *, int);
-    void loadDefaultCtrl(controlSettings *, int);
-    void saveDefaultCtrl(controlSettings *, int);
+    void loadCtrl(controlSettings &, int);
+    void saveCtrl(controlSettings &, int);
+    void loadDefaultCtrl(controlSettings &, int);
+    void saveDefaultCtrl(controlSettings &, int);
 };
 
 #endif

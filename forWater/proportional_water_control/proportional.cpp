@@ -35,8 +35,8 @@ void proportional::setSetpoint(float setpoint_in){
 
 //Run 1 step of the controller - outputs "flow rate"
 float proportional::go(float pressure){
-  Serial.print(setpoint,2);
-  Serial.print('\t');  
+  //Serial.print(setpoint,2);
+  //Serial.print('\t');  
   //Do proportional control
   float out = pidGains[0]*(setpoint-pressure);
   out=constrain(out,-1.0,1.0);
