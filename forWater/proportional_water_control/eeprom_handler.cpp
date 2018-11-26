@@ -24,21 +24,21 @@ void eepromHandler::saveDefaultGlobal(globalSettings (&settings)){
 
 
 //Save control settings for a single control line.
-void eepromHandler::loadCtrl(controlSettings *ctrlSettings, int channelIdx){
+void eepromHandler::loadCtrl(controlSettings (&ctrlSettings), int channelIdx){
   EEPROM_readAnything(getSaveLoc(0, channelIdx,false), ctrlSettings);
 }
 
-void eepromHandler::saveCtrl(controlSettings *ctrlSettings, int channelIdx){
+void eepromHandler::saveCtrl(controlSettings (&ctrlSettings), int channelIdx){
   EEPROM_writeAnything(getSaveLoc(0, channelIdx,false), ctrlSettings);
 }
 
 
 //Save or load default control settings for a single control line.
-void eepromHandler::loadDefaultCtrl(controlSettings *ctrlSettings, int channelIdx){
+void eepromHandler::loadDefaultCtrl(controlSettings (&ctrlSettings), int channelIdx){
   EEPROM_readAnything(getSaveLoc(0, channelIdx,true), ctrlSettings);
 }
 
-void eepromHandler::saveDefaultCtrl(controlSettings *ctrlSettings, int channelIdx){
+void eepromHandler::saveDefaultCtrl(controlSettings (&ctrlSettings), int channelIdx){
   EEPROM_writeAnything(getSaveLoc(0, channelIdx,true), ctrlSettings);
 }
 

@@ -132,8 +132,8 @@ void valvePair::go(float act_in){
   //Otherwise, vent proportionally
   else{
   */
-  Serial.print(act_in);
-  Serial.print('\t');
+  //Serial.print(act_in);
+  //Serial.print('\t');
     if (act_in <0.0){
       ventProportional(abs(act_in));
     }

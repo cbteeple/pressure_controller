@@ -29,7 +29,7 @@
 #define SENSOR_I2C false
 
 #define SENSOR_MODEL 1
-#define NUM_SENSORS 1
+#define NUM_SENSORS 3
 
 //Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
