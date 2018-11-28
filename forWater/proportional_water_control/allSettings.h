@@ -6,8 +6,9 @@
 class globalSettings
 {
   public:
-    unsigned int looptime;
+    unsigned int looptime = 0;
     bool outputsOn=false;
+    
 };
 
 
@@ -16,6 +17,7 @@ class sensorSettings
 {
   public:
   	//Shared
+    bool on = true;
   	int sensorModel=1;
 
   	//i2c stuff
@@ -34,6 +36,7 @@ class sensorSettings
 class controlSettings
 {
   public:
+    bool channelOn = true;
     float setpoint;
     float deadzone;
     int controlMode;
