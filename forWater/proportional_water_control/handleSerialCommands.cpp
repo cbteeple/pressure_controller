@@ -197,7 +197,9 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     for (int i=0; i<numSensors; i++){
       saveHandler.loadCtrl(ctrlSettings[i], i);
     }
+    bool set_temp = settings.outputsOn;
     saveHandler.loadGlobal(settings);
+    settings.outputsOn=set_temp;
     newSettings=true;
 
     if (broadcast){
@@ -206,26 +208,62 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   }
 
 
-  else if(command.startsWith("SAVEDEF")){
+  else if(command.startsWith("DEFSAVE")){
     for (int i=0; i<numSensors; i++){
       saveHandler.saveDefaultCtrl(ctrlSettings[i], i);
     }
     saveHandler.saveDefaultGlobal(settings);
     if (broadcast){
-      Serial.print("Settings saved to onboard storage");
+      Serial.print("Settings saved as default");
     }
   }
 
   
-  else if(command.startsWith("LOADDEF")){
+  else if(command.startsWith("DEFLOAD")){
     for (int i=0; i<numSensors; i++){
       saveHandler.loadDefaultCtrl(ctrlSettings[i], i);
     }
+    bool set_temp = settings.outputsOn;
     saveHandler.loadDefaultGlobal(settings);
+    settings.outputsOn=set_temp;
     newSettings=true;
     if (broadcast){
-      Serial.print("Settings retrieved from onboard storage");
+      Serial.print("Settings retrieved from default");
     }
+  }
+
+
+  else if(command.startsWith("CHAN")){
+    if(getStringValue(command,';',numSensors).length()){
+      for (int i=0; i<numSensors; i++){
+        ctrlSettings[i].channelOn= bool(getStringValue(command,';',i+1).toInt());
+      }
+      newSettings=true;
+      if (broadcast){
+        Serial.print("NEW ");
+      }
+    }
+    else if(getStringValue(command,';',1).length()){
+      float allset=bool(getStringValue(command,';',1).toInt());
+      for (int i=0; i<numSensors; i++){
+        ctrlSettings[i].channelOn= allset;
+      }
+      newSettings=true;
+      if (broadcast){
+        Serial.print("NEW ");
+      }
+    }
+
+    if (broadcast){
+      Serial.print("CHANNELS ON: ");
+      for (int i=0; i<numSensors; i++){
+        Serial.print(ctrlSettings[i].channelOn);
+        Serial.print('\t');
+      }
+    }
+
+
+    
   }
 
 

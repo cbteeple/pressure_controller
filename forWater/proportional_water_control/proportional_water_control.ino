@@ -29,7 +29,7 @@
 #define SENSOR_I2C false
 
 #define SENSOR_MODEL 1
-#define NUM_SENSORS 3
+#define MAX_NUM_CHANNELS 6
 
 //Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
@@ -44,7 +44,8 @@
   int muxAddr=0x70;
 
 //Set valve pins
-  int valvePins[][2]= { {6,9}, {10,11} };
+  //int valvePins[][2]= { {6,9}, {10,11} };
+  int valvePins[][2]= { {2,3}, {4,5}, {6,7}, {8,9}, {10,11}, {12,13} };
 
 //Default controller settings
   float deadzone_start=0.0;
@@ -55,8 +56,8 @@
 
 //Create a new settings object
 globalSettings settings;
-controlSettings ctrlSettings[NUM_SENSORS];
-sensorSettings senseSettings[NUM_SENSORS];
+controlSettings ctrlSettings[MAX_NUM_CHANNELS];
+sensorSettings senseSettings[MAX_NUM_CHANNELS];
 
 //Create an object to handle serial commands
 handleSerialCommands handleCommands;
@@ -64,28 +65,28 @@ handleSerialCommands handleCommands;
 //Set up sensing
 #if(SENSOR_ANALOG)
   int senseChannels[]={A0,A1,A2,A3};
-  analog_PressureSensor sensors[NUM_SENSORS];
+  analog_PressureSensor sensors[MAX_NUM_CHANNELS];
 #elif(SENSOR_I2C)
-  int senseChannels[]={0,1,2,3};
-  i2c_PressureSensor sensors[NUM_SENSORS];
+  int senseChannels[]={0,1,2,3,4,5,6,7};
+  i2c_PressureSensor sensors[MAX_NUM_CHANNELS];
 #endif
 
 int ave_len=10;
-float pressures[NUM_SENSORS];
-float valveSets[NUM_SENSORS];
+float pressures[MAX_NUM_CHANNELS];
+float valveSets[MAX_NUM_CHANNELS];
 
 
 //Set up valve pairs  
-valvePair valves[NUM_SENSORS];
+valvePair valves[MAX_NUM_CHANNELS];
 
 
 //Create an array of controller objects for pressure control
 #if CONTROL_BANGBANG
-  bangBang controllers[NUM_SENSORS];
+  bangBang controllers[MAX_NUM_CHANNELS];
 #elif CONTROL_P
-  proportional controllers[NUM_SENSORS];
+  proportional controllers[MAX_NUM_CHANNELS];
 #elif CONTROL_PID
-  pidFull controllers[NUM_SENSORS];
+  pidFull controllers[MAX_NUM_CHANNELS];
 #endif 
 
 
@@ -105,9 +106,9 @@ void setup() {
     Serial.setTimeout(10);
  
   //Initialize control settings
-    handleCommands.initialize(NUM_SENSORS);
+    handleCommands.initialize(MAX_NUM_CHANNELS);
     handleCommands.startBroadcast();
-    for (int i=0; i<NUM_SENSORS; i++){
+    for (int i=0; i<MAX_NUM_CHANNELS; i++){
       
       //Initialize control settings
       ctrlSettings[i].setpoint=setpoint_start;
@@ -141,7 +142,7 @@ void setup() {
 
 
   //Initialize the pressure sensor and control objects
-    for (int i=0; i<NUM_SENSORS; i++){
+    for (int i=0; i<MAX_NUM_CHANNELS; i++){
       sensors[i].initialize(senseSettings[i]);
       valves[i].initialize(valvePins[i][0],valvePins[i][1]);
       controllers[i].initialize(ctrlSettings[i]);
@@ -163,30 +164,38 @@ void loop() {
    bool newSettings=handleCommands.go(settings, ctrlSettings);
   
   //Get pressure readings
-    for (int i=0; i<NUM_SENSORS; i++){
-      //Serial.println("Inside the for loop");
-      //Get the new pressures
-      sensors[i].getData();
-      pressures[i] = sensors[i].getPressure();
-      
-      //Update controller settings
+    for (int i=0; i<MAX_NUM_CHANNELS; i++){   
+      //Update controller settings if there are new ones
       if (newSettings){
         controllers[i].updateSettings(ctrlSettings[i]);
         controllers[i].setSetpoint(ctrlSettings[i].setpoint);
       }
 
-      //Run 1 step of the controller
-      valveSets[i] = controllers[i].go(pressures[i]);
-
-      //Send new actuation signal to the valves
-      valves[i].go( valveSets[i] );
-      
-      //Serial.print('\n');
+      if (ctrlSettings[i].channelOn){
+        //Get the new pressures
+        sensors[i].getData();
+        pressures[i] = sensors[i].getPressure();
+  
+        //Run 1 step of the controller
+        valveSets[i] = controllers[i].go(pressures[i]);
+  
+        //Send new actuation signal to the valves
+        valves[i].go( valveSets[i] );
+        
+        //Serial.print('\n');
+      }
+      else{
+        pressures[i]=0;
+      }
     }
 
   //Print out data at close to the correct rate
   currentTime=millis();
   if (settings.outputsOn && (currentTime-previousTime>= settings.looptime)){
+    Serial.print(currentTime);
+    Serial.print('\t');
+    Serial.print(currentTime-previousTime);
+    Serial.print('\t');
     printData();
     previousTime=currentTime;
   }
@@ -204,8 +213,8 @@ void printData(){
   //Serial.print('\t');
   //Serial.print(currentTime-previousTime);
   //Serial.print('\t');
-  for (int i=0;i<NUM_SENSORS;i++){
-    Serial.print(pressures[i],5);
+  for (int i=0; i<MAX_NUM_CHANNELS; i++){
+    Serial.print(pressures[i],4);
     Serial.print('\t');  
   }
   Serial.print('\n');
