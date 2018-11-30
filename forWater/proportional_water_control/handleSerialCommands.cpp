@@ -104,6 +104,39 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       }
     }
   }
+
+  
+    else if(command.startsWith("VALVE")){
+    if(getStringValue(command,';',numSensors).length()){
+      for (int i=0; i<numSensors; i++){
+        ctrlSettings[i].valveDirect= getStringValue(command,';',i+1).toFloat();
+      }
+      newSettings=true;
+      if (broadcast){
+        Serial.print("NEW ");
+      }
+    }
+    else if(getStringValue(command,';',1).length()){
+      float allset=getStringValue(command,';',1).toFloat();
+      for (int i=0; i<numSensors; i++){
+        ctrlSettings[i].valveDirect= allset;
+      }
+      newSettings=true;
+      if (broadcast){
+        Serial.print("NEW ");
+      }
+    }
+    if (broadcast){
+      Serial.print("VALVE DIRECT SETTING: ");
+      for (int i=0; i<numSensors; i++){
+        Serial.print(ctrlSettings[i].valveDirect,4);
+        Serial.print('\t');
+      }
+    }
+  }
+
+
+  
   else if(command.startsWith("WINDOW")){
      if(getStringValue(command,';',numSensors).length()){
       for (int i=0; i<numSensors; i++){

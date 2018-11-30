@@ -40,6 +40,7 @@ class controlSettings
     float setpoint;
     float deadzone;
     int controlMode;
+    float valveDirect;
     float pidGains [3];
     float integratorResetTime;
 };
