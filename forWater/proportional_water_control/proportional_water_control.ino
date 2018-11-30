@@ -121,6 +121,8 @@ void setup() {
           ctrlSettings[i].pidGains[j]=pid_start[j];
           ctrlSettings[i].deadzone=deadzone_start;
           ctrlSettings[i].integratorResetTime=integratorResetTime_start;
+          ctrlSettings[i].controlMode = 1;
+          ctrlSettings[i].valveDirect = 0;
         }
       }
 
@@ -172,17 +174,23 @@ void loop() {
       }
 
       if (ctrlSettings[i].channelOn){
-        //Get the new pressures
-        sensors[i].getData();
-        pressures[i] = sensors[i].getPressure();
-  
-        //Run 1 step of the controller
-        valveSets[i] = controllers[i].go(pressures[i]);
-  
-        //Send new actuation signal to the valves
-        valves[i].go( valveSets[i] );
+        if (ctrlSettings[i].controlMode==1){
+          //Get the new pressures
+          sensors[i].getData();
+          pressures[i] = sensors[i].getPressure();
+    
+          //Run 1 step of the controller
+          valveSets[i] = controllers[i].go(pressures[i]);
+        }
+        else{
+           valveSets[i]=ctrlSettings[i].valveDirect;
+        }
+    
+          //Send new actuation signal to the valves
+          valves[i].go( valveSets[i] );
+          
+          //Serial.print('\n');
         
-        //Serial.print('\n');
       }
       else{
         pressures[i]=0;
