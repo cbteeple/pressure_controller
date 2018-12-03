@@ -29,7 +29,7 @@
 #define SENSOR_I2C false
 
 #define SENSOR_MODEL 1
-#define MAX_NUM_CHANNELS 6
+#define MAX_NUM_CHANNELS 2
 
 //Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
@@ -44,8 +44,8 @@
   int muxAddr=0x70;
 
 //Set valve pins
-  //int valvePins[][2]= { {6,9}, {10,11} };
-  int valvePins[][2]= { {2,3}, {4,5}, {6,7}, {8,9}, {10,11}, {12,13} };
+  int valvePins[][2]= { {6,9}, {10,11} };
+  //int valvePins[][2]= { {2,3}, {4,5}, {6,7}, {8,9}, {10,11}, {12,13} };
 
 //Default controller settings
   float deadzone_start=0.0;
