@@ -29,9 +29,10 @@ void valvePair::initialize(){
 }
 
 
-void valvePair::setSettings(int offset_in, int range_in){
+void valvePair::setSettings(int offset_in, int max_in){
   offset=offset_in;
-  outRange=range_in;
+  outMax=max_in;
+  outRange=outMax-offset;
 }
 
 
@@ -56,11 +57,11 @@ void valvePair::ventValveOff(){
 
 //Analog valves
 void valvePair::pressureValveAnalog(int val){
-   analogWrite(pinPressure, val); 
+  analogWrite(pinPressure, val);
 }
 
 void valvePair::ventValveAnalog(int val){
-  analogWrite(pinVent, val); 
+  analogWrite(pinVent, val);
 }
 
 
@@ -142,8 +143,7 @@ void valvePair::go(float act_in){
     }
     else{
       pressurizeProportional(abs(act_in));
-    }  
-    
+    }
 }
 
 

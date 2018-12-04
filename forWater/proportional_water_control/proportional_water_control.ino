@@ -46,11 +46,12 @@
 //Set valve pins
   int valvePins[][2]= { {6,9}, {10,11} };
   //int valvePins[][2]= { {2,3}, {4,5}, {6,7}, {8,9}, {10,11}, {12,13} };
+  int valveOffset=203;
 
 //Default controller settings
   float deadzone_start=0.0;
   float setpoint_start=0;
-  float pid_start[]={1.0,0.1,0.1}; 
+  float pid_start[]={0.6,0.05,1.8}; 
   float integratorResetTime_start = 50;
 
 
@@ -147,6 +148,7 @@ void setup() {
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
       sensors[i].initialize(senseSettings[i]);
       valves[i].initialize(valvePins[i][0],valvePins[i][1]);
+      valves[i].setSettings(valveOffset,255);
       controllers[i].initialize(ctrlSettings[i]);
     }
 
@@ -174,10 +176,11 @@ void loop() {
       }
 
       if (ctrlSettings[i].channelOn){
-        if (ctrlSettings[i].controlMode==1){
-          //Get the new pressures
+        //Get the new pressures
           sensors[i].getData();
           pressures[i] = sensors[i].getPressure();
+          
+        if (ctrlSettings[i].controlMode==1){
     
           //Run 1 step of the controller
           valveSets[i] = controllers[i].go(pressures[i]);
