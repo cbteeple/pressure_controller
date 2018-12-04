@@ -24,12 +24,20 @@ void pidFull::updateSettings(controlSettings &newSettings){
   }
   deadWindow = newSettings.deadzone;
   integratorTime = newSettings.integratorResetTime;
+  if (newSettings.integratorResetTime==-1.0){
+    integratorResetOn = false; 
+  }
+  else{
+    integratorResetOn = true;
+  }
 }
 
 
 void pidFull::resetIntegrator(){
-  integral = 0;
-  lastIntegratorReset=millis();
+  if (integratorResetOn){
+    integral = 0;
+    lastIntegratorReset=millis();
+  }
 }
 
 

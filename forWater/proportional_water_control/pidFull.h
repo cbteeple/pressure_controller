@@ -20,6 +20,7 @@ class pidFull
     float deadWindow;
 
     unsigned int integratorTime = 10;
+    bool integratorResetOn = false;
     unsigned long lastIntegratorReset = 0;
     void resetIntegrator();
   
