@@ -46,7 +46,7 @@
 //Set valve pins
   //int valvePins[][2]= { {6,9}, {10,11} };
   int valvePins[][2]= { {2,3}, {4,5}, {6,7}, {8,9}, {10,11}, {12,13} };
-  int valveOffset=203;
+  int valveOffset=205;
 
 //Default controller settings
   float deadzone_start=0.0;
