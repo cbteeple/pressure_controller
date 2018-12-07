@@ -159,7 +159,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   }
   else if(command.startsWith("PID")){
     int channel=0;
-     if(getStringValue(command,';',numSensors).length()){
+     if(getStringValue(command,';',4).length()){
       channel = getStringValue(command,';',1).toInt();
       for (int i=0; i<3; i++){
         ctrlSettings[channel].pidGains[i]=getStringValue(command,';',i+2).toFloat();

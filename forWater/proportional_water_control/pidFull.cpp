@@ -24,6 +24,7 @@ void pidFull::updateSettings(controlSettings &newSettings){
   }
   deadWindow = newSettings.deadzone;
   integratorTime = newSettings.integratorResetTime;
+  integralStart = newSettings.integralStart;
   if (newSettings.integratorResetTime==-1.0){
     integratorResetOn = false; 
   }
@@ -34,16 +35,16 @@ void pidFull::updateSettings(controlSettings &newSettings){
 
 
 void pidFull::resetIntegrator(){
-  if (integratorResetOn){
     integral = 0;
     lastIntegratorReset=millis();
-  }
 }
 
 
 //Update the setpoint
 void pidFull::setSetpoint(float setpoint_in){
-  resetIntegrator();
+  if (integratorResetOn){
+    resetIntegrator();
+  }
   setpoint = setpoint_in;
 }
 
@@ -65,8 +66,10 @@ float pidFull::go(float pressure){
     out = 0;
   }
   else{
-    if(currTime - lastIntegratorReset >=integratorTime){
-       resetIntegrator();
+    if (integratorResetOn){
+      if(currTime - lastIntegratorReset >=integratorTime){
+         resetIntegrator();
+      }
     }
   
     integral += error*timestep;
@@ -74,6 +77,10 @@ float pidFull::go(float pressure){
   
     //Serial.print(integral,2);
     //Serial.print('\t');  
+
+    if(abs(error)>integralStart){
+      resetIntegrator();
+    }
     
     float p_out = pidGains[0]*(error);
     float i_out = pidGains[1]*(integral);

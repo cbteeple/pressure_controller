@@ -43,6 +43,7 @@ class controlSettings
     float valveDirect;
     float pidGains [3];
     float integratorResetTime;
+    float integralStart = 0.5;
 };
 
 
