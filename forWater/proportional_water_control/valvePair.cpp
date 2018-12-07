@@ -122,6 +122,8 @@ float valvePair::mapFloat(float x, float in_min, float in_max, float out_min, fl
 
 //Update controller settings
 void valvePair::go(float act_in){
+//  Serial.print(act_in);
+//  Serial.print('\t');
 
   //Check for saturation
  /* if (act_in == 0.0 || act_in == -1.0){

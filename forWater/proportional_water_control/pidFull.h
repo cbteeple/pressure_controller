@@ -22,6 +22,7 @@ class pidFull
     unsigned int integratorTime = 10;
     bool integratorResetOn = false;
     unsigned long lastIntegratorReset = 0;
+    float integralStart=0.05;
     void resetIntegrator();
   
   public:
