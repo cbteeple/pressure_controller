@@ -135,7 +135,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     if (broadcast){
       Serial.print("MAX PRESSURE: ");
       for (int i=0; i<numSensors; i++){
-        Serial.print(ctrlSettings[i].setpoint,4);
+        Serial.print(ctrlSettings[i].maxPressure,4);
         Serial.print('\t');
       }
     }
@@ -165,7 +165,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     if (broadcast){
       Serial.print("MIN PRESSURE: ");
       for (int i=0; i<numSensors; i++){
-        Serial.print(ctrlSettings[i].setpoint,4);
+        Serial.print(ctrlSettings[i].minPressure,4);
         Serial.print('\t');
       }
     }
