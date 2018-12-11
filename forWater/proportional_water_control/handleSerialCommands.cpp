@@ -294,7 +294,9 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
 
   else if(command.startsWith("LOAD")){
     for (int i=0; i<numSensors; i++){
+      float set_temp = ctrlSettings[i].setpoint;
       saveHandler.loadCtrl(ctrlSettings[i], i);
+      ctrlSettings[i].setpoint=set_temp;
     }
     bool set_temp = settings.outputsOn;
     saveHandler.loadGlobal(settings);
