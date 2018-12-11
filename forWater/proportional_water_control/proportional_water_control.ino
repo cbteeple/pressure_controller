@@ -53,6 +53,8 @@
   float setpoint_start=0;
   float pid_start[]={0.6,0.03,0}; 
   float integratorResetTime_start = -1;
+  float minPressure_start = 0; //[psi]
+  float maxPressure_start = 20; //[psi]
 
 
 //Create a new settings object
@@ -113,6 +115,10 @@ void setup() {
       
       //Initialize control settings
       ctrlSettings[i].setpoint=setpoint_start;
+      ctrlSettings[i].maxPressure = maxPressure_start;
+      ctrlSettings[i].minPressure = minPressure_start;
+      ctrlSettings[i].controlMode = 1;
+      ctrlSettings[i].valveDirect = 0;
       
       if(CONTROL_BANGBANG){
         ctrlSettings[i].deadzone=deadzone_start;
@@ -122,8 +128,6 @@ void setup() {
           ctrlSettings[i].pidGains[j]=pid_start[j];
           ctrlSettings[i].deadzone=deadzone_start;
           ctrlSettings[i].integratorResetTime=integratorResetTime_start;
-          ctrlSettings[i].controlMode = 1;
-          ctrlSettings[i].valveDirect = 0;
         }
       }
 

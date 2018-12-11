@@ -44,6 +44,8 @@ class controlSettings
     float pidGains [3];
     float integratorResetTime;
     float integralStart = 3.0;
+    float maxPressure;
+    float minPressure;
 };
 
 
