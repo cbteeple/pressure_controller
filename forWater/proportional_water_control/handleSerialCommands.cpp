@@ -76,10 +76,14 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       Serial.print(settings.looptime);
     }
   }
+  //______________________________________________________________
+  //Handle changes in setpoint
   else if(command.startsWith("SET")){
     if(getStringValue(command,';',numSensors).length()){
       for (int i=0; i<numSensors; i++){
-        ctrlSettings[i].setpoint= getStringValue(command,';',i+1).toFloat();
+        ctrlSettings[i].setpoint= constrain(getStringValue(command,';',i+1).toFloat(),
+        ctrlSettings[i].minPressure,
+        ctrlSettings[i].maxPressure);
       }
       newSettings=true;
       if (broadcast){
@@ -89,7 +93,9 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     else if(getStringValue(command,';',1).length()){
       float allset=getStringValue(command,';',1).toFloat();
       for (int i=0; i<numSensors; i++){
-        ctrlSettings[i].setpoint= allset;
+        ctrlSettings[i].setpoint= constrain(allset,
+        ctrlSettings[i].minPressure,
+        ctrlSettings[i].maxPressure);
       }
       newSettings=true;
       if (broadcast){
@@ -98,6 +104,66 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     }
     if (broadcast){
       Serial.print("SETPOINT: ");
+      for (int i=0; i<numSensors; i++){
+        Serial.print(ctrlSettings[i].setpoint,4);
+        Serial.print('\t');
+      }
+    }
+  }
+//____________________________________________________________
+//Handle MAXIMUM Software Pressure Limits
+  else if(command.startsWith("MAXP")){
+    if(getStringValue(command,';',numSensors).length()){
+      for (int i=0; i<numSensors; i++){
+        ctrlSettings[i].maxPressure= getStringValue(command,';',i+1).toFloat();
+      }
+      newSettings=true;
+      if (broadcast){
+        Serial.print("NEW ");
+      }
+    }
+    else if(getStringValue(command,';',1).length()){
+      float allset=getStringValue(command,';',1).toFloat();
+      for (int i=0; i<numSensors; i++){
+        ctrlSettings[i].maxPressure= allset;
+      }
+      newSettings=true;
+      if (broadcast){
+        Serial.print("NEW ");
+      }
+    }
+    if (broadcast){
+      Serial.print("MAX PRESSURE: ");
+      for (int i=0; i<numSensors; i++){
+        Serial.print(ctrlSettings[i].setpoint,4);
+        Serial.print('\t');
+      }
+    }
+  }
+  //____________________________________________________________
+//Handle MINIMUM Software Pressure Limits
+  else if(command.startsWith("MINP")){
+    if(getStringValue(command,';',numSensors).length()){
+      for (int i=0; i<numSensors; i++){
+        ctrlSettings[i].minPressure= getStringValue(command,';',i+1).toFloat();
+      }
+      newSettings=true;
+      if (broadcast){
+        Serial.print("NEW ");
+      }
+    }
+    else if(getStringValue(command,';',1).length()){
+      float allset=getStringValue(command,';',1).toFloat();
+      for (int i=0; i<numSensors; i++){
+        ctrlSettings[i].minPressure= allset;
+      }
+      newSettings=true;
+      if (broadcast){
+        Serial.print("NEW ");
+      }
+    }
+    if (broadcast){
+      Serial.print("MIN PRESSURE: ");
       for (int i=0; i<numSensors; i++){
         Serial.print(ctrlSettings[i].setpoint,4);
         Serial.print('\t');
