@@ -31,7 +31,7 @@
 #define SENSOR_I2C false
 
 #define SENSOR_MODEL 1
-#define MAX_NUM_CHANNELS 6
+#define MAX_NUM_CHANNELS 4
 
 //Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
@@ -173,7 +173,7 @@ void setup() {
     // Initialize the LCD
     lcdAttached = lcd.begin();
     if (!lcdAttached){
-      Serial.println("LCD Not Attached!");  
+      Serial.println("_LCD Not Attached!");  
     }
     lcd.clearOnUpdate(false);
 
