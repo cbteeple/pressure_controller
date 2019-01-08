@@ -31,7 +31,7 @@
 #define SENSOR_I2C false
 
 #define SENSOR_MODEL 1
-#define MAX_NUM_CHANNELS 3
+#define MAX_NUM_CHANNELS 6
 
 //Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
@@ -291,7 +291,7 @@ void lcdUpdateDistributed(){
   int i = currLCDIndex;
 
   int currRow = currLCDIndex/3;
-  int currCol = currLCDIndex*5 -currRow*16;
+  int currCol = (currLCDIndex-currRow*3)*5;
   
   String strTmp="";
   if (ctrlSettings[i].channelOn){  
