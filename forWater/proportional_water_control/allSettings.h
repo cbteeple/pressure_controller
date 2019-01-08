@@ -8,7 +8,7 @@ class globalSettings
   public:
     unsigned int looptime = 0;
     bool outputsOn=false;
-    unsigned int lcdLoopTime = 1000;
+    unsigned int lcdLoopTime = 500;
     
 };
 

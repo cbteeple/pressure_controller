@@ -31,7 +31,7 @@
 #define SENSOR_I2C false
 
 #define SENSOR_MODEL 1
-#define MAX_NUM_CHANNELS 6
+#define MAX_NUM_CHANNELS 4
 
 //Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
@@ -166,10 +166,16 @@ void setup() {
 
     
     settings.looptime =0;
+    settings.lcdLoopTime = 333;
     settings.outputsOn=false;
 
     // Initialize the LCD
     lcdAttached = lcd.begin();
+    if (!lcdAttached){
+      Serial.println("LCD Not Attached!");  
+    }
+    lcd.clearOnUpdate(false);
+
 }
 
 
@@ -188,11 +194,12 @@ void loop() {
         controllers[i].updateSettings(ctrlSettings[i]);
         controllers[i].setSetpoint(ctrlSettings[i].setpoint);
       }
-
-      if (ctrlSettings[i].channelOn){
+      
         //Get the new pressures
-          sensors[i].getData();
-          pressures[i] = sensors[i].getPressure();
+        sensors[i].getData();
+        pressures[i] = sensors[i].getPressure();
+          
+        if (ctrlSettings[i].channelOn){
           
         if (ctrlSettings[i].controlMode==1){
     
@@ -210,7 +217,7 @@ void loop() {
         
       }
       else{
-        pressures[i]=0;
+        //pressures[i]=0;
       }
     }
 
@@ -253,17 +260,24 @@ void printData(){
 void lcdUpdate(){
   String toWrite = "";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
-    if ( (i+1)%3 == 0){
-      toWrite = '\n';
+    if ( i>0 && (i)%3 == 0){
+      toWrite += '\n';
     }
 
-    String strTmp = String(pressures[i], 1);
-    if (strTmp.length() <4){
-      toWrite += ' ';
+    String strTmp="";
+    if (ctrlSettings[i].channelOn){  
+      strTmp = String(pressures[i], 1);
+      if (strTmp.length() <4){
+        strTmp += ' ';
+      }
     }
+    else{
+      strTmp = "<  >";
+    }
+    
     toWrite += strTmp;
+    toWrite += ' ';
   }
-  
   lcd.write(toWrite);  
 }
 
