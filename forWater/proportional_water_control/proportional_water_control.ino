@@ -31,7 +31,7 @@
 #define SENSOR_I2C false
 
 #define SENSOR_MODEL 1
-#define MAX_NUM_CHANNELS 4
+#define MAX_NUM_CHANNELS 3
 
 //Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
@@ -100,6 +100,7 @@ uint8_t lcd_addr = 0x27;
 EasyLCD lcd(lcd_addr, 16, 2);
 
 bool lcdAttached= false;
+int currLCDIndex=0;
 
 //Set up output task manager variables
 unsigned long previousTime=0;
@@ -232,8 +233,9 @@ void loop() {
     previousTime=currentTime;
   }
 
-  if (lcdAttached && (currentTime-previousLCDTime>= settings.lcdLoopTime)){
-    lcdUpdate();
+  if (lcdAttached && (currentTime-previousLCDTime>= settings.lcdLoopTime/MAX_NUM_CHANNELS)){
+    //lcdUpdate();
+    lcdUpdateDistributed();
     previousLCDTime=currentTime;
   }
     
@@ -268,7 +270,7 @@ void lcdUpdate(){
     if (ctrlSettings[i].channelOn){  
       strTmp = String(pressures[i], 1);
       if (strTmp.length() <4){
-        strTmp += ' ';
+        strTmp =' '+strTmp;
       }
     }
     else{
@@ -279,5 +281,37 @@ void lcdUpdate(){
     toWrite += ' ';
   }
   lcd.write(toWrite);  
+}
+
+
+void lcdUpdateDistributed(){
+  
+  String toWrite = "";
+  
+  int i = currLCDIndex;
+
+  int currRow = currLCDIndex/3;
+  int currCol = currLCDIndex*5 -currRow*16;
+  
+  String strTmp="";
+  if (ctrlSettings[i].channelOn){  
+    strTmp = String(pressures[i], 1);
+    if (strTmp.length() <4){
+      strTmp =' '+strTmp;
+    }
+  }
+  else{
+    strTmp = "<  >";
+  }
+  
+  toWrite += strTmp;
+  toWrite += ' ';
+  lcd.writeAtPosition(toWrite,currRow,currCol);
+
+  currLCDIndex++;
+  if (currLCDIndex>=MAX_NUM_CHANNELS){
+    currLCDIndex=0;
+  }
+  
 }
 
