@@ -7,6 +7,8 @@
 #include "proportional.h"
 #include "pidFull.h"
 
+#include <EasyLCD.h>
+
 //SENSING:
   //Arduino ADC pins:
     //Mega:  A0-A15                        (all pins work fine)
@@ -93,9 +95,15 @@ valvePair valves[MAX_NUM_CHANNELS];
 #endif 
 
 
+//Set up LCD Screen
+uint8_t lcd_addr = 0x27;
+EasyLCD lcd(lcd_addr, 16, 2);
+
+bool lcdAttached= false;
 
 //Set up output task manager variables
 unsigned long previousTime=0;
+unsigned long previousLCDTime=0;
 unsigned long currentTime=0;
 
 
@@ -156,10 +164,12 @@ void setup() {
       controllers[i].initialize(ctrlSettings[i]);
     }
 
-
     
     settings.looptime =0;
     settings.outputsOn=false;
+
+    // Initialize the LCD
+    lcdAttached = lcd.begin();
 }
 
 
@@ -214,6 +224,11 @@ void loop() {
     printData();
     previousTime=currentTime;
   }
+
+  if (lcdAttached && (currentTime-previousLCDTime>= settings.lcdLoopTime)){
+    lcdUpdate();
+    previousLCDTime=currentTime;
+  }
     
   
 }
@@ -224,10 +239,6 @@ void loop() {
 
 //PRINT DATA OUT FUNCTION
 void printData(){
-  //Serial.print(currentTime);
-  //Serial.print('\t');
-  //Serial.print(currentTime-previousTime);
-  //Serial.print('\t');
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
     Serial.print(pressures[i],4);
     Serial.print('\t');  
@@ -236,4 +247,23 @@ void printData(){
   
 }
 
+
+
+//LCD UPDATE FUNCTION
+void lcdUpdate(){
+  String toWrite = "";
+  for (int i=0; i<MAX_NUM_CHANNELS; i++){
+    if ( (i+1)%3 == 0){
+      toWrite = '\n';
+    }
+
+    String strTmp = String(pressures[i], 1);
+    if (strTmp.length() <4){
+      toWrite += ' ';
+    }
+    toWrite += strTmp;
+  }
+  
+  lcd.write(toWrite);  
+}
 

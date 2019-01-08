@@ -76,6 +76,23 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       Serial.print(settings.looptime);
     }
   }
+
+  else if (command.startsWith("LCDTIME")){
+    if(getStringValue(command,';',1).length()){
+      settings.lcdLoopTime = getStringValue(command,';',1).toInt();
+      newSettings=true;
+      if (broadcast){
+        Serial.print("NEW ");
+      }
+    }
+    if (broadcast){
+      Serial.print("LCD Loop Time: ");
+      Serial.print(settings.lcdLoopTime);
+    }
+  }
+
+
+  
   //______________________________________________________________
   //Handle changes in setpoint
   else if(command.startsWith("SET")){
