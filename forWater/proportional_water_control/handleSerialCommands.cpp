@@ -256,6 +256,8 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
      
      }
     if (broadcast){
+      Serial.print("PID");
+      Serial.print('\n');
       for (int j=0; j<numSensors; j++){
         Serial.print("_ Gains= ");
         for (int i=0; i<3; i++){
