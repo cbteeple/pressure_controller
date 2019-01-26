@@ -1,5 +1,6 @@
 #include "analog_PressureSensor.h"
 #include "i2c_PressureSensor.h"
+#include "i2c_mux.h"
 #include "handleSerialCommands.h"
 #include "allSettings.h"
 #include "valvePair.h"
@@ -48,7 +49,7 @@
 //Set valve pins
   //int valvePins[][2]= { {6,9}, {10,11} };
   int valvePins[][2]= { {2,3}, {4,5}, {6,7}, {8,9}, {10,11}, {12,13} };
-  int valveOffset=205;
+  int valveOffset=225;
 
 //Default controller settings
   float deadzone_start=0.0;
@@ -66,10 +67,11 @@ sensorSettings senseSettings[MAX_NUM_CHANNELS];
 
 //Create an object to handle serial commands
 handleSerialCommands handleCommands;
+i2c_Mux mux(muxAddr);
 
 //Set up sensing
 #if(SENSOR_ANALOG)
-  int senseChannels[]={A0,A1,A2,A3};
+  int senseChannels[]={A0,A1,A2,A3,A4,A5,A6,A7};
   analog_PressureSensor sensors[MAX_NUM_CHANNELS];
 #elif(SENSOR_I2C)
   int senseChannels[]={0,1,2,3,4,5,6,7};
@@ -149,7 +151,7 @@ void setup() {
       }
       else if(SENSOR_I2C){
         senseSettings[i].sensorAddr= sensorAddr;
-        senseSettings[i].useMux     = useMux;
+        senseSettings[i].useMux     = false;
         senseSettings[i].muxAddr    = muxAddr;
         senseSettings[i].muxChannel = senseChannels[i];
       }
@@ -197,6 +199,9 @@ void loop() {
       }
       
         //Get the new pressures
+        if (useMux){
+          mux.setActiveChannel(senseChannels[i]);
+        }
         sensors[i].getData();
         pressures[i] = sensors[i].getPressure();
           
