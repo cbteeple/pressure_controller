@@ -27,11 +27,11 @@
 
 
 //Define the type of sensor to use (only one can be true)
-#define SENSOR_ANALOG true
-#define SENSOR_I2C false
+#define SENSOR_ANALOG false
+#define SENSOR_I2C true
 
 #define SENSOR_MODEL 1
-#define MAX_NUM_CHANNELS 6
+#define MAX_NUM_CHANNELS 4
 
 //Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
