@@ -31,7 +31,7 @@
 #define SENSOR_I2C false
 
 #define SENSOR_MODEL 1
-#define MAX_NUM_CHANNELS 4
+#define MAX_NUM_CHANNELS 6
 
 //Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
