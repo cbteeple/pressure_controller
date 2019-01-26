@@ -15,10 +15,8 @@
 void i2c_PressureSensor::initialize(sensorSettings &senseSet){
   sensor_addr=senseSet.sensorAddr;
   use_mux = senseSet.useMux;
-  if (use_mux){
-    mux_addr=senseSet.muxAddr;
-    mux_channel=senseSet.muxChannel;
-  }
+  mux_addr=senseSet.muxAddr;
+  mux_channel=senseSet.muxChannel;
      
   setCalibration(senseSet.sensorModel);
 
@@ -26,6 +24,9 @@ void i2c_PressureSensor::initialize(sensorSettings &senseSet){
     Wire.begin();
     Wire.setClock(400000L);
   }
+
+  setMuxChannel(mux_channel);
+  
 }
 
 
