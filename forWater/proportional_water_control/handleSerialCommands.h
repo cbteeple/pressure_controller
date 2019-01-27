@@ -12,7 +12,7 @@ class handleSerialCommands
   private:      
     int numSensors;
     String command;
-    bool broadcast = true;
+    bool broadcast = false;
     eepromHandler saveHandler;
 
     bool getCommand();
