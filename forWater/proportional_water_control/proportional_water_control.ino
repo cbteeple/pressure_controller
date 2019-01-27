@@ -121,7 +121,7 @@ void setup() {
  
   //Initialize control settings
     handleCommands.initialize(MAX_NUM_CHANNELS);
-    handleCommands.startBroadcast();
+    //handleCommands.startBroadcast();
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
       
       //Initialize control settings
