@@ -67,6 +67,8 @@ sensorSettings senseSettings[MAX_NUM_CHANNELS];
 
 //Create an object to handle serial commands
 handleSerialCommands handleCommands;
+trajectory traj;
+
 i2c_Mux mux(muxAddr);
 
 //Set up sensing
@@ -112,6 +114,7 @@ unsigned long currentTime=0;
 
 
 
+
 //______________________________________________________________________
 void setup() {
   //Start serial
@@ -121,7 +124,7 @@ void setup() {
  
   //Initialize control settings
     handleCommands.initialize(MAX_NUM_CHANNELS);
-    //handleCommands.startBroadcast();
+    handleCommands.startBroadcast();
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
       
       //Initialize control settings
@@ -183,20 +186,34 @@ void setup() {
 
 
 
-
+bool runtraj = traj.running;
 //______________________________________________________________________
 void loop() {
   //Serial.println("_words need to be here (for some reason)");
   //Handle serial commands
-   bool newSettings=handleCommands.go(settings, ctrlSettings);
+
+  traj.CurrTime = millis();
+  runtraj = traj.running;
   
-  //Get pressure readings
+  bool newSettings=handleCommands.go(settings, ctrlSettings,traj);    
+  
+  //Get pressure readings and do control
     for (int i=0; i<MAX_NUM_CHANNELS; i++){   
       //Update controller settings if there are new ones
-      if (newSettings){
-        controllers[i].updateSettings(ctrlSettings[i]);
-        controllers[i].setSetpoint(ctrlSettings[i].setpoint);
-      }
+
+      //if we are in mode 2, set the setpoint to be a linear interpolation between trajectory points
+        if (ctrlSettings[i].controlMode==2){
+          if (runtraj){
+            //Set setpoint
+            controllers[i].setSetpoint(traj.interp(i));
+          }
+        }
+        else{
+          if (newSettings){
+          controllers[i].updateSettings(ctrlSettings[i]);
+          controllers[i].setSetpoint(ctrlSettings[i].setpoint);
+          }  
+        }
       
         //Get the new pressures
         if (useMux){
@@ -204,22 +221,21 @@ void loop() {
         }
         sensors[i].getData();
         pressures[i] = sensors[i].getPressure();
-          
+
+        //Perform control if the channel is on
         if (ctrlSettings[i].channelOn){
-          
-        if (ctrlSettings[i].controlMode==1){
-    
-          //Run 1 step of the controller
-          valveSets[i] = controllers[i].go(pressures[i]);
-        }
-        else{
-           valveSets[i]=ctrlSettings[i].valveDirect;
-        }
-    
-          //Send new actuation signal to the valves
-          valves[i].go( valveSets[i] );
-          
-          //Serial.print('\n');
+          //Run 1 step of the controller if we are in mode 1 or 2
+          if (ctrlSettings[i].controlMode>=1){
+            valveSets[i] = controllers[i].go(pressures[i]);
+          }
+          else{
+             valveSets[i]=ctrlSettings[i].valveDirect;
+          }
+      
+            //Send new actuation signal to the valves
+            valves[i].go( valveSets[i] );
+            
+            //Serial.print('\n');
         
       }
       else{
@@ -319,4 +335,5 @@ void lcdUpdateDistributed(){
   }
   
 }
+
 

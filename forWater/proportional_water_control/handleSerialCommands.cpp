@@ -6,11 +6,11 @@
 
 //_________________________________________________________
 //PUBLIC FUNCTIONS
-bool handleSerialCommands::go(globalSettings (&settings), controlSettings *ctrlSettings){
+bool handleSerialCommands::go(globalSettings (&settings), controlSettings *ctrlSettings, trajectory (&traj)){
   bool newCommand = getCommand();
   bool newSettings = false;
   if (newCommand){
-    newSettings=processCommand(settings, ctrlSettings);
+    newSettings=processCommand(settings, ctrlSettings, traj);
   }
   return newSettings;
 }
@@ -46,12 +46,51 @@ bool handleSerialCommands::getCommand(){
 
 
 
-bool handleSerialCommands::processCommand(globalSettings (&settings), controlSettings *ctrlSettings){
+bool handleSerialCommands::processCommand(globalSettings (&settings), controlSettings *ctrlSettings, trajectory (&traj)){
   bool newSettings=false;
   if (broadcast){
     Serial.print("_");
   }
-  if(command.startsWith("OFF")){
+ 
+  //______________________________________________________________
+  //Handle changes in setpoint first so it's a fast operation
+  if(command.startsWith("SET")){
+    if(getStringValue(command,';',numSensors).length()){
+      for (int i=0; i<numSensors; i++){
+        ctrlSettings[i].setpoint= constrain(getStringValue(command,';',i+1).toFloat(),
+        ctrlSettings[i].minPressure,
+        ctrlSettings[i].maxPressure);
+      }
+      newSettings=true;
+      if (broadcast){
+        Serial.print("NEW ");
+      }
+    }
+    else if(getStringValue(command,';',1).length()){
+      float allset=getStringValue(command,';',1).toFloat();
+      for (int i=0; i<numSensors; i++){
+        ctrlSettings[i].setpoint= constrain(allset,
+        ctrlSettings[i].minPressure,
+        ctrlSettings[i].maxPressure);
+      }
+      newSettings=true;
+      if (broadcast){
+        Serial.print("NEW ");
+      }
+    }
+    if (broadcast){
+      Serial.print("SETPOINT: ");
+      for (int i=0; i<numSensors; i++){
+        Serial.print(ctrlSettings[i].setpoint,4);
+        Serial.print('\t');
+      }
+    }
+  }
+
+
+
+
+  else if(command.startsWith("OFF")){
     settings.outputsOn = false;
     if (broadcast){
       Serial.print("Output: OFF");
@@ -92,41 +131,8 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   }
 
 
+
   
-  //______________________________________________________________
-  //Handle changes in setpoint
-  else if(command.startsWith("SET")){
-    if(getStringValue(command,';',numSensors).length()){
-      for (int i=0; i<numSensors; i++){
-        ctrlSettings[i].setpoint= constrain(getStringValue(command,';',i+1).toFloat(),
-        ctrlSettings[i].minPressure,
-        ctrlSettings[i].maxPressure);
-      }
-      newSettings=true;
-      if (broadcast){
-        Serial.print("NEW ");
-      }
-    }
-    else if(getStringValue(command,';',1).length()){
-      float allset=getStringValue(command,';',1).toFloat();
-      for (int i=0; i<numSensors; i++){
-        ctrlSettings[i].setpoint= constrain(allset,
-        ctrlSettings[i].minPressure,
-        ctrlSettings[i].maxPressure);
-      }
-      newSettings=true;
-      if (broadcast){
-        Serial.print("NEW ");
-      }
-    }
-    if (broadcast){
-      Serial.print("SETPOINT: ");
-      for (int i=0; i<numSensors; i++){
-        Serial.print(ctrlSettings[i].setpoint,4);
-        Serial.print('\t');
-      }
-    }
-  }
 //____________________________________________________________
 //Handle MAXIMUM Software Pressure Limits
   else if(command.startsWith("MAXP")){
@@ -386,7 +392,94 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     
   }
 
+  else if(command.startsWith("ECHO")){
+    bool broadcast_tmp=broadcast;
+    
+    if(getStringValue(command,';',1).length()){
+      broadcast = bool(getStringValue(command,';',1).toInt());
+    }
 
+    if(!broadcast_tmp){
+      Serial.print("_");
+    }
+    
+    if(broadcast){
+      Serial.print("ECHO: ON");
+    }
+    else{
+      Serial.print("ECHO: OFF");
+    }
+    if (!broadcast){
+      Serial.print('\n');
+    }
+  }
+
+  //
+  //[trajectory length]
+  else if (command.startsWith("TRAJCONFIG")){
+    if(getStringValue(command,';',2).length()){
+      traj.len = constrain(getStringValue(command,';',1).toInt(),1,200);
+      traj.wrap = bool(getStringValue(command,';',2).toInt());
+    }
+    if (broadcast){
+      Serial.print("TRAJ LENGTH: ");
+      Serial.print(traj.len);
+    }
+  }
+
+  //[index];[time];[set0];[set1];[set2];[set3]
+  else if(command.startsWith("TRAJSET")){
+    if(getStringValue(command,';',numSensors+2).length()){
+      
+      float row[6]={0,0,0,0,0,0};
+      
+      for (int i=0; i<numSensors+1; i++){
+        row[i]= getStringValue(command,';',i+1).toFloat();
+      }
+      
+    traj.setLine(row);
+
+    if (broadcast){
+      Serial.print("TRAJSET: ");
+      for(int i=0;i<6;i++){
+        Serial.print('\t');
+        Serial.print(row[i],2);
+      }
+    }
+    
+    
+    }
+
+    else{
+      if (broadcast){
+        Serial.print("TRAJ:");
+        for (int i=0; i<traj.len; i++){
+            Serial.print('\n');
+            Serial.print(traj.trajtimes[i]);
+            Serial.print('\t');
+          for (int j=0; j<4; j++){
+            Serial.print(traj.trajpts[i][j]);
+            Serial.print('\t');
+          }
+        }
+      }
+      
+    }
+
+    
+  }
+
+  else if(command.startsWith("TRAJSTART")){
+    traj.start();
+  }
+  
+  else if(command.startsWith("TRAJSTOP")){
+    traj.stop();
+  }
+
+
+
+//Unrecognized
   else {
     newSettings=false;
     if (broadcast){
@@ -394,6 +487,8 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     }
   }
 
+
+//End the line with a newline
   if (broadcast){
     Serial.print("\n");
   }
@@ -420,4 +515,5 @@ String handleSerialCommands::getStringValue(String data, char separator, int ind
 
   return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
+
 
