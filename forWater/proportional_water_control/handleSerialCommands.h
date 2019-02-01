@@ -16,14 +16,15 @@ class handleSerialCommands
     eepromHandler saveHandler;
 
     bool getCommand();
-    bool processCommand(globalSettings &, controlSettings *);
+    bool processCommand(globalSettings &, controlSettings *, trajectory &);
     String getStringValue(String, char, int);
   
   public:
     void initialize(int);
-    bool go(globalSettings &, controlSettings *);
+    bool go(globalSettings &, controlSettings *, trajectory &);
     void startBroadcast();
     void stopBroadcast();
 };
 
 #endif
+

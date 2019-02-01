@@ -65,3 +65,4 @@ int eepromHandler::getSaveLoc(int settingType, int channelIdx, bool isDefault){
   }
   return settingsStart;
 }
+
