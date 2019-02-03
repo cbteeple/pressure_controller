@@ -118,7 +118,12 @@ void i2c_PressureSensor::getData(void){
   pressure1|=0<<6;
 
   long p_comb = pressure1<<8 | pressure0;
-  pressure = long((p_comb - output_min)*(pressure_max-pressure_min))/float(output_max-output_min)+pressure_min;
+  float pressure_tmp = long((p_comb - output_min)*(pressure_max-pressure_min))/float(output_max-output_min)+pressure_min;
+
+  //Do some error checking
+  if (pressure_tmp>-10){
+    pressure = pressure_tmp;
+  }
 
   if (!firstCall){
     pressureSmooth=alpha*pressure+ (1-alpha)*pressureLast;
