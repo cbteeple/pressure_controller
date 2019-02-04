@@ -55,12 +55,17 @@ class trajectory
   private:
     const static unsigned int maxLen = 200;
     int curr_idx = 1;
+
+    float lerp(float a, float b, float f){
+    return a + f * (b - a);
+    }
     
   public:
     unsigned long StartTime=0;
     unsigned long CurrTime=0;
     
     int len = 20;
+    int start_idx = 0;
     bool wrap = false;
     bool running = false;
     float trajpts [maxLen][4];
@@ -91,7 +96,7 @@ class trajectory
 
     void start(){
       running = true;
-      curr_idx = 1;
+      curr_idx = start_idx+1;
       StartTime = CurrTime;
     }
 
@@ -104,9 +109,9 @@ class trajectory
       //Make sure to interpolate in the correct region
       float deltaT = float(CurrTime-StartTime)/1000.0;
 
-      if(deltaT >= trajtimes[len-1]){
-        curr_idx = len-1;
-        deltaT = trajtimes[len-1];
+      if(deltaT >= trajtimes[start_idx+len-1]){
+        curr_idx = start_idx+len-1;
+        deltaT = trajtimes[start_idx+len-1];
 
         running=false;  
         
@@ -115,7 +120,7 @@ class trajectory
         while(deltaT>trajtimes[curr_idx]){
           curr_idx++;
   
-          if (curr_idx>=len-1){
+          if (curr_idx>=start_idx+len-1){
             break;
           }
         }
@@ -132,7 +137,7 @@ class trajectory
         percent
         );
 
-        if ((deltaT >= trajtimes[len-1]) & wrap & channel==3){
+        if ((deltaT >= trajtimes[start_idx+len-1]) & wrap & channel==3){
           start();
         }
 
@@ -142,12 +147,6 @@ class trajectory
         //Serial.print(set);
         //Serial.print('\n');
       return set;
-    }
-
-
-
-    float lerp(float a, float b, float f){
-    return a + f * (b - a);
     }
 
 };

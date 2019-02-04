@@ -43,18 +43,18 @@ class PressureController:
 
     def sendTraj(self):
         lastTime = 0.0
-        configstring = "trajconfig;%d;%d" %(len(self.traj),wrap)
+        configstring = "trajconfig;%d;%d;%d" %(0,len(self.traj),wrap)
         print(configstring)
         self.s.write(configstring+'\n')
         for idx, entry in enumerate(self.traj):
             # Send a string to the pressure controller
             string="trajset;%d;%0.3f;%0.3f;%0.3f;%0.3f;%0.3f" %(
                 idx,
-                entry[0],
-                self.speedFactor*entry[1],
-                self.speedFactor*entry[2],
-                self.speedFactor*entry[3],
-                self.speedFactor*entry[4])
+                self.speedFactor*entry[0],
+                entry[1],
+                entry[2],
+                entry[3],
+                entry[4])
             print(string)
             self.s.write(string+'\n')
             
