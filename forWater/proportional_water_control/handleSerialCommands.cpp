@@ -415,15 +415,22 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   }
 
   //
-  //[trajectory length]
+  //[trajectory length] [trajectory starting index] [wrap mode]
   else if (command.startsWith("TRAJCONFIG")){
-    if(getStringValue(command,';',2).length()){
-      traj.len = constrain(getStringValue(command,';',1).toInt(),1,200);
-      traj.wrap = bool(getStringValue(command,';',2).toInt());
+    if(getStringValue(command,';',3).length()){
+      traj.start_idx = constrain(getStringValue(command,';',1).toInt(),0,199);
+      traj.len = constrain(getStringValue(command,';',2).toInt(),1,200);
+      traj.wrap = bool(getStringValue(command,';',3).toInt());
     }
     if (broadcast){
-      Serial.print("TRAJ LENGTH: ");
+      Serial.print("TRAJ CONFIG: start = ");
+      Serial.print(traj.start_idx);
+      Serial.print('\t');
+      Serial.print("len = ");
       Serial.print(traj.len);
+      Serial.print('\t');
+      Serial.print("wrap = ");
+      Serial.print(traj.wrap);
     }
   }
 
@@ -453,7 +460,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     else{
       if (broadcast){
         Serial.print("TRAJ:");
-        for (int i=0; i<traj.len; i++){
+        for (int i=traj.start_idx; i<(traj.start_idx+traj.len); i++){
             Serial.print('\n');
             Serial.print(traj.trajtimes[i]);
             Serial.print('\t');
