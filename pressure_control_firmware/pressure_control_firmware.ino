@@ -13,7 +13,7 @@
 
 
 //Include the config file from the system you are using
-#include "config/config_hydraulic.h"
+#include "config/config_pneumatic.h"
 
 
 
