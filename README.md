@@ -3,3 +3,6 @@ An object-oriented approach to doing pressure control. Hopefully things are modu
 
 ## Dependencies
  - [EEPROMAnything Library](https://github.com/collin80/EEPROMAnything) by collin80
+
+## How to use the code:
+[Instructions on the Wiki!](https://github.com/cbteeple/pressure_controller/wiki)
