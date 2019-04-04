@@ -2,18 +2,22 @@
 #include "i2c_PressureSensor.h"
 #include "i2c_mux.h"
 #include "handleSerialCommands.h"
+#include "handleButtons.h"
 #include "allSettings.h"
 #include "valvePair.h"
 #include "bangBang.h"
 #include "proportional.h"
 #include "pidFull.h"
 
+
+
 #include <EasyLCD.h>
 
 
 
 //Include the config file from the system you are using
-#include "config/config_pneumatic.h"
+#include "config/config_hydraulic.h"
+
 
 
 
@@ -25,6 +29,10 @@ sensorSettings senseSettings[MAX_NUM_CHANNELS];
 
 //Create an object to handle serial commands
 handleSerialCommands handleCommands;
+
+Button  buttons[3] { {buttonPins[0]}, { buttonPins[1] }, { buttonPins[2] } };
+handleButtons buttonHandler(MAX_NUM_CHANNELS);
+
 trajectory traj;
 
 i2c_Mux mux(muxAddr);
@@ -79,8 +87,25 @@ void setup() {
     Serial.begin(115200);
     //Serial.flush();
     Serial.setTimeout(10);
+
+
+  //Buttons:
+  /*
+    for (int i=0; i<3; i++){
+      pinMode(buttonPins[i], INPUT_PULLUP);
+    }
+    attachInterrupt(digitalPinToInterrupt(buttonPins[0]), buttons.up, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(buttonPins[1]), buttons.down, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(buttonPins[2]), buttons.enter, CHANGE);
+    */
+    
  
   //Initialize control settings
+    for (int idx=0; idx<3; idx++){
+      buttons[idx].begin();
+    }
+  
+    buttonHandler.initialize();
     handleCommands.initialize(MAX_NUM_CHANNELS);
     handleCommands.startBroadcast();
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
@@ -139,12 +164,14 @@ void setup() {
       Serial.println("_LCD Not Attached!");  
     }
     lcd.clearOnUpdate(false);
+    lcd.fadeTime(250);
 
 }
 
 
 
 bool runtraj = traj.running;
+bool lcdOverride = false;
 //______________________________________________________________________
 void loop() {
   //Serial.println("_words need to be here (for some reason)");
@@ -153,7 +180,27 @@ void loop() {
   traj.CurrTime = millis();
   runtraj = traj.running;
   
-  bool newSettings=handleCommands.go(settings, ctrlSettings,traj);    
+  bool newSettings=handleCommands.go(settings, ctrlSettings,traj);
+  String buttonMessage= buttonHandler.go(buttons,settings, ctrlSettings); 
+
+  if (buttonMessage =="r"){
+    lcd.clearOnUpdate(true);
+    lcd.fadeOnUpdate(true);
+    
+    lcdMessage("");
+    lcd.clearOnUpdate(false);
+    lcd.fadeOnUpdate(false);
+    
+    lcdOverride = false;
+  }
+  else if (buttonMessage != ""){
+    lcd.clearOnUpdate(true);
+    lcdMessage(buttonMessage);
+    lcd.clearOnUpdate(false);
+    lcdOverride = true;
+  }
+
+  
   
   //Get pressure readings and do control
     for (int i=0; i<MAX_NUM_CHANNELS; i++){   
@@ -214,8 +261,10 @@ void loop() {
 
   if (lcdAttached && (currentTime-previousLCDTime>= settings.lcdLoopTime/MAX_NUM_CHANNELS)){
     //lcdUpdate();
-    lcdUpdateDistributed();
-    previousLCDTime=currentTime;
+    if (!lcdOverride){
+      lcdUpdateDistributed();
+      previousLCDTime=currentTime;
+    }
   }
     
   
@@ -293,5 +342,10 @@ void lcdUpdateDistributed(){
   }
   
 }
+
+void lcdMessage(String message){
+  lcd.write(message);
+}
+
 
 

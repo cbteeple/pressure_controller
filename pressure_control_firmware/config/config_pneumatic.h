@@ -39,8 +39,11 @@
 
 //Set valve pins
   //int valvePins[][2]= { {6,9}, {10,11} };
-  int valvePins[][2]= { {2,3}, {4,5}, {6,7}, {8,9}, {10,11}, {12,13} };
+  int valvePins[][2]= { {4,5}, {6,7}, {8,9}, {10,11}, {12,13}, {44,45} }
   int valveOffset=225;
+
+//Set Button pins
+  int buttonPins[]={2,18,19};
 
 //Default controller settings
   float pid_start[]={0.6,0.03,0}; 
