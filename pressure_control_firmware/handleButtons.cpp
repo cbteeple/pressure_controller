@@ -57,9 +57,10 @@ String handleButtons::go(Button *buttons, globalSettings (&settings), controlSet
                     if (ctrlSettings[i].channelOn){
                         ctrlSettings[i].valveDirect = ctrlSettings[i].valveDirect +0.05;
                         //buttonMessage+=String(ctrlSettings[i].valveDirect,2)+" ";
+                        buttonMessage= "Direct Valve Set\n" +String(ctrlSettings[i].valveDirect,2);
                     }
                 } 
-                buttonMessage+= "Direct Valve Set\n" +String(ctrlSettings[0].valveDirect,2);
+                //buttonMessage+= "Direct Valve Set\n" +String(ctrlSettings[0].valveDirect,2);
             }
         } break;
 
@@ -69,9 +70,10 @@ String handleButtons::go(Button *buttons, globalSettings (&settings), controlSet
                     if (ctrlSettings[i].channelOn){
                         ctrlSettings[i].valveDirect = ctrlSettings[i].valveDirect -0.05;
                         //buttonMessage+=String(ctrlSettings[i].valveDirect,2)+" ";
+                        buttonMessage= "Direct Valve Set\n" +String(ctrlSettings[i].valveDirect,2);
                     }
                 } 
-                buttonMessage+= "Direct Valve Set\n" +String(ctrlSettings[0].valveDirect,2);
+                //buttonMessage+= "Direct Valve Set\n" +String(ctrlSettings[0].valveDirect,2);
             }
         } break;
             

@@ -438,9 +438,9 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   else if(command.startsWith("TRAJSET")){
     if(getStringValue(command,';',numSensors+2).length()){
       
-      float row[6]={0,0,0,0,0,0};
+      float row[numSensors+2];
       
-      for (int i=0; i<numSensors+1; i++){
+      for (int i=0; i<numSensors+2; i++){
         row[i]= getStringValue(command,';',i+1).toFloat();
       }
       
@@ -448,7 +448,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
 
     if (broadcast){
       Serial.print("TRAJSET: ");
-      for(int i=0;i<6;i++){
+      for(int i=0;i<numSensors+2;i++){
         Serial.print('\t');
         Serial.print(row[i],2);
       }
@@ -464,7 +464,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
             Serial.print('\n');
             Serial.print(traj.trajtimes[i]);
             Serial.print('\t');
-          for (int j=0; j<4; j++){
+          for (int j=0; j<numSensors; j++){
             Serial.print(traj.trajpts[i][j]);
             Serial.print('\t');
           }
