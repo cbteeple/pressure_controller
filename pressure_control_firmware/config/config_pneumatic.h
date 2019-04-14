@@ -39,7 +39,7 @@
 
 //Set valve pins
   //int valvePins[][2]= { {6,9}, {10,11} };
-  int valvePins[][2]= { {4,5}, {6,7}, {8,9}, {10,11}, {12,13}, {44,45} }
+  int valvePins[][2]= { {4,5}, {6,7}, {8,9}, {10,11}, {12,13}, {44,45} };
   int valveOffset=225;
 
 //Set Button pins

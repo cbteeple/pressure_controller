@@ -4,6 +4,7 @@ import serial
 import time
 import sys
 import os
+import yaml
 
 speedFactor=1.0
 wrap = True
@@ -90,7 +91,14 @@ class PressureController:
 if __name__ == '__main__':
     if len(sys.argv)==2:
         try:
-            pres=PressureController('COM17',115200)
+            inFile=os.path.join("config","serial_config.yaml")
+            with open(inFile) as f:
+                # use safe_load instead of load
+                serial_set = yaml.safe_load(f)
+                f.close()
+
+            # Create a pressure controller object
+            pres=PressureController(serial_set.get("devname"), serial_set.get("baudrate"))
             pres.getTraj(sys.argv[1])
 
             # Upload the trajectory and start it

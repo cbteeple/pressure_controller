@@ -1,0 +1,34 @@
+
+# Channels - turn them on or off
+channels:
+    channel1: 'on'
+    channel2: 'on'
+    channel3: 'on'
+    channel4: 'on'
+
+
+# Loop time for outputting data.
+#   This is not strictly enforced, but will always be within 10 ms.
+#   If set to 0ms, the loop wil run as fast as the control loop.
+data_loop_time: 100 #[ms]
+
+
+#Set the PID Values.
+#   If "all_equal" is True, then only the values in "values" are used
+#   If "all-equal" is False, then settings for all channels must be specified
+PID:
+    all_equal: True
+    values: [0.2000, 0.0030, 0.0030]
+    channel1: []
+    channel2: []
+    channel3: []
+    channel4: []
+
+# Set the max and min pressures in software [psi]
+#   If single value, then it will be set for all channels
+#   If a vector of length NUM_CHANNELS, then each channel is set independently
+max_pressure: 25
+min_pressure: -10
+
+#For debugging purposes
+echo: True

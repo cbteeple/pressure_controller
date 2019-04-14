@@ -16,7 +16,7 @@
 
 
 //Include the config file from the system you are using
-#include "config/config_hydraulic.h"
+#include "config/config_pneumatic.h"
 
 
 
@@ -29,6 +29,7 @@ sensorSettings senseSettings[MAX_NUM_CHANNELS];
 
 //Create an object to handle serial commands
 handleSerialCommands handleCommands;
+eepromHandler saveHandler;
 
 Button  buttons[3] { {buttonPins[0]}, { buttonPins[1] }, { buttonPins[2] } };
 handleButtons buttonHandler(MAX_NUM_CHANNELS);
@@ -165,6 +166,10 @@ void setup() {
     }
     lcd.clearOnUpdate(false);
     lcd.fadeTime(250);
+
+
+    //Get saved settings
+    loadSettings();
 
 }
 
@@ -348,4 +353,18 @@ void lcdMessage(String message){
 }
 
 
+
+
+
+
+void loadSettings(){
+  for (int i=0; i<MAX_NUM_CHANNELS; i++){
+    float set_temp = ctrlSettings[i].setpoint;
+    saveHandler.loadCtrl(ctrlSettings[i], i);
+    ctrlSettings[i].setpoint=set_temp;
+  }
+  bool set_temp = settings.outputsOn;
+  saveHandler.loadGlobal(settings);
+  settings.outputsOn=set_temp;
+}
 

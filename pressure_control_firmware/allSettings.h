@@ -53,7 +53,7 @@ class controlSettings
 class trajectory
 {
   private:
-    const static unsigned int maxLen = 200;
+    const static unsigned int maxLen = 100;
     int curr_idx = 1;
 
     float lerp(float a, float b, float f){
@@ -88,8 +88,8 @@ class trajectory
       int idx = int(row[0]);
       trajtimes[idx]=row[1];
 
-      for(int i=2;i<(6);i++){
-        trajpts[idx][i-2]=row[i];
+      for(int i=0;i<(6);i++){
+        trajpts[idx][i]=row[i+2];
       }
     };
 
