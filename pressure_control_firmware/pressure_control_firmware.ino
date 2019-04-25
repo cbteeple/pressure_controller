@@ -232,6 +232,13 @@ void loop() {
         sensors[i].getData();
         pressures[i] = sensors[i].getPressure();
 
+
+        //Software Watchdog - If pressure exceeds max, vent forever until the mode gets reset.
+        if (pressures[i] > ctrlSettings[i].maxPressure){
+          ventUntilReset();
+          
+        }
+
         //Perform control if the channel is on
         if (ctrlSettings[i].channelOn){
           //Run 1 step of the controller if we are in mode 1 or 2
@@ -367,4 +374,14 @@ void loadSettings(){
   saveHandler.loadGlobal(settings);
   settings.outputsOn=set_temp;
 }
+
+
+
+void ventUntilReset(){
+  for (int i=0; i<MAX_NUM_CHANNELS; i++){  
+    ctrlSettings[i].controlMode = 0;
+    ctrlSettings[i].valveDirect = -1.0;
+    valves[i].go( ctrlSettings[i].valveDirect );
+  }
+  }
 
