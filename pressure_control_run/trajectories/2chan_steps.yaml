@@ -1,0 +1,11 @@
+settings:
+    interp: 'linear'
+    time_increment: 4.0
+    wrap: true
+
+setpoints:
+    # [time, p0, p1, p2, p3]
+    - [0.000,  0, 0, 0,  0]
+    - [0.079,  0, 0, 0,  0]
+    - [0.080,  15, 15, 0,  0]
+    - [0.160,  15, 15, 0,  0]

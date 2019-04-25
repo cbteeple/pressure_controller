@@ -19,8 +19,9 @@ class PressureController:
         self.s = serial.Serial(devname,baudrate)
         self.config_folder  = config_folder
 
-        self.s.write("load"+'\n')
         time.sleep(2)
+        self.s.write("load"+'\n')
+        self.readStuff()
             
 
     def readConfig(self, filename):
@@ -33,40 +34,39 @@ class PressureController:
 
     def setConfig(self, filename):
         self.readConfig(filename)
-        self.readStuff()
         
         self.sendCommand("echo",bool(self.config.get("echo")))
-        time.sleep(0.2)
+        time.sleep(0.1)
         self.readStuff()
 
         self.num_channels = self.config.get("channels").get("num_channels")
-        time.sleep(0.2)
+        time.sleep(0.1)
         self.readStuff()
         
         self.sendCommand("chan",self.config.get("channels").get("states"))
-        time.sleep(0.2)
+        time.sleep(0.1)
         self.readStuff()
         
 
         self.sendCommand("maxp", self.config.get("max_pressure") )
-        time.sleep(0.2)
+        time.sleep(0.1)
         self.readStuff()
         self.sendCommand("minp", self.config.get("min_pressure") )
-        time.sleep(0.2)
+        time.sleep(0.1)
         self.readStuff()
         
         self.handlePID()
         
         self.sendCommand("time",int(self.config.get("data_loop_time")))
-        time.sleep(0.2)
+        time.sleep(0.1)
         self.readStuff()
         
         self.sendCommand("mode",1)
-        time.sleep(0.2)
+        time.sleep(0.1)
         self.readStuff()
         
         self.sendCommand("save",[])
-        time.sleep(0.2)
+        time.sleep(0.1)
         self.readStuff()
         #self.sendCommand("save",[])
 
@@ -102,7 +102,7 @@ class PressureController:
         # Send out the settings for all channels
         for idx in range(self.num_channels):
             self.sendCommand("pid",[idx]+values[idx])
-            time.sleep(0.2)
+            time.sleep(0.1)
             self.readStuff()
 
 

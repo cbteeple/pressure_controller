@@ -5,6 +5,7 @@ import time
 import sys
 import os
 import yaml
+import pickle
 
 speedFactor=1.0
 wrap = True
@@ -16,27 +17,51 @@ def serialRead(ser):
     while ser.in_waiting:  # Or: while ser.inWaiting():
         print (ser.readline())
 
+
+def portIsUsable(portName):
+    try:
+       ser = serial.Serial(port=portName)
+       return True
+    except:
+       return False
+
+
+def seriInit(devname,baudrate):
+    try:
+        ser= serial.Serial(devname,baudrate, timeout=1)
+        ser.isOpen() # try to open port, if possible print message and proceed with 'while True:'
+
+    except IOError: # if port is already opened, close it and open it again and print message
+        #global ser
+        print ("Port was already open. Unplug + replug the arduino and try again.")
+        ser = None
+    return ser
+
+
+
 class PressureController:
     def __init__(self, devname,baudrate):
-        self.s = serial.Serial(devname,baudrate)
+        self.s = seriInit(devname,baudrate)
+        
+        if self.s is None:
+            sys.exit()
+        
         self.trajFolder  = trajFolder
         self.speedFactor = speedFactor
 
-        time.sleep(1)
 
-        self.s.write("echo;0"+'\n')
-        self.s.write("time;100"+'\n')
+        time.sleep(1)
+        
+
         self.s.write("mode;1"+'\n')
-        self.s.write("on"+'\n')
-        #time.sleep(2)
+
             
     def setPressure(self, press):
         self.s.write("set;%0.3f"%(press)+'\n')
 
 
     def shutdown(self):
-        self.s.write("off\n")
-        self.s.write("set;0"+'\n')
+        #self.s.write("set;0"+'\n')
         self.s.close()
         
     
@@ -62,14 +87,19 @@ if __name__ == '__main__':
             # Create a pressure controller object
             pres=PressureController(serial_set.get("devname"), serial_set.get("baudrate"))
 
-            # Upload the trajectory and start it
-            pres.setPressure(float(sys.argv[1]))
+            if str(sys.argv[1]) is 's':
+                pres.shutdown()
+            else:
+                # Upload the trajectory and start it
+                pres.setPressure(float(sys.argv[1]))
+            
+            pres.shutdown()
             #pres.readStuff()
-            while True:
-                pres.readStuff()
+            #while True:
+            #    pres.readStuff()
                 
         except KeyboardInterrupt:
-            pres.shutdown()
-            
+            pass
+            #pres.shutdown()
     else:
         print("Please include a pressure as the input")
