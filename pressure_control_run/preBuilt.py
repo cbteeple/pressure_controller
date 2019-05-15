@@ -7,7 +7,6 @@ import os
 import yaml
 
 speedFactor=1.0
-wrap = True
 dataBack=True
 trajFolder = "trajectories"
 
@@ -35,16 +34,33 @@ class PressureController:
 
     # Read in the trajectory and store it in a list of arrays
     def getTraj(self,filename):
-        inFile=os.path.join(trajFolder,filename+".traj")
+        # Read in the setpoint file
+        inFile=os.path.join(trajFolder,filename+".yaml")
         with open(inFile,'r') as f:
-            lines = f.readlines()
+            # use safe_load instead of load
+            trajIn = yaml.safe_load(f)
             f.close()
 
-            self.traj = [[float(x) for x in line.split('\t')] for line in lines]
+
+        # Get data from the file
+        #self.settings = trajIn.get("settings")
+        self.traj = trajIn.get("setpoints")
+        self.wrap = trajIn.get("wrap")
+
+
+
+
+
+        #inFile=os.path.join(trajFolder,filename+".traj")
+        #with open(inFile,'r') as f:
+        #    lines = f.readlines()
+        #    f.close()
+        #
+        #    self.traj = [[float(x) for x in line.split('\t')] for line in lines]
 
     def sendTraj(self):
         lastTime = 0.0
-        configstring = "trajconfig;%d;%d;%d" %(0,len(self.traj),wrap)
+        configstring = "trajconfig;%d;%d;%d" %(0,len(self.traj),self.wrap)
         print(configstring)
         self.s.write(configstring+'\n')
         for idx, entry in enumerate(self.traj):
@@ -91,6 +107,7 @@ class PressureController:
 if __name__ == '__main__':
     if len(sys.argv)==2:
         try:
+            # Get the serial object to use
             inFile=os.path.join("config","serial_config.yaml")
             with open(inFile) as f:
                 # use safe_load instead of load

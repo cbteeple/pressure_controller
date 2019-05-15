@@ -14,7 +14,7 @@ def serialRead(ser):
     while ser.in_waiting:  # Or: while ser.inWaiting():
         print (ser.readline())
 
-class PressureController:
+class configSender:
     def __init__(self, devname,baudrate):
         self.s = serial.Serial(devname,baudrate)
         self.config_folder  = config_folder
@@ -26,49 +26,57 @@ class PressureController:
 
     def readConfig(self, filename):
         inFile=os.path.join(self.config_folder,filename+".yaml")
-        with open(inFile) as f:
-            # use safe_load instead of load
-            self.config = yaml.safe_load(f)
-            f.close()
+
+        if os.path.isfile(inFile):
+            with open(inFile) as f:
+                # use safe_load instead of load
+                self.config = yaml.safe_load(f)
+                f.close()
+        else:
+            self.config=None
+            print("The config file does not exist")
+            self.shutdown()
+            
 
 
     def setConfig(self, filename):
         self.readConfig(filename)
-        
-        self.sendCommand("echo",bool(self.config.get("echo")))
-        time.sleep(0.1)
-        self.readStuff()
 
-        self.num_channels = self.config.get("channels").get("num_channels")
-        time.sleep(0.1)
-        self.readStuff()
-        
-        self.sendCommand("chan",self.config.get("channels").get("states"))
-        time.sleep(0.1)
-        self.readStuff()
-        
+        if self.config:
+            self.sendCommand("echo",bool(self.config.get("echo")))
+            time.sleep(0.1)
+            self.readStuff()
 
-        self.sendCommand("maxp", self.config.get("max_pressure") )
-        time.sleep(0.1)
-        self.readStuff()
-        self.sendCommand("minp", self.config.get("min_pressure") )
-        time.sleep(0.1)
-        self.readStuff()
-        
-        self.handlePID()
-        
-        self.sendCommand("time",int(self.config.get("data_loop_time")))
-        time.sleep(0.1)
-        self.readStuff()
-        
-        self.sendCommand("mode",1)
-        time.sleep(0.1)
-        self.readStuff()
-        
-        self.sendCommand("save",[])
-        time.sleep(0.1)
-        self.readStuff()
-        #self.sendCommand("save",[])
+            self.num_channels = self.config.get("channels").get("num_channels")
+            time.sleep(0.1)
+            self.readStuff()
+            
+            self.sendCommand("chan",self.config.get("channels").get("states"))
+            time.sleep(0.1)
+            self.readStuff()
+            
+
+            self.sendCommand("maxp", self.config.get("max_pressure") )
+            time.sleep(0.1)
+            self.readStuff()
+            self.sendCommand("minp", self.config.get("min_pressure") )
+            time.sleep(0.1)
+            self.readStuff()
+            
+            self.handlePID()
+            
+            self.sendCommand("time",int(self.config.get("data_loop_time")))
+            time.sleep(0.1)
+            self.readStuff()
+            
+            self.sendCommand("mode",1)
+            time.sleep(0.1)
+            self.readStuff()
+            
+            self.sendCommand("save",[])
+            time.sleep(0.1)
+            self.readStuff()
+            #self.sendCommand("save",[])
 
 
 
@@ -117,22 +125,25 @@ class PressureController:
     
 
 
+def get_serial_path():
+    inFile=os.path.join("config","serial_config.yaml")
+    with open(inFile) as f:
+        # use safe_load instead of load
+        serial_set = yaml.safe_load(f)
+        f.close()
 
+    return serial_set
   
 
 
 if __name__ == '__main__':
     if len(sys.argv)==2:
-        inFile=os.path.join("config","serial_config.yaml")
-        with open(inFile) as f:
-            # use safe_load instead of load
-            serial_set = yaml.safe_load(f)
-            f.close()
+        serial_set = get_serial_path()
 
-        # Create a pressure controller object
-        pres=PressureController(serial_set.get("devname"), serial_set.get("baudrate"))
+        # Create a config object
+        pres=configSender(serial_set.get("devname"), serial_set.get("baudrate"))
 
-        # Upload the trajectory and start it
+        # Upload the configuration and save it
         pres.setConfig(sys.argv[1])
         #pres.readStuff()
         #while True:
@@ -140,6 +151,21 @@ if __name__ == '__main__':
             
         
         pres.shutdown()
+    elif len(sys.argv)==1:
+        serial_set = get_serial_path()
+        
+        # Create a config object
+        pres=configSender(serial_set.get("devname"), serial_set.get("baudrate"))
+
+        # Upload the configuration and save it
+        pres.setConfig('default')
+        #pres.readStuff()
+        #while True:
+            #pres.readStuff()
             
+        pres.shutdown()
+
+
+
     else:
-        print("Please include a pressure as the input")
+        print("Please include a config file as the input")

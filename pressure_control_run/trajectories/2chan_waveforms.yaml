@@ -1,20 +1,20 @@
 # Top-level settings
 settings:
-    traj_type: 'interp'  # Types include: 'waveform', 'interp'
+    traj_type: 'waveform'  # Types include: 'waveform', 'interp'
     wrap: true
 
 
 # Place all of the type-specific settings in here
 config:
-    subsample_num: 60 #Total number of subsamples
+    subsample_num: 90 #Total number of subsamples
     
-    num_cycles: 3 #hz
+    num_cycles: 1 #hz
 
-    channels: [1,1,1,1]
-    waveform_type: 'sin' 
-    waveform_freq: 2   #Hz
-    waveform_max:  [20, 25, 15, 3  ]   #psi
-    waveform_min:  [0,  0,  5, 0.5]   #psi
+    channels: [1,1,0,0]
+    waveform_type: 'cos-down' 
+    waveform_freq: 0.05   #Hz
+    waveform_max:  [20, 0, 15, 3  ]   #psi
+    waveform_min:  [0,  20,  5, 0.5]   #psi
 
     interp_type: cubic   # can be: 'linear', 'cubic'
     setpoints: # Setpoints are only used if you are doing an interpolation

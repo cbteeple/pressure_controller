@@ -78,6 +78,7 @@ class PressureController:
 if __name__ == '__main__':
     if len(sys.argv)==2:
         try:
+            # Get the serial object to use
             inFile=os.path.join("config","serial_config.yaml")
             with open(inFile) as f:
                 # use safe_load instead of load
@@ -90,7 +91,7 @@ if __name__ == '__main__':
             if str(sys.argv[1]) is 's':
                 pres.shutdown()
             else:
-                # Upload the trajectory and start it
+                # Upload the pressure
                 pres.setPressure(float(sys.argv[1]))
             
             pres.shutdown()
