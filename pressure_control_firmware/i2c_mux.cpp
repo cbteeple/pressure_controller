@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include "Arduino.h"
 
-#include "i2c_Mux.h"
+#include "i2c_mux.h"
 
 
 
@@ -22,5 +22,3 @@ void i2c_Mux::setActiveChannel(int channel){
   Wire.endTransmission();      // stop transmitting
   delay(1);
 }
-
-
