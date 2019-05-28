@@ -86,9 +86,9 @@ class configSender:
         if isinstance(values, list):
             if values:
                 for val in values:
-                    txt+= ";%0.3f"%(val)
+                    txt+= ";%0.5f"%(val)
         elif isinstance(values, numbers.Number):
-            txt+=";%0.3f"%(values)
+            txt+=";%0.5f"%(values)
         else:
             raise ValueError('sendCommand expects either a list or a number')
 

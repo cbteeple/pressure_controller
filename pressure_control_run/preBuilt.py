@@ -5,15 +5,22 @@ import time
 import sys
 import os
 import yaml
+from pynput.keyboard import Key, Listener
 
 speedFactor=1.0
 dataBack=True
 trajFolder = "trajectories"
 
+restartFlag = False
+
 # Read in data from the pressure controller (this seems not to work yet)
 def serialRead(ser):
     while ser.in_waiting:  # Or: while ser.inWaiting():
         print (ser.readline())
+
+
+
+
 
 class PressureController:
     def __init__(self, devname,baudrate):
@@ -25,7 +32,6 @@ class PressureController:
 
         self.s.write("echo;0"+'\n')
         self.s.write("load"+'\n')
-        self.s.write("time;100"+'\n')
         self.s.write("set;0"+'\n')
         self.s.write("mode;2"+'\n')
         #s.write('on')
@@ -35,7 +41,7 @@ class PressureController:
     # Read in the trajectory and store it in a list of arrays
     def getTraj(self,filename):
         # Read in the setpoint file
-        inFile=os.path.join(trajFolder,filename+".yaml")
+        inFile=os.path.join(trajFolder,filename+"_raw.yaml")
         with open(inFile,'r') as f:
             # use safe_load instead of load
             trajIn = yaml.safe_load(f)
@@ -95,9 +101,39 @@ class PressureController:
         
     
     def readStuff(self):
-        while self.s.in_waiting:  # Or: while ser.inWaiting():
+        if self.s.in_waiting:  # Or: while ser.inWaiting():
             print self.s.readline().strip()
     
+
+
+
+
+
+
+def on_press(key):
+    try:
+        print('alphanumeric key {0} pressed'.format(
+            key.char))
+    except AttributeError:
+        print('special key {0} pressed'.format(
+            key))
+    pass
+
+
+def on_release(key):
+    global restartFlag
+    if key == Key.space:
+        print('Restart Trajectory')
+        restartFlag =True
+    print('{0} released'.format(
+        key))
+
+
+listener = Listener(
+    on_press=on_press,
+    on_release=on_release)
+listener.start()
+
 
 
 
@@ -105,7 +141,13 @@ class PressureController:
 
 
 if __name__ == '__main__':
-    if len(sys.argv)==2:
+    if 2<= len(sys.argv)<=3:
+
+        if len(sys.argv)==3:
+            speedFact = 1.0/float(sys.argv[2])
+        else:
+            speedFact= 1.0
+        
         try:
             # Get the serial object to use
             inFile=os.path.join("config","serial_config.yaml")
@@ -118,6 +160,9 @@ if __name__ == '__main__':
             pres=PressureController(serial_set.get("devname"), serial_set.get("baudrate"))
             pres.getTraj(sys.argv[1])
 
+
+            pres.speedFactor = speedFact
+
             # Upload the trajectory and start it
             pres.sendTraj()
             
@@ -126,8 +171,12 @@ if __name__ == '__main__':
             #pres.readStuff()
             while True:
                 pres.readStuff()
+                if restartFlag is True:
+                    pres.startTraj()
+                    restartFlag = False
                 
         except KeyboardInterrupt:
+            listener.stop()
             pres.shutdown()
             
     else:
