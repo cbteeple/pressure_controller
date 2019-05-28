@@ -181,6 +181,8 @@ void setup() {
 
 bool runtraj = traj.running;
 bool lcdOverride = false;
+float setpoint_local[MAX_NUM_CHANNELS];
+
 //______________________________________________________________________
 void loop() {
   //Serial.println("_words need to be here (for some reason)");
@@ -219,14 +221,19 @@ void loop() {
         if (ctrlSettings[i].controlMode==2){
           if (runtraj){
             //Set setpoint
-            controllers[i].setSetpoint(traj.interp(i));
+            setpoint_local[i] = traj.interp(i);
+            controllers[i].setSetpoint(setpoint_local[i]);
           }
         }
         else{
           if (newSettings){
+<<<<<<< HEAD
           //NOT THIS!
+=======
+          setpoint_local[i] = ctrlSettings[i].setpoint;
+>>>>>>> c5b72a4... Added nice top-level button interface, added setpoint output to serial
           controllers[i].updateSettings(ctrlSettings[i]);
-          controllers[i].setSetpoint(ctrlSettings[i].setpoint);
+          controllers[i].setSetpoint(setpoint_local[i]);
           }  
         }
       
@@ -297,8 +304,10 @@ void loop() {
 //PRINT DATA OUT FUNCTION
 void printData(){
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
-    Serial.print(pressures[i],4);
-    Serial.print('\t');  
+    Serial.print(setpoint_local[i],3);
+    Serial.print('\t'); 
+    Serial.print(pressures[i],3);
+    Serial.print('\t'); 
   }
   Serial.print('\n');
   
@@ -392,4 +401,3 @@ void ventUntilReset(){
     valves[i].go( ctrlSettings[i].valveDirect );
   }
   }
-
