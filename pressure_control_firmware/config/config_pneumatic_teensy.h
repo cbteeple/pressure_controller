@@ -20,11 +20,12 @@
 
 
 //Define the type of sensor to use (only one can be true)
-#define SENSOR_ANALOG false
-#define SENSOR_I2C true
-#define ADC_RES 10
+#define SENSOR_ANALOG true
+#define SENSOR_I2C false
+#define ADC_RES 13
+#define ADC_MAX_VOLTS 3.3
 
-#define SENSOR_MODEL 1
+#define SENSOR_MODEL 3
 #define MAX_NUM_CHANNELS 4
 
 //Define the type of controller to use (only one can be true)
@@ -35,16 +36,16 @@
 //Set default settings for things
 //If using i2c sensors...
   int sensorAddr=0x58;
-  bool useMux=true;
+  bool useMux=false;
   int muxAddr=0x70;
 
 //Set valve pins
   //int valvePins[][2]= { {6,9}, {10,11} };
-  int valvePins[][2]= { {4,5}, {6,7}, {8,9}, {10,11}, {12,13}, {44,45} };
+  int valvePins[][2]= { {2,3}, {4,5}, {6,7}, {8,9}, {10,11}, {12,13}, {44,45} };
   int valveOffset=225;
 
 //Set Button pins
-  int buttonPins[]={2,18,19};
+  int buttonPins[]={0,1,31};
 
 //Default controller settings
   float pid_start[]={0.6,0.03,0}; 
