@@ -30,6 +30,8 @@ class sensorSettings
 
     //Analog stuff
     int sensorPin;
+    int adc_res;
+    int adc_max_volts;
 };
 
 

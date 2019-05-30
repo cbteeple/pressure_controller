@@ -9,10 +9,10 @@
 i2c_Mux::i2c_Mux(int mux_addr_in){
   mux_addr=mux_addr_in;
   //Start i2c stuff
-  if (TWCR == 0){ // do this check so that Wire only gets initialized once
+ // if (TWCR == 0){ // do this check so that Wire only gets initialized once
     Wire.begin();
     Wire.setClock(400000L);
-  }
+ // }
 }
 
 void i2c_Mux::setActiveChannel(int channel){

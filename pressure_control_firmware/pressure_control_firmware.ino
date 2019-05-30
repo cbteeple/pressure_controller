@@ -16,7 +16,7 @@
 
 
 //Include the config file from the system you are using
-#include "config/config_pneumatic.h"
+#include "config/config_pneumatic_teensy.h"
 
 
 
@@ -89,6 +89,8 @@ void setup() {
     //Serial.flush();
     Serial.setTimeout(10);
 
+    analogReadResolution(ADC_RES);
+
 
   //Buttons:
   /*
@@ -135,6 +137,8 @@ void setup() {
 
       if(SENSOR_ANALOG){
         senseSettings[i].sensorPin=senseChannels[i];
+        senseSettings[i].adc_res=ADC_RES;
+        senseSettings[i].adc_max_volts=ADC_MAX_VOLTS;
       }
       else if(SENSOR_I2C){
         senseSettings[i].sensorAddr= sensorAddr;
@@ -220,6 +224,7 @@ void loop() {
         }
         else{
           if (newSettings){
+          //NOT THIS!
           controllers[i].updateSettings(ctrlSettings[i]);
           controllers[i].setSetpoint(ctrlSettings[i].setpoint);
           }  
@@ -229,6 +234,8 @@ void loop() {
         if (useMux){
           mux.setActiveChannel(senseChannels[i]);
         }
+
+        //NOT THIS
         sensors[i].getData();
         pressures[i] = sensors[i].getPressure();
 
@@ -241,6 +248,7 @@ void loop() {
 
         //Perform control if the channel is on
         if (ctrlSettings[i].channelOn){
+          
           //Run 1 step of the controller if we are in mode 1 or 2
           if (ctrlSettings[i].controlMode>=1){
             valveSets[i] = controllers[i].go(pressures[i]);

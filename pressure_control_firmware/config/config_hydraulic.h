@@ -22,6 +22,7 @@
 //Define the type of sensor to use (only one can be true)
 #define SENSOR_ANALOG true
 #define SENSOR_I2C false
+#define ADC_RES 10
 
 #define SENSOR_MODEL 1
 #define MAX_NUM_CHANNELS 6

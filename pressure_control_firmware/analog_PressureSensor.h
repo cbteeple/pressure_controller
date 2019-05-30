@@ -10,6 +10,8 @@ class analog_PressureSensor
   private:
     int sensePin;
     int sensorType;
+    float adc_max_counts = 1023.0;
+    float adc_max_volts = 5.0;
         
     //Calibration settings
     float output_max;
