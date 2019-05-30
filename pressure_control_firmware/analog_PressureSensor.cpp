@@ -11,8 +11,7 @@ void analog_PressureSensor::initialize(sensorSettings &senseSet){
   sensorType=senseSet.sensorModel;
   sensePin=senseSet.sensorPin;
 
-  adc_max_counts = pow(2,senseSet.adc_res);
-  Serial.print(adc_max_counts);
+  adc_max_counts = pow(2.0,senseSet.adc_res);
   adc_max_volts = senseSet.adc_max_volts;
 
   setCalibration(sensorType);
