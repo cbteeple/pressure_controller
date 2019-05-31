@@ -227,11 +227,9 @@ void loop() {
         }
         else{
           if (newSettings){
-<<<<<<< HEAD
           //NOT THIS!
-=======
+
           setpoint_local[i] = ctrlSettings[i].setpoint;
->>>>>>> c5b72a4... Added nice top-level button interface, added setpoint output to serial
           controllers[i].updateSettings(ctrlSettings[i]);
           controllers[i].setSetpoint(setpoint_local[i]);
           }  
