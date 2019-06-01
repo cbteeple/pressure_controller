@@ -111,22 +111,14 @@ class PressureController:
 
 
 def on_press(key):
-    try:
-        print('alphanumeric key {0} pressed'.format(
-            key.char))
-    except AttributeError:
-        print('special key {0} pressed'.format(
-            key))
     pass
 
 
 def on_release(key):
     global restartFlag
     if key == Key.space:
-        print('Restart Trajectory')
+        print('_RESTART')
         restartFlag =True
-    print('{0} released'.format(
-        key))
 
 
 listener = Listener(

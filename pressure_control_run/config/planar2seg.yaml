@@ -24,4 +24,4 @@ max_pressure: [28, 28, 28,20]
 min_pressure: -10
 
 #For debugging purposes
-echo: true
+echo: false
