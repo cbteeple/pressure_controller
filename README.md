@@ -5,6 +5,7 @@ An object-oriented approach to doing pressure control. Hopefully things are modu
  - [EEPROMAnything Library](https://github.com/collin80/EEPROMAnything) by collin80
  - [Button Library](https://github.com/madleech/Button) by madleech
  - [EasyLCD Library](https://github.com/cbteeple/EasyLCD) by cbteeple (that's me!)
+   - [LiquidCrystal_I2C](https://github.com/johnrickman/LiquidCrystal_I2C) by johnrickman .
 
 ## How to use the code:
 [Instructions on the Wiki!](https://github.com/cbteeple/pressure_controller/wiki)
