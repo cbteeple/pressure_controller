@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "Arduino.h"
 
+
 #ifndef __allSettings_H__
 #define __allSettings_H__
 
@@ -55,6 +56,7 @@ class controlSettings
 class trajectory
 {
   private:
+   
     const static unsigned int maxLen = 1000;
     int curr_idx = 1;
 
