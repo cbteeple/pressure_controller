@@ -20,8 +20,6 @@
 
 
 
-
-
 //Create a new settings object
 globalSettings settings;
 controlSettings ctrlSettings[MAX_NUM_CHANNELS];
@@ -40,7 +38,6 @@ i2c_Mux mux(muxAddr);
 
 //Set up sensing
 #if(SENSOR_ANALOG)
-  int senseChannels[]={A0,A1,A2,A3,A4,A5,A6,A7};
   analog_PressureSensor sensors[MAX_NUM_CHANNELS];
 #elif(SENSOR_I2C)
   int senseChannels[]={0,1,2,3,4,5,6,7};
@@ -292,7 +289,6 @@ void loop() {
     }
   }
     
-  
 }
 
 

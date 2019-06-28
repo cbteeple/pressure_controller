@@ -1,4 +1,5 @@
 
+#include "Arduino.h"
 //CONFIG FOR PNEUMATIC PRESSURE SYSTEM
 
 
@@ -40,18 +41,21 @@
   bool useMux=false;
   int muxAddr=0x70;
 
+//Set sensor pins
+  int senseChannels[]={A21,A20,A19,A18,A17,A16,A15,A14};
+
 //Set valve pins
   //int valvePins[][2]= { {6,9}, {10,11} };
-  int valvePins[][2]= { {2,3}, {4,5}, {6,7}, {8,9}, {10,11}, {12,13}, {44,45} };
-  int valveOffset=225;
+  int valvePins[][2]= { {23,22}, {21,20}, {2,3}, {4,5}, {6,7}, {8,9}, {10,14}, {29,30} };
+  int valveOffset=229;
 
 //Set Button pins
-  int buttonPins[]={0,1,31};
+  int buttonPins[]={26,27,28};
 
 //Default controller settings
-  float pid_start[]={0.6,0.03,0}; 
+  float pid_start[]={0.1,0.001,0}; 
   float deadzone_start=0.0;
   float setpoint_start=0;
   float integratorResetTime_start = -1;
   float minPressure_start = 0; //[psi]
-  float maxPressure_start = 20; //[psi]
+  float maxPressure_start = 28; //[psi]
