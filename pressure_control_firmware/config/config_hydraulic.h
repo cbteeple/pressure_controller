@@ -38,6 +38,9 @@
   bool useMux=true;
   int muxAddr=0x70;
 
+//Set sensor pins
+  int senseChannels[]={A0,A1,A2,A3,A4,A5,A6,A7,A8};
+
 //Set valve pins
   //int valvePins[][2]= { {6,9}, {10,11} };
   int valvePins[][2]= { {4,5}, {6,7}, {8,9}, {10,11}, {12,13}, {44,45} };
