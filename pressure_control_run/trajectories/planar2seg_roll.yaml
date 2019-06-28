@@ -3,7 +3,7 @@ meta:
     shimy_base: 1.0  #seconds
 
 settings:
-    traj_type: 'waveform'  # Types include: 'waveform', 'interp'
+    traj_type: 'interp'  # Types include: 'waveform', 'interp'
     wrap: false
 
 
@@ -13,20 +13,20 @@ config:
     
     num_cycles: 10 # Number
 
-    channels: [1,1,0,0]
+    channels: [1,1,1,1]
     waveform_type: 'square'
     waveform_freq: 5.75   #Hz
-    waveform_max:  [20, 0, 15, 5  ]   #psi
-    waveform_min:  [0,  20,  0, 15]   #psi
+    waveform_max:  [20, 0,  3, 3  ]   #psi
+    waveform_min:  [0,  20, 3, 3  ]   #psi
 
 
     interp_type: none   # can be: 'linear', 'cubic'
     setpoints: # Setpoints are only used if you are doing an interpolation
         # [time, finger1, finger2, n/c, n/c]
-        prefix:
-            - [0.000,   0, 0, 0,  0]
-            - [2.0,    15, 15, 0,  0]
-        suffix:
-            - [0.001,  15, 15, 0,  0]
-            - [4.0,  15, 15, 0,  0]
-            - [6.0,  0, 0, 0,  0]
+        - [0.000,   0, 0, 0,  0]
+        - [2.0,    15, 15, 0,  0]
+        - [4.0,    0, 20, 10,  0]
+        - [6.0,    20, 0, 0,  10]
+        - [8.0,    15, 15, 0,  0]
+        - [10.0,   0,0 , 10,  10]
+        - [11.0,  0, 0, 0,  0]

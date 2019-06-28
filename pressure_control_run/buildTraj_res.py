@@ -9,6 +9,7 @@ import scipy.signal as signal
 import sys
 import os
 import matplotlib.pyplot as plt
+import numbers
 
 trajFolder = "trajectories"
 
@@ -64,7 +65,17 @@ class trajBuilder:
 
 
     def doWaveform(self):
-        freq = float(self.config.get("waveform_freq"))
+        freq_in = self.config.get("waveform_freq")
+
+        # Convert the frequency to floats
+        if isinstance(freq_in, numbers.Number):
+            freq = float(freq_in)
+        elif isinstance(freq_in, list):
+            freq = []
+            for item in freq_in:
+                freq.append(float(item))
+
+
         press_max = np.array(self.config.get("waveform_max"))
         press_min = np.array(self.config.get("waveform_min"))
         waveform_type = self.config.get("waveform_type")
@@ -74,11 +85,7 @@ class trajBuilder:
         prefix = traj_setpoints.get("prefix",None)
         suffix = traj_setpoints.get("suffix",None)
 
-        if prefix is not None:
-            prefix = np.asarray(prefix)
-            suffix = np.asarray(suffix)
 
-    
         channels =  self.config.get("channels")
         num_cycles = float(self.config.get("num_cycles"))
 
@@ -108,6 +115,7 @@ class trajBuilder:
             traj = np.array([-1,-1,1,1])
             traj = np.tile(traj,int(num_cycles))
             traj = np.append(traj, traj[0])
+
 
         elif waveform_type == "sin":
             time_samp = np.linspace(0,num_cycles/freq, self.subsample_num+1 )
@@ -159,13 +167,18 @@ class trajBuilder:
         out_traj_whole = np.append(out_times,out_traj,axis=1)
 
 
-        # Update the times
-        out_traj_whole[:,0] = out_traj_whole[:,0] + prefix[-1,0]
+        if prefix is not None:
+            prefix = np.asarray(prefix)
+            # Update the times
+            out_traj_whole[:,0] = out_traj_whole[:,0] + prefix[-1,0]
 
-        out_traj_whole = np.append(prefix,out_traj_whole,axis=0);
+            # Append to the array
+            out_traj_whole = np.append(prefix,out_traj_whole,axis=0);
 
-        suffix[:,0] = suffix[:,0] + out_traj_whole[-1,0]
-        out_traj_whole = np.append(out_traj_whole,suffix,axis=0);
+        if suffix is not None:
+            suffix = np.asarray(suffix)        
+            suffix[:,0] = suffix[:,0] + out_traj_whole[-1,0]
+            out_traj_whole = np.append(out_traj_whole,suffix,axis=0);
 
         plt.plot(out_traj_whole[:,0],out_traj_whole[:,1:])
         plt.show()

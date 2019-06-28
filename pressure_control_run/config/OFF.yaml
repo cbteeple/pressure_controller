@@ -1,7 +1,7 @@
 # Channels - turn them on or off
 channels:
     num_channels: 4
-    states: [1, 1, 0, 0]
+    states: [0, 0, 0, 0]
 
 
 # Loop time for outputting data.
@@ -15,13 +15,13 @@ data_loop_time: 10 #[ms]
 #   If "all-equal" is False, then settings for all channels must be specified as a list of lists
 PID:
     all_equal: True
-    values: [0.1000, 0.0010, 0.0010]
+    values: [0.2000, 0.0030, 0.0030]
 
 # Set the max and min pressures in software [psi]
 #   If single value, then it will be set for all channels
 #   If a vector of length NUM_CHANNELS, then each channel is set independently
-max_pressure: [28, 28, 28,20]
+max_pressure: 15
 min_pressure: -10
 
 #For debugging purposes
-echo: false
+echo: False

@@ -7,7 +7,7 @@ channels:
 # Loop time for outputting data.
 #   This is not strictly enforced, but will always be within 10 ms.
 #   If set to 0ms, the loop wil run as fast as the control loop.
-data_loop_time: 150 #[ms]
+data_loop_time: 20 #[ms]
 
 
 #Set the PID Values.
