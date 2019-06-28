@@ -141,17 +141,9 @@ void valvePair::go(float act_in){
       ventProportional(abs(act_in));
     }
     else if(act_in ==0.0){
-      Serial.println("idle");
       idle();
     }
     else{
       pressurizeProportional(abs(act_in));
     }
 }
-
-
-
-
-
-
-
