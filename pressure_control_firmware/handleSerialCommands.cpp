@@ -260,20 +260,21 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
         Serial.print('\n');
       }
      
-     }
-    if (broadcast){
-      Serial.print("PID");
-      Serial.print('\n');
-      for (int j=0; j<numSensors; j++){
-        Serial.print("_ Gains= ");
-        for (int i=0; i<3; i++){
-          Serial.print(ctrlSettings[j].pidGains[i],4);
-          Serial.print('\t');
-        }
-        Serial.print('\n');
-      }
     }
-     
+    else{
+      if (broadcast){
+        Serial.print("PID");
+        Serial.print('\n');
+        for (int j=0; j<numSensors; j++){
+          Serial.print("_ Gains= ");
+          for (int i=0; i<3; i++){
+            Serial.print(ctrlSettings[j].pidGains[i],4);
+            Serial.print('\t');
+          }
+          Serial.print('\n');
+        }
+      }
+    }  
   }
  else if(command.startsWith("MODE")){
     if(getStringValue(command,';',numSensors).length()){
@@ -418,8 +419,8 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   //[trajectory length] [trajectory starting index] [wrap mode]
   else if (command.startsWith("TRAJCONFIG")){
     if(getStringValue(command,';',3).length()){
-      traj.start_idx = constrain(getStringValue(command,';',1).toInt(),0,199);
-      traj.len = constrain(getStringValue(command,';',2).toInt(),1,200);
+      traj.start_idx = constrain(getStringValue(command,';',1).toInt(),0,1999);
+      traj.len = constrain(getStringValue(command,';',2).toInt(),1,2000);
       traj.wrap = bool(getStringValue(command,';',3).toInt());
     }
     if (broadcast){
