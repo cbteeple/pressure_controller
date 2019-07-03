@@ -55,9 +55,10 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   //______________________________________________________________
   //Handle changes in setpoint first so it's a fast operation
   if(command.startsWith("SET")){
-    if(getStringValue(command,';',numSensors).length()){
+    if(getStringValue(command,';',numSensors+1).length()){
       for (int i=0; i<numSensors; i++){
-        ctrlSettings[i].setpoint= constrain(getStringValue(command,';',i+1).toFloat(),
+        ctrlSettings[i].settime= constrain(getStringValue(command,';',1).toFloat(),0,1000);
+        ctrlSettings[i].setpoint= constrain(getStringValue(command,';',i+2).toFloat(),
         ctrlSettings[i].minPressure,
         ctrlSettings[i].maxPressure);
       }
@@ -66,9 +67,10 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
         Serial.print("NEW ");
       }
     }
-    else if(getStringValue(command,';',1).length()){
-      float allset=getStringValue(command,';',1).toFloat();
+    else if(getStringValue(command,';',2).length()){
+      float allset=getStringValue(command,';',2).toFloat();
       for (int i=0; i<numSensors; i++){
+        ctrlSettings[i].settime= constrain(getStringValue(command,';',1).toFloat(),0,1000);
         ctrlSettings[i].setpoint= constrain(allset,
         ctrlSettings[i].minPressure,
         ctrlSettings[i].maxPressure);
@@ -80,6 +82,8 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     }
     if (broadcast){
       Serial.print("SETPOINT: ");
+      Serial.print(ctrlSettings[0].settime,4);
+      Serial.print('\t');
       for (int i=0; i<numSensors; i++){
         Serial.print(ctrlSettings[i].setpoint,4);
         Serial.print('\t');
@@ -419,8 +423,8 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   //[trajectory length] [trajectory starting index] [wrap mode]
   else if (command.startsWith("TRAJCONFIG")){
     if(getStringValue(command,';',3).length()){
-      traj.start_idx = constrain(getStringValue(command,';',1).toInt(),0,1999);
-      traj.len = constrain(getStringValue(command,';',2).toInt(),1,2000);
+      traj.start_idx = constrain(getStringValue(command,';',1).toInt(),0,999);
+      traj.len = constrain(getStringValue(command,';',2).toInt(),1,1000);
       traj.wrap = bool(getStringValue(command,';',3).toInt());
     }
     if (broadcast){
@@ -523,6 +527,7 @@ String handleSerialCommands::getStringValue(String data, char separator, int ind
 
   return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
+
 
 
 

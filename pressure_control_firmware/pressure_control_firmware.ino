@@ -8,6 +8,7 @@
 #include "bangBang.h"
 #include "proportional.h"
 #include "pidFull.h"
+#include "interp_lin.h"
 
 
 
@@ -51,6 +52,8 @@ float valveSets[MAX_NUM_CHANNELS];
 
 //Set up valve pairs  
 valvePair valves[MAX_NUM_CHANNELS];
+
+interpLin setpoint_interp[MAX_NUM_CHANNELS];
 
 
 //Create an array of controller objects for pressure control
@@ -180,13 +183,18 @@ bool runtraj = traj.running;
 bool lcdOverride = false;
 float setpoint_local[MAX_NUM_CHANNELS];
 
+unsigned long curr_time=0;
+
 //______________________________________________________________________
 void loop() {
   //Serial.println("_words need to be here (for some reason)");
   //Handle serial commands
 
-  traj.CurrTime = millis();
+  traj.CurrTime = micros();
   runtraj = traj.running;
+
+  curr_time = micros();
+  
   
   bool newSettings=handleCommands.go(settings, ctrlSettings,traj);
   String buttonMessage= buttonHandler.go(buttons,settings, ctrlSettings); 
@@ -224,12 +232,24 @@ void loop() {
         }
         else{
           if (newSettings){
-          //NOT THIS!
+            controllers[i].updateSettings(ctrlSettings[i]);
+          
+            if (ctrlSettings[i].controlMode==1){
+              setpoint_local[i] = ctrlSettings[i].setpoint;
+              controllers[i].setSetpoint(setpoint_local[i]);
+            }
+            else if (ctrlSettings[i].controlMode==3){
+              setpoint_interp[i].newGoal(ctrlSettings[i]);
+            }
+          }
 
-          setpoint_local[i] = ctrlSettings[i].setpoint;
-          controllers[i].updateSettings(ctrlSettings[i]);
-          controllers[i].setSetpoint(setpoint_local[i]);
-          }  
+          if (ctrlSettings[i].controlMode==3) {
+            setpoint_interp[i].CurrTime = curr_time;
+            setpoint_local[i] = setpoint_interp[i].go();
+            controllers[i].setSetpoint(setpoint_local[i]);
+          }
+          
+
         }
       
         //Get the new pressures
@@ -251,7 +271,7 @@ void loop() {
         //Perform control if the channel is on
         if (ctrlSettings[i].channelOn){
           
-          //Run 1 step of the controller if we are in mode 1 or 2
+          //Run 1 step of the controller if we are not in mode 0
           if (ctrlSettings[i].controlMode>=1){
             valveSets[i] = controllers[i].go(pressures[i]);
           }
@@ -395,3 +415,4 @@ void ventUntilReset(){
     valves[i].go( ctrlSettings[i].valveDirect );
   }
   }
+
