@@ -415,4 +415,3 @@ void ventUntilReset(){
     valves[i].go( ctrlSettings[i].valveDirect );
   }
   }
-
