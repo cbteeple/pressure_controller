@@ -220,7 +220,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       }
     }
     if (broadcast){
-      Serial.print("VALVE DIRECT SETTING: ");
+      Serial.print("VALVE: ");
       for (int i=0; i<numSensors; i++){
         Serial.print(ctrlSettings[i].valveDirect,4);
         Serial.print('\t');
@@ -386,7 +386,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     }
 
     if (broadcast){
-      Serial.print("CHANNELS ON: ");
+      Serial.print("CHAN: ");
       for (int i=0; i<numSensors; i++){
         Serial.print(ctrlSettings[i].channelOn);
         Serial.print('\t');
