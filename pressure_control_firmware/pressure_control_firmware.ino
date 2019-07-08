@@ -298,9 +298,9 @@ void loop() {
 //PRINT DATA OUT FUNCTION
 void printData(){
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
-    Serial.print(setpoint_local[i],3);
+    Serial.print(setpoint_local[i],5);
     Serial.print('\t'); 
-    Serial.print(pressures[i],3);
+    Serial.print(pressures[i],5);
     Serial.print('\t'); 
   }
   Serial.print('\n');
