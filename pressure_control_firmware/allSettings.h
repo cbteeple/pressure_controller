@@ -51,6 +51,7 @@ class controlSettings
     float integralStart = 3.0;
     float maxPressure;
     float minPressure;
+    float settime;
 };
 
 class trajectory
@@ -58,6 +59,7 @@ class trajectory
   private:
    
     const static unsigned int maxLen = 1000;
+    const static unsigned int maxChannels = 4;
     int curr_idx = 1;
 
     float lerp(float a, float b, float f){
@@ -72,7 +74,7 @@ class trajectory
     int start_idx = 0;
     bool wrap = false;
     bool running = false;
-    float trajpts [maxLen][4];
+    float trajpts [maxLen][maxChannels];
     float trajtimes [maxLen];
     
     bool setLength(int len_in){
@@ -111,7 +113,7 @@ class trajectory
     float interp(int channel){
 
       //Make sure to interpolate in the correct region
-      float deltaT = float(CurrTime-StartTime)/1000.0;
+      float deltaT = float(CurrTime-StartTime)/1000000.0;
 
       if(deltaT >= trajtimes[start_idx+len-1]){
         curr_idx = start_idx+len-1;
@@ -141,7 +143,7 @@ class trajectory
         percent
         );
 
-        if ((deltaT >= trajtimes[start_idx+len-1]) & wrap & channel==3){
+        if ((deltaT >= trajtimes[start_idx+len-1]) & wrap & channel==maxChannels-1){
           start();
         }
 
@@ -159,5 +161,6 @@ class trajectory
 
 
 #endif
+
 
 
