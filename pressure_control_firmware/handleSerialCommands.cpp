@@ -55,9 +55,10 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   //______________________________________________________________
   //Handle changes in setpoint first so it's a fast operation
   if(command.startsWith("SET")){
-    if(getStringValue(command,';',numSensors).length()){
+    if(getStringValue(command,';',numSensors+1).length()){
       for (int i=0; i<numSensors; i++){
-        ctrlSettings[i].setpoint= constrain(getStringValue(command,';',i+1).toFloat(),
+        ctrlSettings[i].settime= constrain(getStringValue(command,';',1).toFloat(),0,1000);
+        ctrlSettings[i].setpoint= constrain(getStringValue(command,';',i+2).toFloat(),
         ctrlSettings[i].minPressure,
         ctrlSettings[i].maxPressure);
       }
@@ -66,9 +67,10 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
         Serial.print("NEW ");
       }
     }
-    else if(getStringValue(command,';',1).length()){
-      float allset=getStringValue(command,';',1).toFloat();
+    else if(getStringValue(command,';',2).length()){
+      float allset=getStringValue(command,';',2).toFloat();
       for (int i=0; i<numSensors; i++){
+        ctrlSettings[i].settime= constrain(getStringValue(command,';',1).toFloat(),0,1000);
         ctrlSettings[i].setpoint= constrain(allset,
         ctrlSettings[i].minPressure,
         ctrlSettings[i].maxPressure);
@@ -79,7 +81,9 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       }
     }
     if (broadcast){
-      Serial.print("SETPOINT: ");
+      Serial.print("SET: ");
+      Serial.print(ctrlSettings[0].settime,4);
+      Serial.print('\t');
       for (int i=0; i<numSensors; i++){
         Serial.print(ctrlSettings[i].setpoint,4);
         Serial.print('\t');
@@ -93,13 +97,13 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   else if(command.startsWith("OFF")){
     settings.outputsOn = false;
     if (broadcast){
-      Serial.print("Output: OFF");
+      Serial.print("OFF: Outputs Off");
     }
   }
   else if(command.startsWith("ON")){ 
     settings.outputsOn = true;
     if (broadcast){
-      Serial.print("Output: ON");
+      Serial.print("ON: Outputs On");
     }
   }
   else if (command.startsWith("TIME")){
@@ -111,7 +115,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       }
     }
     if (broadcast){
-      Serial.print("Loop Time: ");
+      Serial.print("TIME: ");
       Serial.print(settings.looptime);
     }
   }
@@ -125,7 +129,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       }
     }
     if (broadcast){
-      Serial.print("LCD Loop Time: ");
+      Serial.print("LCDTIME: ");
       Serial.print(settings.lcdLoopTime);
     }
   }
@@ -156,7 +160,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       }
     }
     if (broadcast){
-      Serial.print("MAX PRESSURE: ");
+      Serial.print("MAXP: ");
       for (int i=0; i<numSensors; i++){
         Serial.print(ctrlSettings[i].maxPressure,4);
         Serial.print('\t');
@@ -186,7 +190,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       }
     }
     if (broadcast){
-      Serial.print("MIN PRESSURE: ");
+      Serial.print("MINP: ");
       for (int i=0; i<numSensors; i++){
         Serial.print(ctrlSettings[i].minPressure,4);
         Serial.print('\t');
@@ -216,7 +220,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       }
     }
     if (broadcast){
-      Serial.print("VALVE DIRECT SETTING: ");
+      Serial.print("VALVE: ");
       for (int i=0; i<numSensors; i++){
         Serial.print(ctrlSettings[i].valveDirect,4);
         Serial.print('\t');
@@ -260,20 +264,21 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
         Serial.print('\n');
       }
      
-     }
-    if (broadcast){
-      Serial.print("PID");
-      Serial.print('\n');
-      for (int j=0; j<numSensors; j++){
-        Serial.print("_ Gains= ");
-        for (int i=0; i<3; i++){
-          Serial.print(ctrlSettings[j].pidGains[i],4);
-          Serial.print('\t');
-        }
-        Serial.print('\n');
-      }
     }
-     
+    else{
+      if (broadcast){
+        Serial.print("PID");
+        Serial.print('\n');
+        for (int j=0; j<numSensors; j++){
+          Serial.print("_ Gains= ");
+          for (int i=0; i<3; i++){
+            Serial.print(ctrlSettings[j].pidGains[i],4);
+            Serial.print('\t');
+          }
+          Serial.print('\n');
+        }
+      }
+    }  
   }
  else if(command.startsWith("MODE")){
     if(getStringValue(command,';',numSensors).length()){
@@ -312,7 +317,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     saveHandler.saveGlobal(settings);
 
     if (broadcast){
-      Serial.print("Settings saved to onboard storage");
+      Serial.print("SAVE: Settings saved to onboard storage");
     }
   }
 
@@ -329,7 +334,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     newSettings=true;
 
     if (broadcast){
-      Serial.print("Settings retrieved from onboard storage");
+      Serial.print("LOAD: Settings retrieved from onboard storage");
     }
   }
 
@@ -340,7 +345,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     }
     saveHandler.saveDefaultGlobal(settings);
     if (broadcast){
-      Serial.print("Settings saved as default");
+      Serial.print("DEFSAVE: Settings saved as default");
     }
   }
 
@@ -354,7 +359,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     settings.outputsOn=set_temp;
     newSettings=true;
     if (broadcast){
-      Serial.print("Settings retrieved from default");
+      Serial.print("DEFLOAD: Settings retrieved from default");
     }
   }
 
@@ -381,7 +386,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     }
 
     if (broadcast){
-      Serial.print("CHANNELS ON: ");
+      Serial.print("CHAN: ");
       for (int i=0; i<numSensors; i++){
         Serial.print(ctrlSettings[i].channelOn);
         Serial.print('\t');
@@ -418,12 +423,12 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   //[trajectory length] [trajectory starting index] [wrap mode]
   else if (command.startsWith("TRAJCONFIG")){
     if(getStringValue(command,';',3).length()){
-      traj.start_idx = constrain(getStringValue(command,';',1).toInt(),0,199);
-      traj.len = constrain(getStringValue(command,';',2).toInt(),1,200);
+      traj.start_idx = constrain(getStringValue(command,';',1).toInt(),0,999);
+      traj.len = constrain(getStringValue(command,';',2).toInt(),1,1000);
       traj.wrap = bool(getStringValue(command,';',3).toInt());
     }
     if (broadcast){
-      Serial.print("TRAJ CONFIG: start = ");
+      Serial.print("TRAJCONFIG: start = ");
       Serial.print(traj.start_idx);
       Serial.print('\t');
       Serial.print("len = ");
@@ -459,7 +464,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
 
     else{
       if (broadcast){
-        Serial.print("TRAJ:");
+        Serial.print("TRAJSET:");
         for (int i=traj.start_idx; i<(traj.start_idx+traj.len); i++){
             Serial.print('\n');
             Serial.print(traj.trajtimes[i]);
@@ -478,10 +483,16 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
 
   else if(command.startsWith("TRAJSTART")){
     traj.start();
+    if (broadcast){
+      Serial.print("TRAJSTART: Trajectory Started");
+    }
   }
   
   else if(command.startsWith("TRAJSTOP")){
     traj.stop();
+    if (broadcast){
+      Serial.print("TRAJSTOP: Trajectory Stopped");
+    }
   }
 
 
@@ -490,7 +501,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
   else {
     newSettings=false;
     if (broadcast){
-      Serial.print("Unrecognized Command");
+      Serial.print("UNREC: Unrecognized Command");
     }
   }
 
@@ -522,6 +533,3 @@ String handleSerialCommands::getStringValue(String data, char separator, int ind
 
   return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
-
-
-
