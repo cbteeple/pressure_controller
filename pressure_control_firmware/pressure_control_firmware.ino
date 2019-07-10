@@ -85,9 +85,9 @@ unsigned long currentTime=0;
 //______________________________________________________________________
 void setup() {
   //Start serial
-    Serial.begin(115200);
+    Serial.begin(2000000);
     //Serial.flush();
-    Serial.setTimeout(10);
+    Serial.setTimeout(2);
 
     analogReadResolution(ADC_RES);
 

@@ -7,10 +7,11 @@
 //_________________________________________________________
 //PUBLIC FUNCTIONS
 bool handleSerialCommands::go(globalSettings (&settings), controlSettings *ctrlSettings, trajectory (&traj)){
-  bool newCommand = getCommand();
+  bool newCommand = getCommandByChar(); //getCommand();
   bool newSettings = false;
   if (newCommand){
     newSettings=processCommand(settings, ctrlSettings, traj);
+    command = "";
   }
   return newSettings;
 }
@@ -26,12 +27,15 @@ void handleSerialCommands::stopBroadcast(){
 
 void handleSerialCommands::initialize(int num){
   numSensors=num;
+  // reserve 200 bytes for the inputString:
+  command.reserve(200);
 }
 
 
 //_________________________________________________________
 //PRIVATE FUNCTIONS
 
+//METHOD DEPRICATED
 bool handleSerialCommands::getCommand(){
   if (Serial.available() > 0) {
     command = Serial.readStringUntil('\n');
@@ -41,6 +45,26 @@ bool handleSerialCommands::getCommand(){
   else{
     return false;
   }
+}
+
+
+bool handleSerialCommands::getCommandByChar(){
+  //unsigned long start_time = micros();
+  while (Serial.available()) {
+    // get the new byte:
+    char inChar = (char)Serial.read();
+    // Add new byte to the inputString:
+    command += inChar;
+    // If the incoming character is a newline, set a flag so we can process it
+    if (inChar == '\n') {
+       command.toUpperCase();
+       //Serial.print("_SER: Line Complete");
+       //Serial.print('\t');
+       //Serial.println(micros() - start_time);
+      return true;
+    }
+  }
+  return false;
 }
 
 
