@@ -16,6 +16,7 @@ class handleSerialCommands
     eepromHandler saveHandler;
 
     bool getCommand();
+    bool getCommandByChar();
     bool processCommand(globalSettings &, controlSettings *, trajectory &);
     String getStringValue(String, char, int);
   
@@ -27,6 +28,3 @@ class handleSerialCommands
 };
 
 #endif
-
-
-
