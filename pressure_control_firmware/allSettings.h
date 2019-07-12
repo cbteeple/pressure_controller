@@ -104,6 +104,7 @@ class trajectory
       running = true;
       curr_idx = start_idx+1;
       StartTime = CurrTime;
+      Serial.println("_TRAJ: Start");
     }
 
     void stop(){
@@ -161,6 +162,3 @@ class trajectory
 
 
 #endif
-
-
-
