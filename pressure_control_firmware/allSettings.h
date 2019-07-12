@@ -144,8 +144,11 @@ class trajectory
         percent
         );
 
-        if ((deltaT >= trajtimes[start_idx+len-1]) & wrap & channel==maxChannels-1){
-          start();
+        if (deltaT >= trajtimes[start_idx+len-1] & channel==maxChannels-1){
+          Serial.println("_TRAJ: End");
+          if (wrap ){
+            start();
+          }
         }
 
         //Serial.print("_SETPOINT: ");
