@@ -69,11 +69,14 @@ class trajectory
   public:
     unsigned long StartTime=0;
     unsigned long CurrTime=0;
+    unsigned long ResumeTime=0;
     
     int len = 20;
     int start_idx = 0;
     bool wrap = false;
     bool running = false;
+    bool finished = false;
+    bool reset=false;
     float trajpts [maxLen][maxChannels];
     float trajtimes [maxLen];
     
@@ -101,6 +104,8 @@ class trajectory
 
 
     void start(){
+      reset=false;
+      finished = false;
       running = true;
       curr_idx = start_idx+1;
       StartTime = CurrTime;
@@ -108,8 +113,20 @@ class trajectory
     }
 
     void stop(){
-      running=false;  
+      running=false;
+      reset=true;
     }
+
+    void pause(){
+      running=false;
+      ResumeTime = CurrTime;
+    }
+
+    void resume(){
+      running=true;
+      StartTime = CurrTime-(ResumeTime-StartTime);
+    }
+    
 
     float interp(int channel){
 
@@ -146,6 +163,7 @@ class trajectory
 
         if (deltaT >= trajtimes[start_idx+len-1] & channel==maxChannels-1){
           Serial.println("_TRAJ: End");
+          finished = true;
           if (wrap ){
             start();
           }

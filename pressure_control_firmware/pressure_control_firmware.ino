@@ -179,9 +179,11 @@ void setup() {
 
 
 
-bool runtraj = traj.running;
 bool lcdOverride = false;
 float setpoint_local[MAX_NUM_CHANNELS];
+
+bool runtraj = traj.running;
+bool traj_reset = traj.reset;
 
 unsigned long curr_time=0;
 
@@ -192,7 +194,7 @@ void loop() {
 
   traj.CurrTime = micros();
   runtraj = traj.running;
-
+  traj_reset = traj.reset;
   curr_time = micros();
   
   
@@ -229,6 +231,11 @@ void loop() {
             setpoint_local[i] = traj.interp(i);
             controllers[i].setSetpoint(setpoint_local[i]);
           }
+          if (traj_reset){
+            setpoint_local[i] =0.0;
+            controllers[i].setSetpoint(setpoint_local[i]);
+          }
+
         }
         else{
           if (newSettings){
