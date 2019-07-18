@@ -46,8 +46,8 @@ bool handleHIDCommands::getCommand() {
     
     command = in_str;
     command.toUpperCase();
-    Serial.print("Recieved: ");
-    Serial.println(command);
+    //Serial.print("Recieved: ");
+    //Serial.println(command);
     return true;
   }
   else {
@@ -60,7 +60,7 @@ bool handleHIDCommands::getCommand() {
 
 void handleHIDCommands::sendString(String bc_string){
   bc_string.getBytes(out_buffer, 64);
-  int n = RawHID.send(out_buffer, 10);
+  int n = RawHID.send(out_buffer, 1);
 
 }
 
