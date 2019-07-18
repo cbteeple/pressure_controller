@@ -59,6 +59,10 @@ bool handleHIDCommands::getCommand() {
 
 
 void handleHIDCommands::sendString(String bc_string){
+  // Reset the buffer with zeros
+  for (int i=0; i<64; i++) {
+    out_buffer[i] = 0;
+  }
   bc_string.getBytes(out_buffer, 64);
   int n = RawHID.send(out_buffer, 1);
 
@@ -522,7 +526,7 @@ bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettin
       bc_string += ("ECHO: ON");
     }
     else {
-      Serial.println("_ECHO: OFF");
+      sendString("_ECHO: OFF");
     }
   }
 

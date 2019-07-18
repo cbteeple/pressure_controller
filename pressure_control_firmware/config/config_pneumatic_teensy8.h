@@ -18,7 +18,7 @@
     //Nano:  3, 6, 9, 10, 11               (pin 5 fails consistently, no idea why)
 
 
-// Define the Comm type
+// Use raw USB communication as an HID object - Comment out for Serial communication
 #define COMMS_USB
 
 //Define the type of sensor to use (only one can be true)
