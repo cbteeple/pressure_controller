@@ -348,12 +348,12 @@ void loop() {
 String generateDataStr(){
 String send_str = "";
   send_str+=String(currentTime);
-  send_str+=('\t'); ;
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
+    send_str+=('\t'); 
     send_str+=String(setpoint_local[i],3);
     send_str+=('\t'); 
     send_str+=String(pressures[i],3);
-    send_str+=('\t'); 
+    
   }
   return send_str;
 }

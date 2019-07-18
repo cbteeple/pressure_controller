@@ -38,7 +38,7 @@ void handleHIDCommands::initialize(int num) {
 //METHOD DEPRICATED
 bool handleHIDCommands::getCommand() {
 
-  int n = RawHID.recv(in_buffer, 0); // 0 timeout = do not wait
+  int n = RawHID.recv(in_buffer, 1); // 0 timeout = do not wait
   if (n > 0) {
 
     String in_str;
