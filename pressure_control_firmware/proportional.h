@@ -23,6 +23,3 @@ class proportional
 };
 
 #endif
-
-
-

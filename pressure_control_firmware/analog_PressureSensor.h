@@ -41,6 +41,3 @@ class analog_PressureSensor
 };
 
 #endif
-
-
-

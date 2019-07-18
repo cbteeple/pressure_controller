@@ -63,6 +63,3 @@ float interpLin::go(){
 float interpLin::lerp(float a, float b, float f){
     return a + f * (b - a);
 }
-
-
-

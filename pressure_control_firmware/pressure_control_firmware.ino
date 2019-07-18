@@ -2,6 +2,7 @@
 #include "i2c_PressureSensor.h"
 #include "i2c_mux.h"
 #include "handleSerialCommands.h"
+#include "handleHIDCommands.h"
 #include "handleButtons.h"
 #include "allSettings.h"
 #include "valvePair.h"
@@ -27,7 +28,13 @@ controlSettings ctrlSettings[MAX_NUM_CHANNELS];
 sensorSettings senseSettings[MAX_NUM_CHANNELS];
 
 //Create an object to handle serial commands
-handleSerialCommands handleCommands;
+#ifdef COMMS_USB
+  handleHIDCommands handleCommands;
+
+#else
+  handleSerialCommands handleCommands;
+#endif
+
 eepromHandler saveHandler;
 
 Button  buttons[3] { {buttonPins[0]}, { buttonPins[1] }, { buttonPins[2] } };
@@ -300,10 +307,6 @@ void loop() {
   //Print out data at close to the correct rate
   currentTime=millis();
   if (settings.outputsOn && (currentTime-previousTime>= settings.looptime)){
-    Serial.print(currentTime);
-    Serial.print('\t');
-    Serial.print(currentTime-previousTime);
-    Serial.print('\t');
     printData();
     previousTime=currentTime;
   }
@@ -323,15 +326,32 @@ void loop() {
 
 
 //PRINT DATA OUT FUNCTION
-void printData(){
-  for (int i=0; i<MAX_NUM_CHANNELS; i++){
-    Serial.print(setpoint_local[i],5);
-    Serial.print('\t'); 
-    Serial.print(pressures[i],5);
-    Serial.print('\t'); 
-  }
-  Serial.print('\n');
+#ifdef COMMS_USB
+  void printData(){
+  handleCommands.sendString(generateDataStr());
   
+}
+
+#else
+  void printData(){
+  
+   Serial.println(generateDataStr());
+  
+}
+#endif
+
+
+String generateDataStr(){
+String send_str = "";
+  send_str+=String(currentTime);
+  send_str+=('\t'); ;
+  for (int i=0; i<MAX_NUM_CHANNELS; i++){
+    send_str+=String(setpoint_local[i],3);
+    send_str+=('\t'); 
+    send_str+=String(pressures[i],3);
+    send_str+=('\t'); 
+  }
+  return send_str;
 }
 
 
