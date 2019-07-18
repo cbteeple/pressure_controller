@@ -30,6 +30,10 @@ sensorSettings senseSettings[MAX_NUM_CHANNELS];
 //Create an object to handle serial commands
 #ifdef COMMS_USB
   handleHIDCommands handleCommands;
+  #define VENDOR_ID               0x16C0
+  #define PRODUCT_ID              0x0486
+  #define RAWHID_USAGE_PAGE       0xFFAB  // recommended: 0xFF00 to 0xFFFF
+  #define RAWHID_USAGE            0x0200  // recommended: 0x0100 to 0xFFFF
 
 #else
   handleSerialCommands handleCommands;
