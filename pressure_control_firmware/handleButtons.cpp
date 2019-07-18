@@ -109,5 +109,3 @@ bool handleButtons::checkForLongPress(int buttonNum){
     bool longPress=pressEnd[buttonNum]-pressStart[buttonNum] >= longPressDuration;
     return longPress;
 }
-
-

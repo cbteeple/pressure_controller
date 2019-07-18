@@ -142,11 +142,3 @@ float i2c_PressureSensor::getPressure(void){
 float i2c_PressureSensor::getPressureSmoothed(void){
   return pressureSmooth;
 }
-
-
-
-
-
-
-
-

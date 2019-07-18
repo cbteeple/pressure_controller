@@ -25,6 +25,3 @@ class handleButtons
 };
 
 #endif
-
-
-

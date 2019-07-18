@@ -89,12 +89,3 @@ float analog_PressureSensor::getPressure(void){
 float analog_PressureSensor::getPressureSmoothed(void){
   return pressureSmooth;
 }
-
-
-
-
-
-
-
-
-

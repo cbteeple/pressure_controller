@@ -22,4 +22,3 @@ void i2c_Mux::setActiveChannel(int channel){
   Wire.endTransmission();      // stop transmitting
   delay(1);
 }
-
