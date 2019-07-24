@@ -26,6 +26,7 @@
 globalSettings settings;
 controlSettings ctrlSettings[MAX_NUM_CHANNELS];
 sensorSettings senseSettings[MAX_NUM_CHANNELS];
+valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
 
 //Create an object to handle serial commands
 #ifdef COMMS_USB
@@ -157,7 +158,12 @@ void setup() {
         senseSettings[i].muxAddr    = muxAddr;
         senseSettings[i].muxChannel = senseChannels[i];
       }
+
+      //Inbitialize valve settings
+      for (int j=0; j<2; j++){
+        valvePairSettings[i].valveOffset[j] = valveOffset[i][j];
       
+      }
     }
 
 
@@ -165,7 +171,7 @@ void setup() {
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
       sensors[i].initialize(senseSettings[i]);
       valves[i].initialize(valvePins[i][0],valvePins[i][1]);
-      valves[i].setSettings(valveOffset,255);
+      valves[i].setSettings(valvePairSettings[i]);
       controllers[i].initialize(ctrlSettings[i]);
     }
 

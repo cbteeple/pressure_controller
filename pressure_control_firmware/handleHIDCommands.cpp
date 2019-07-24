@@ -108,10 +108,9 @@ bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettin
     if (broadcast) {
       bc_string += "SET: ";
       bc_string += String(ctrlSettings[0].settime, 4);
-      bc_string += '\t';
       for (int i = 0; i < numSensors; i++) {
-        bc_string += String(ctrlSettings[i].setpoint, 4);
         bc_string += '\t';
+        bc_string += String(ctrlSettings[i].setpoint, 4);
       }
     }
   }
@@ -187,6 +186,44 @@ bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettin
       bc_string += String(settings.lcdLoopTime);
     }
   }
+
+  
+  else if (command.startsWith("INTSTART")) {
+      if (getStringValue(command, ';', numSensors).length()) {
+        for (int i = 0; i < numSensors; i++) {
+          ctrlSettings[i].integralStart = getStringValue(command, ';', i + 1).toFloat();
+        }
+        newSettings = true;
+        if (broadcast) {
+          bc_string += "NEW ";
+        }
+      }
+      else if (getStringValue(command, ';', 1).length()) {
+        float allset = getStringValue(command, ';', 1).toFloat();
+        for (int i = 0; i < numSensors; i++) {
+          ctrlSettings[i].integralStart = allset;
+        }
+        newSettings = true;
+        if (broadcast) {
+          bc_string += "NEW ";
+        }
+      }
+      if (broadcast) {
+        bc_string += ("INTSTART: ");
+        for (int i = 0; i < numSensors; i++) {
+          bc_string += String(ctrlSettings[i].integralStart, 4);
+          bc_string += ('\t');
+        }
+      }
+    }
+
+
+
+
+
+
+
+
 
 
 
