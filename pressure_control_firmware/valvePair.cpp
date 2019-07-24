@@ -1,5 +1,6 @@
 #include "valvePair.h"
 #include <Arduino.h>
+#include "allSettings.h"
 
 
 valvePair::valvePair(int pin1, int pin2){
@@ -29,10 +30,16 @@ void valvePair::initialize(){
 }
 
 
-void valvePair::setSettings(int offset_in, int max_in){
-  offset=offset_in;
-  outMax=max_in;
-  outRange=outMax-offset;
+void valvePair::setSettings(valveSettings &newSettings){
+
+  offset_p = newSettings.valveOffset[0];
+  offset_v = newSettings.valveOffset[1];
+  outMax_p = newSettings.valveMax[0];
+  outMax_v = newSettings.valveMax[1];
+  
+
+  outRange_p=outMax_p-offset_p;
+  outRange_v=outMax_v-offset_v;
 }
 
 
@@ -72,34 +79,22 @@ void valvePair::pressurize(){
 
 void valvePair::pressurizeProportional(float val){
   ventValveAnalog(0);
-  float set1=mapFloat(val,0.0,1.0,0.0,float(outRange));
-  int set = constrain(set1+ offset, 0, 255);
+  float set1=mapFloat(val,0.0,1.0,0.0,float(outRange_p));
+  int set = constrain(set1+ offset_p, 0, 255);
   pressureValveAnalog(set);
-  //Serial.print("Pres_P");
-  //Serial.print('\t');
-  //Serial.print('\t');
-  //Serial.print(set1,6);
-  //Serial.print('\t');
-  //Serial.print(set);
 }
+
 
 void valvePair::vent(){
   pressureValveOff();
   ventValveOn(); 
 }
 
-
 void valvePair::ventProportional(float val){
   pressureValveAnalog(0);
-  float set1=mapFloat(val,0.0,1.0,0.0,float(outRange));
-  int set = constrain(set1+ offset, 0, 255);
+  float set1=mapFloat(val,0.0,1.0,0.0,float(outRange_v));
+  int set = constrain(set1+ offset_v, 0, 255);
   ventValveAnalog(set);
-  //Serial.print("Vent_P");
-  //Serial.print('\t');
-  //Serial.print('\t');
-  //Serial.print(set1,6);
-  //Serial.print('\t');
-  //Serial.print(set);
 }
 
 

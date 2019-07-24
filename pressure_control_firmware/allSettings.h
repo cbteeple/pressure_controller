@@ -35,6 +35,13 @@ class sensorSettings
     int adc_max_volts;
 };
 
+class valveSettings
+{
+  public:
+    int valveOffset[2] = {220, 220};
+    int valveMax[2] = {255, 255};
+};
+
 
 
 
@@ -48,7 +55,7 @@ class controlSettings
     float valveDirect;
     float pidGains [3];
     float integratorResetTime;
-    float integralStart = 3.0;
+    float integralStart = 5.0;
     float maxPressure;
     float minPressure;
     float settime;

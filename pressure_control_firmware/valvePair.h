@@ -3,14 +3,19 @@
 #ifndef __valvePair_H__
 #define __valvePair_H__
 
+#include "allSettings.h"
+
 class valvePair
 {
   private:
     int pinPressure;
     int pinVent;
-    int offset = 0;//220;
-    int outMax=255;
-    int outRange=outMax-offset;
+    int offset_p = 0;
+    int offset_v = 0;
+    int outMax_p = 255;
+    int outMax_v = 255;
+    int outRange_p=outMax_p-offset_p;
+    int outRange_v=outMax_v-offset_v;
     float mapFloat(float, float, float, float, float);
   
   public:
@@ -18,7 +23,7 @@ class valvePair
     valvePair(int, int);
     void initialize();
     void initialize(int, int);
-    void setSettings(int, int);
+    void setSettings(valveSettings &);
     void pressureValveOn();
     void pressureValveOff();
     void pressureValveAnalog(int);

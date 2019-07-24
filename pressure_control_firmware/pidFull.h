@@ -10,7 +10,7 @@ class pidFull
   private:
     float pressureLast;
     float pressureSmooth;
-    float integral=0;
+    double integral=0.0L;
     float lastError=0;
     unsigned long timestep;
     unsigned long lastTime=0;
@@ -30,6 +30,7 @@ class pidFull
     void initialize(controlSettings &);
     void updateSettings(controlSettings &);
     void setSetpoint(float);
+    void setSetpointDirect(float);
     float go(float);
 };
 
