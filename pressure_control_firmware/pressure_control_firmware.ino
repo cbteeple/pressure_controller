@@ -1,8 +1,6 @@
 #include "analog_PressureSensor.h"
 #include "i2c_PressureSensor.h"
 #include "i2c_mux.h"
-#include "handleSerialCommands.h"
-#include "handleHIDCommands.h"
 #include "handleButtons.h"
 #include "allSettings.h"
 #include "valvePair.h"
@@ -19,6 +17,7 @@
 
 //Include the config file from the system you are using
 #include "config/config_pneumatic_teensy.h"
+//#include "config/config_vacuum.h"
 
 
 
@@ -30,13 +29,16 @@ valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
 
 //Create an object to handle serial commands
 #ifdef COMMS_USB
+  #include "handleHIDCommands.h"
   handleHIDCommands handleCommands;
   #define VENDOR_ID               0x16C0
   #define PRODUCT_ID              0x0486
   #define RAWHID_USAGE_PAGE       0xFFAB  // recommended: 0xFF00 to 0xFFFF
   #define RAWHID_USAGE            0x0200  // recommended: 0x0100 to 0xFFFF
 
-#else
+#endif
+#ifndef COMMS_USB
+  #include "handleSerialCommands.h"
   handleSerialCommands handleCommands;
 #endif
 
