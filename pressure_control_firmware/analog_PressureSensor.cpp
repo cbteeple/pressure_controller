@@ -25,7 +25,9 @@ void analog_PressureSensor::initialize(sensorSettings &senseSet,int a, int b, in
 }
 
 
-void analog_PressureSensor::setCalibration(int sensorType){
+void analog_PressureSensor::setCalibration(int sensorType_in){
+
+  sensorType = sensorType_in;
    if (sensorType==1){
       output_max = 4.5;
       output_min = 0.5;
@@ -48,6 +50,14 @@ void analog_PressureSensor::setCalibration(int sensorType){
       pressure_max = 60;
       pressure_min = 0;
    }
+   else if (sensorType==4){
+    //Teensy 
+      output_max = 4.5*0.6666666;
+      output_min = 0.5*0.6666666;
+      output_offset = 0.5*0.6666666;
+      pressure_max = 30; //PSI
+      pressure_min = -30; //PSI
+   }
 }
 
 
@@ -68,9 +78,18 @@ void analog_PressureSensor::setSmoothing(float alpha_in){
 void analog_PressureSensor::getData(void){
   //Get the data
   pressureLast=pressure;
-                  
+
+                    
   float pressure_volts = float(analogRead(sensePin))*adc_max_volts/adc_max_counts;
-  pressure = float(pressure_volts-output_offset)*float(pressure_max-pressure_min)/float(output_max-output_min);
+
+  //Choose the correct calibration curve
+  if (sensorType<4){
+    pressure = float(pressure_volts-output_offset)*float(pressure_max-pressure_min)/float(output_max-output_min);
+  }
+  else if (sensorType==4){
+    pressure = ( float(pressure_volts-output_offset) * float(pressure_max-pressure_min) / float(output_max-output_min) ) + pressure_min;
+  }
+  
 
   if (!firstCall){
     pressureSmooth=alpha*pressure+ (1-alpha)*pressureLast;
