@@ -16,12 +16,14 @@
     //Micro: 3, 5, 6, 9, 10, 11, 12, 13    (all pins work fine)
     //Nano:  3, 6, 9, 10, 11               (pin 5 fails consistently, no idea why)
 
-
+// Use raw USB communication as an HID object - Comment out for Serial communication
+#define COMMS_USB
 
 
 //Define the type of sensor to use (only one can be true)
 #define SENSOR_ANALOG false
 #define SENSOR_I2C true
+#define ADC_RES 10
 
 #define SENSOR_MODEL 1
 #define MAX_NUM_CHANNELS 4

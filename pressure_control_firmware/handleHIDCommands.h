@@ -3,20 +3,21 @@
 #include "eeprom_handler.h"
 
 
-#ifndef __handleSerialCommands_H__
-#define __handleSerialCommands_H__
+#ifndef __handleHIDCommands_H__
+#define __handleHIDCommands_H__
 
 
-class handleSerialCommands
+class handleHIDCommands
 {
-  private:      
+  private:
+    byte in_buffer[64];
+    byte out_buffer[64];   
     int numSensors;
     String command;
     bool broadcast = false;
     eepromHandler saveHandler;
 
     bool getCommand();
-    bool getCommandByChar();
     bool processCommand(globalSettings &, controlSettings *, trajectory &);
     String getStringValue(String, char, int);
   
@@ -25,6 +26,7 @@ class handleSerialCommands
     bool go(globalSettings &, controlSettings *, trajectory &);
     void startBroadcast();
     void stopBroadcast();
+    void sendString(String);
 };
 
 #endif

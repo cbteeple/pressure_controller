@@ -48,6 +48,11 @@ void pidFull::setSetpoint(float setpoint_in){
   setpoint = setpoint_in;
 }
 
+//Update the setpoint
+void pidFull::setSetpointDirect(float setpoint_in){
+  setpoint = setpoint_in;
+}
+
 
 
 
@@ -57,7 +62,7 @@ float pidFull::go(float pressure){
   //Serial.print('\t');  
   //Do pid control
   float out=0.0;
-  unsigned long currTime=millis();
+  unsigned long currTime=micros();
   timestep = currTime-lastTime;
   
   float error=setpoint-pressure;
@@ -72,8 +77,8 @@ float pidFull::go(float pressure){
       }
     }
   
-    integral += error*timestep;
-    float dError = (error - lastError)/timestep;
+    integral += error*timestep/1000000.0;
+    float dError = (error - lastError)/timestep/1000000.0;
   
     //Serial.print(integral,2);
     //Serial.print('\t');  
@@ -95,5 +100,3 @@ float pidFull::go(float pressure){
 
   return out;
 }
-
-

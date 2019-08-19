@@ -1,13 +1,13 @@
 #include <stdlib.h>
 #include "Arduino.h"
-#include "handleSerialCommands.h"
+#include "handleHIDCommands.h"
 #include "allSettings.h"
 #include "eeprom_handler.h"
 
 //_________________________________________________________
 //PUBLIC FUNCTIONS
-bool handleSerialCommands::go(globalSettings (&settings), controlSettings *ctrlSettings, trajectory (&traj)) {
-  bool newCommand = getCommandByChar(); //getCommand();
+bool handleHIDCommands::go(globalSettings (&settings), controlSettings *ctrlSettings, trajectory (&traj)) {
+  bool newCommand = getCommand(); //getCommand();
   bool newSettings = false;
   if (newCommand) {
     newSettings = processCommand(settings, ctrlSettings, traj);
@@ -16,16 +16,16 @@ bool handleSerialCommands::go(globalSettings (&settings), controlSettings *ctrlS
   return newSettings;
 }
 
-void handleSerialCommands::startBroadcast() {
+void handleHIDCommands::startBroadcast() {
   broadcast = true;
 }
 
-void handleSerialCommands::stopBroadcast() {
+void handleHIDCommands::stopBroadcast() {
   broadcast = false;
 }
 
 
-void handleSerialCommands::initialize(int num) {
+void handleHIDCommands::initialize(int num) {
   numSensors = num;
   // reserve 200 bytes for the inputString:
   command.reserve(200);
@@ -36,41 +36,44 @@ void handleSerialCommands::initialize(int num) {
 //PRIVATE FUNCTIONS
 
 //METHOD DEPRICATED
-bool handleSerialCommands::getCommand() {
-  if (Serial.available() > 0) {
-    command = Serial.readStringUntil('\n');
+bool handleHIDCommands::getCommand() {
+
+  int n = RawHID.recv(in_buffer, 1); // 0 timeout = do not wait
+  if (n > 0) {
+
+    String in_str;
+    for (char c : in_buffer) in_str += c;
+    
+    command = in_str;
     command.toUpperCase();
+    //Serial.print("Recieved: ");
+    //Serial.println(command);
     return true;
   }
   else {
     return false;
   }
+
 }
 
 
-bool handleSerialCommands::getCommandByChar() {
-  //unsigned long start_time = micros();
-  while (Serial.available()) {
-    // get the new byte:
-    char inChar = (char)Serial.read();
-    // Add new byte to the inputString:
-    command += inChar;
-    // If the incoming character is a newline, set a flag so we can process it
-    if (inChar == '\n') {
-      command.toUpperCase();
-      //Serial.print("_SER: Line Complete");
-      //Serial.print('\t');
-      //Serial.println(micros() - start_time);
-      return true;
-    }
+
+void handleHIDCommands::sendString(String bc_string){
+  // Reset the buffer with zeros
+  for (int i=0; i<64; i++) {
+    out_buffer[i] = 0;
   }
-  return false;
+  bc_string.getBytes(out_buffer, 64);
+  int n = RawHID.send(out_buffer, 1);
+
 }
 
 
 
 
-bool handleSerialCommands::processCommand(globalSettings (&settings), controlSettings *ctrlSettings, trajectory (&traj)) {
+
+
+bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettings *ctrlSettings, trajectory (&traj)) {
   bool newSettings = false;
   String bc_string = "_";
 
@@ -105,10 +108,9 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
     if (broadcast) {
       bc_string += "SET: ";
       bc_string += String(ctrlSettings[0].settime, 4);
-      bc_string += '\t';
       for (int i = 0; i < numSensors; i++) {
-        bc_string += String(ctrlSettings[i].setpoint, 4);
         bc_string += '\t';
+        bc_string += String(ctrlSettings[i].setpoint, 4);
       }
     }
   }
@@ -184,6 +186,44 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       bc_string += String(settings.lcdLoopTime);
     }
   }
+
+  
+  else if (command.startsWith("INTSTART")) {
+      if (getStringValue(command, ';', numSensors).length()) {
+        for (int i = 0; i < numSensors; i++) {
+          ctrlSettings[i].integralStart = getStringValue(command, ';', i + 1).toFloat();
+        }
+        newSettings = true;
+        if (broadcast) {
+          bc_string += "NEW ";
+        }
+      }
+      else if (getStringValue(command, ';', 1).length()) {
+        float allset = getStringValue(command, ';', 1).toFloat();
+        for (int i = 0; i < numSensors; i++) {
+          ctrlSettings[i].integralStart = allset;
+        }
+        newSettings = true;
+        if (broadcast) {
+          bc_string += "NEW ";
+        }
+      }
+      if (broadcast) {
+        bc_string += ("INTSTART: ");
+        for (int i = 0; i < numSensors; i++) {
+          bc_string += String(ctrlSettings[i].integralStart, 4);
+          bc_string += ('\t');
+        }
+      }
+    }
+
+
+
+
+
+
+
+
 
 
 
@@ -523,7 +563,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
       bc_string += ("ECHO: ON");
     }
     else {
-      Serial.println("_ECHO: OFF");
+      sendString("_ECHO: OFF");
     }
   }
 
@@ -539,7 +579,8 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
 
   //End the line with a newline
   if (broadcast) {
-    Serial.println(bc_string);
+    sendString(bc_string);
+    //Serial.println(bc_string);
   }
 
   return newSettings;
@@ -548,7 +589,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
 
 
 
-String handleSerialCommands::getStringValue(String data, char separator, int index)
+String handleHIDCommands::getStringValue(String data, char separator, int index)
 {
   int found = 0;
   int strIndex[] = {0, -1};

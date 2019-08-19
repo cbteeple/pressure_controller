@@ -1,13 +1,13 @@
 #include "analog_PressureSensor.h"
 #include "i2c_PressureSensor.h"
 #include "i2c_mux.h"
-#include "handleSerialCommands.h"
 #include "handleButtons.h"
 #include "allSettings.h"
 #include "valvePair.h"
 #include "bangBang.h"
 #include "proportional.h"
 #include "pidFull.h"
+#include "interp_lin.h"
 
 
 
@@ -16,9 +16,8 @@
 
 
 //Include the config file from the system you are using
-#include "config/config_pneumatic.h"
-
-
+//#include "config/config_pneumatic_teensy.h"
+#include "config/config_vacuum.h"
 
 
 
@@ -26,9 +25,23 @@
 globalSettings settings;
 controlSettings ctrlSettings[MAX_NUM_CHANNELS];
 sensorSettings senseSettings[MAX_NUM_CHANNELS];
+valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
 
 //Create an object to handle serial commands
-handleSerialCommands handleCommands;
+#ifdef COMMS_USB
+  #include "handleHIDCommands.h"
+  handleHIDCommands handleCommands;
+  #define VENDOR_ID               0x16C0
+  #define PRODUCT_ID              0x0486
+  #define RAWHID_USAGE_PAGE       0xFFAB  // recommended: 0xFF00 to 0xFFFF
+  #define RAWHID_USAGE            0x0200  // recommended: 0x0100 to 0xFFFF
+
+#endif
+#ifndef COMMS_USB
+  #include "handleSerialCommands.h"
+  handleSerialCommands handleCommands;
+#endif
+
 eepromHandler saveHandler;
 
 Button  buttons[3] { {buttonPins[0]}, { buttonPins[1] }, { buttonPins[2] } };
@@ -40,7 +53,6 @@ i2c_Mux mux(muxAddr);
 
 //Set up sensing
 #if(SENSOR_ANALOG)
-  int senseChannels[]={A0,A1,A2,A3,A4,A5,A6,A7};
   analog_PressureSensor sensors[MAX_NUM_CHANNELS];
 #elif(SENSOR_I2C)
   int senseChannels[]={0,1,2,3,4,5,6,7};
@@ -54,6 +66,8 @@ float valveSets[MAX_NUM_CHANNELS];
 
 //Set up valve pairs  
 valvePair valves[MAX_NUM_CHANNELS];
+
+interpLin setpoint_interp[MAX_NUM_CHANNELS];
 
 
 //Create an array of controller objects for pressure control
@@ -85,9 +99,11 @@ unsigned long currentTime=0;
 //______________________________________________________________________
 void setup() {
   //Start serial
-    Serial.begin(115200);
+    Serial.begin(2000000);
     //Serial.flush();
-    Serial.setTimeout(10);
+    Serial.setTimeout(2);
+
+    analogReadResolution(ADC_RES);
 
 
   //Buttons:
@@ -135,6 +151,8 @@ void setup() {
 
       if(SENSOR_ANALOG){
         senseSettings[i].sensorPin=senseChannels[i];
+        senseSettings[i].adc_res=ADC_RES;
+        senseSettings[i].adc_max_volts=ADC_MAX_VOLTS;
       }
       else if(SENSOR_I2C){
         senseSettings[i].sensorAddr= sensorAddr;
@@ -142,7 +160,12 @@ void setup() {
         senseSettings[i].muxAddr    = muxAddr;
         senseSettings[i].muxChannel = senseChannels[i];
       }
+
+      //Inbitialize valve settings
+      for (int j=0; j<2; j++){
+        valvePairSettings[i].valveOffset[j] = valveOffset[i][j];
       
+      }
     }
 
 
@@ -150,7 +173,7 @@ void setup() {
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
       sensors[i].initialize(senseSettings[i]);
       valves[i].initialize(valvePins[i][0],valvePins[i][1]);
-      valves[i].setSettings(valveOffset,255);
+      valves[i].setSettings(valvePairSettings[i]);
       controllers[i].initialize(ctrlSettings[i]);
     }
 
@@ -175,17 +198,24 @@ void setup() {
 
 
 
-bool runtraj = traj.running;
 bool lcdOverride = false;
 float setpoint_local[MAX_NUM_CHANNELS];
+
+bool runtraj = traj.running;
+bool traj_reset = traj.reset;
+
+unsigned long curr_time=0;
 
 //______________________________________________________________________
 void loop() {
   //Serial.println("_words need to be here (for some reason)");
   //Handle serial commands
 
-  traj.CurrTime = millis();
+  traj.CurrTime = micros();
   runtraj = traj.running;
+  traj_reset = traj.reset;
+  curr_time = micros();
+  
   
   bool newSettings=handleCommands.go(settings, ctrlSettings,traj);
   String buttonMessage= buttonHandler.go(buttons,settings, ctrlSettings); 
@@ -220,19 +250,40 @@ void loop() {
             setpoint_local[i] = traj.interp(i);
             controllers[i].setSetpoint(setpoint_local[i]);
           }
+          if (traj_reset){
+            setpoint_local[i] =0.0;
+            controllers[i].setSetpoint(setpoint_local[i]);
+          }
+
         }
         else{
           if (newSettings){
-          setpoint_local[i] = ctrlSettings[i].setpoint;
-          controllers[i].updateSettings(ctrlSettings[i]);
-          controllers[i].setSetpoint(setpoint_local[i]);
-          }  
+            controllers[i].updateSettings(ctrlSettings[i]);
+          
+            if (ctrlSettings[i].controlMode==1){
+              setpoint_local[i] = ctrlSettings[i].setpoint;
+              controllers[i].setSetpoint(setpoint_local[i]);
+            }
+            else if (ctrlSettings[i].controlMode==3){
+              setpoint_interp[i].newGoal(ctrlSettings[i]);
+            }
+          }
+
+          if (ctrlSettings[i].controlMode==3) {
+            setpoint_interp[i].CurrTime = curr_time;
+            setpoint_local[i] = setpoint_interp[i].go();
+            controllers[i].setSetpoint(setpoint_local[i]);
+          }
+          
+
         }
       
         //Get the new pressures
         if (useMux){
           mux.setActiveChannel(senseChannels[i]);
         }
+
+        //NOT THIS
         sensors[i].getData();
         pressures[i] = sensors[i].getPressure();
 
@@ -245,7 +296,8 @@ void loop() {
 
         //Perform control if the channel is on
         if (ctrlSettings[i].channelOn){
-          //Run 1 step of the controller if we are in mode 1 or 2
+          
+          //Run 1 step of the controller if we are not in mode 0
           if (ctrlSettings[i].controlMode>=1){
             valveSets[i] = controllers[i].go(pressures[i]);
           }
@@ -267,10 +319,6 @@ void loop() {
   //Print out data at close to the correct rate
   currentTime=millis();
   if (settings.outputsOn && (currentTime-previousTime>= settings.looptime)){
-    Serial.print(currentTime);
-    Serial.print('\t');
-    Serial.print(currentTime-previousTime);
-    Serial.print('\t');
     printData();
     previousTime=currentTime;
   }
@@ -283,7 +331,6 @@ void loop() {
     }
   }
     
-  
 }
 
 
@@ -291,15 +338,32 @@ void loop() {
 
 
 //PRINT DATA OUT FUNCTION
-void printData(){
-  for (int i=0; i<MAX_NUM_CHANNELS; i++){
-    Serial.print(setpoint_local[i],3);
-    Serial.print('\t'); 
-    Serial.print(pressures[i],3);
-    Serial.print('\t'); 
-  }
-  Serial.print('\n');
+#ifdef COMMS_USB
+  void printData(){
+  handleCommands.sendString(generateDataStr());
   
+}
+
+#else
+  void printData(){
+  
+   Serial.println(generateDataStr());
+  
+}
+#endif
+
+
+String generateDataStr(){
+String send_str = "";
+  send_str+=String(currentTime);
+  for (int i=0; i<MAX_NUM_CHANNELS; i++){
+    send_str+=('\t'); 
+    send_str+=String(setpoint_local[i],3);
+    send_str+=('\t'); 
+    send_str+=String(pressures[i],3);
+    
+  }
+  return send_str;
 }
 
 
