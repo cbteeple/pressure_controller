@@ -9,6 +9,7 @@ from pynput.keyboard import Key, Listener
 
 speedFactor=1.0
 dataBack=True
+saveData = True
 trajFolder = "trajectories"
 
 restartFlag = False
@@ -27,6 +28,7 @@ class PressureController:
         self.s = serial.Serial(devname,baudrate)
         self.trajFolder  = trajFolder
         self.speedFactor = speedFactor
+        self.saveData = saveData
 
         time.sleep(1)
 
@@ -54,8 +56,17 @@ class PressureController:
         self.traj = trajIn.get("setpoints")
         self.wrap = trajIn.get("wrap")
 
+        self.createOutFile(filename)
+        
 
 
+    def createOutFile(self,filename):
+        outFile=os.path.join('data',filename)
+        i = 0
+        while os.path.exists("%s_%s.txt" % (outFile,i) ):
+            i += 1
+
+        self.out_file = open("%s_%s.txt" % (outFile,i), "w+")
 
 
         #inFile=os.path.join(trajFolder,filename+".traj")
@@ -99,11 +110,20 @@ class PressureController:
         self.s.write("mode;1"+'\n')
         self.s.write("set;0"+'\n')
         self.s.close()
+
+        self.out_file.close()
         
     
     def readStuff(self):
         if self.s.in_waiting:  # Or: while ser.inWaiting():
-            print self.s.readline().strip()
+            line = self.s.readline().strip()
+            print(line)
+            if self.saveData:
+                self.saveStuff(line)
+
+
+    def saveStuff(self, line):
+        self.out_file.write(line+'\n')
     
 
 
