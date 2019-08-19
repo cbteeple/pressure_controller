@@ -27,7 +27,7 @@
 #define ADC_RES 13
 #define ADC_MAX_VOLTS 3.3
 
-#define SENSOR_MODEL 3
+#define SENSOR_MODEL 4
 #define MAX_NUM_CHANNELS 4
 
 //Define the type of controller to use (only one can be true)
