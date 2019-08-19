@@ -208,6 +208,9 @@ class trajBuilder:
             # Add the last entry to finish out the trajectory
             allOut.append(traj_setpoints[-1])
 
+
+        
+
         elif interp_type == "cubic":
             traj_setpoints = np.array(traj_setpoints)
             times=traj_setpoints[:,0]
@@ -230,6 +233,13 @@ class trajBuilder:
 
         else:
             allOut = traj_setpoints
+
+            traj_setpoints_graph = np.array(traj_setpoints)
+            times=traj_setpoints_graph[:,0]
+            pres=traj_setpoints_graph[:,1:]
+
+            plt.plot(times,pres)
+            plt.show()
 
 
         

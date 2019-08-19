@@ -1,4 +1,4 @@
 # Serial Info
-#devname: /dev/ttyACM0
-devname: COM4
-baudrate: 115200
+devname: /dev/ttyACM0
+#devname: COM4
+baudrate: 2000000

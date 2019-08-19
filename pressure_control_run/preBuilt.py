@@ -31,11 +31,8 @@ class PressureController:
         time.sleep(1)
 
         self.s.write("echo;0"+'\n')
-<<<<<<< HEAD
         self.s.write("load"+'\n')
-=======
         #self.s.write("load"+'\n')
->>>>>>> master
         self.s.write("set;0"+'\n')
         self.s.write("mode;2"+'\n')
         #s.write('on')
@@ -115,30 +112,23 @@ class PressureController:
 
 
 def on_press(key):
-<<<<<<< HEAD
     try:
         print('alphanumeric key {0} pressed'.format(
             key.char))
     except AttributeError:
         print('special key {0} pressed'.format(
             key))
-=======
->>>>>>> master
     pass
 
 
 def on_release(key):
     global restartFlag
     if key == Key.space:
-<<<<<<< HEAD
         print('Restart Trajectory')
         restartFlag =True
-    print('{0} released'.format(
-        key))
-=======
+        print('{0} released'.format( key))
         print('_RESTART')
         restartFlag =True
->>>>>>> master
 
 
 listener = Listener(
