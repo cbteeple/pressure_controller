@@ -1,0 +1,32 @@
+# Top-level settings
+meta:
+    shimy_base: 1.0  #seconds
+
+settings:
+    traj_type: 'waveform'  # Types include: 'waveform', 'interp'
+    wrap: false
+
+
+# Place all of the type-specific settings in here
+config:
+    subsample_num: 90 #Total number of subsamples
+    
+    num_cycles: 10 # Number
+
+    channels: [1,1,1,1]
+    waveform_type: 'square'
+    waveform_freq: 5.75   #Hz
+    waveform_max:  [20, 0,  10, 10  ]   #psi
+    waveform_min:  [0,  20, 10, 10  ]   #psi
+
+
+    interp_type: none   # can be: 'linear', 'cubic'
+    setpoints: # Setpoints are only used if you are doing an interpolation
+        # [time, finger1, finger2, n/c, n/c]
+        prefix:
+            - [0.000,   0, 0, 0,  0]
+            - [2.0,    15, 15, 10,  10]
+        suffix:
+            - [0.001,  10, 10, 10,  10]
+            - [2.0,  0, 0, 10,  10]
+            - [4.0,  0, 0, 0,  0]

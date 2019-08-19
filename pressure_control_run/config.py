@@ -20,7 +20,17 @@ class configSender:
         self.config_folder  = config_folder
 
         time.sleep(2)
-        self.s.write("load"+'\n')
+        self.s.write("off"+'\n')
+        time.sleep(0.1)
+        self.sendCommand("chan",1)
+        time.sleep(0.1)
+        self.sendCommand("mode",0)
+        time.sleep(0.1)
+        self.sendCommand("valve",-1)
+        time.sleep(0.1)
+        self.sendCommand("valve",-0.001)
+        time.sleep(0.1)
+        #self.s.write("load"+'\n')
         self.readStuff()
             
 
@@ -66,6 +76,10 @@ class configSender:
             self.handlePID()
             
             self.sendCommand("time",int(self.config.get("data_loop_time")))
+            time.sleep(0.1)
+            self.readStuff()
+
+            self.sendCommand("valve",0)
             time.sleep(0.1)
             self.readStuff()
             

@@ -7,7 +7,11 @@ channels:
 # Loop time for outputting data.
 #   This is not strictly enforced, but will always be within 10 ms.
 #   If set to 0ms, the loop wil run as fast as the control loop.
+<<<<<<< HEAD
 data_loop_time: 0 #[ms]
+=======
+data_loop_time: 10 #[ms]
+>>>>>>> master
 
 
 #Set the PID Values.
@@ -24,4 +28,8 @@ max_pressure: [28, 28, 28,20]
 min_pressure: -10
 
 #For debugging purposes
+<<<<<<< HEAD
 echo: true
+=======
+echo: false
+>>>>>>> master

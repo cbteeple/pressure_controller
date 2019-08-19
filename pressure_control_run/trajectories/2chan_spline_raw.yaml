@@ -15,4 +15,7 @@ wrap: true
 - [9.5, 0, 0, 0, 0]
 - [11.0, 0, 0, 0, 0]
 wrap: false
+<<<<<<< HEAD
 >>>>>>> c5b72a4... Added nice top-level button interface, added setpoint output to serial
+=======
+>>>>>>> master

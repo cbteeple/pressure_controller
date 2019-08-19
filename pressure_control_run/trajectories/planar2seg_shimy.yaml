@@ -1,7 +1,16 @@
 # Top-level settings
+<<<<<<< HEAD
 settings:
     traj_type: 'interp'  # Types include: 'waveform', 'interp'
     wrap: true
+=======
+meta:
+    shimy_base: 0.4  #seconds
+
+settings:
+    traj_type: 'interp'  # Types include: 'waveform', 'interp'
+    wrap: false
+>>>>>>> master
 
 
 # Place all of the type-specific settings in here
@@ -36,6 +45,12 @@ config:
         - [3.8,     0, 20, 0,  0]
         - [3.801,  20, 0, 0,  0]
         - [4.0,    20, 0, 0,  0]
+<<<<<<< HEAD
         - [5.0,  15, 15, 0,  0]
         - [6.0,  0, 0, 0,  0]
         - [7.0,  0, 0, 0,  0]
+=======
+        - [4.001,  15, 15, 0,  0]
+        - [8.0,  15, 15, 0,  0]
+        - [10.0,  0, 0, 0,  0]
+>>>>>>> master
