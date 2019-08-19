@@ -20,10 +20,10 @@ void i2c_PressureSensor::initialize(sensorSettings &senseSet){
      
   setCalibration(senseSet.sensorModel);
 
-  if (TWCR == 0){ // do this check so that Wire only gets initialized once
+  //if (TWCR == 0){ // do this check so that Wire only gets initialized once
     Wire.begin();
     Wire.setClock(400000L);
-  }
+  //}
 
   setMuxChannel(mux_channel);
   
@@ -40,10 +40,10 @@ void i2c_PressureSensor::initialize(sensorSettings &senseSet,int a, int b, int c
   }
   setCalibration(a,b,c,d);
 
-  if (TWCR == 0){ // do this check so that Wire only gets initialized once
+  //if (TWCR == 0){ // do this check so that Wire only gets initialized once
     Wire.begin();
     Wire.setClock(400000L);
-  }
+  //}
 }
 
 
@@ -142,10 +142,3 @@ float i2c_PressureSensor::getPressure(void){
 float i2c_PressureSensor::getPressureSmoothed(void){
   return pressureSmooth;
 }
-
-
-
-
-
-
-

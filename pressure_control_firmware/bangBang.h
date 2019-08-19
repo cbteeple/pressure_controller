@@ -23,5 +23,3 @@ class bangBang
 };
 
 #endif
-
-

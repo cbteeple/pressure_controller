@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "Arduino.h"
 
+
 #ifndef __allSettings_H__
 #define __allSettings_H__
 
@@ -30,6 +31,15 @@ class sensorSettings
 
     //Analog stuff
     int sensorPin;
+    int adc_res;
+    int adc_max_volts;
+};
+
+class valveSettings
+{
+  public:
+    int valveOffset[2] = {220, 220};
+    int valveMax[2] = {255, 255};
 };
 
 
@@ -45,15 +55,18 @@ class controlSettings
     float valveDirect;
     float pidGains [3];
     float integratorResetTime;
-    float integralStart = 3.0;
+    float integralStart = 5.0;
     float maxPressure;
     float minPressure;
+    float settime;
 };
 
 class trajectory
 {
   private:
-    const static unsigned int maxLen = 100;
+   
+    const static unsigned int maxLen = 1000;
+    const static unsigned int maxChannels = 4;
     int curr_idx = 1;
 
     float lerp(float a, float b, float f){
@@ -63,12 +76,15 @@ class trajectory
   public:
     unsigned long StartTime=0;
     unsigned long CurrTime=0;
+    unsigned long ResumeTime=0;
     
     int len = 20;
     int start_idx = 0;
     bool wrap = false;
     bool running = false;
-    float trajpts [maxLen][4];
+    bool finished = false;
+    bool reset=false;
+    float trajpts [maxLen][maxChannels];
     float trajtimes [maxLen];
     
     bool setLength(int len_in){
@@ -95,19 +111,34 @@ class trajectory
 
 
     void start(){
+      reset=false;
+      finished = false;
       running = true;
       curr_idx = start_idx+1;
       StartTime = CurrTime;
+      Serial.println("_TRAJ: Start");
     }
 
     void stop(){
-      running=false;  
+      running=false;
+      reset=true;
     }
+
+    void pause(){
+      running=false;
+      ResumeTime = CurrTime;
+    }
+
+    void resume(){
+      running=true;
+      StartTime = CurrTime-(ResumeTime-StartTime);
+    }
+    
 
     float interp(int channel){
 
       //Make sure to interpolate in the correct region
-      float deltaT = float(CurrTime-StartTime)/1000.0;
+      float deltaT = float(CurrTime-StartTime)/1000000.0;
 
       if(deltaT >= trajtimes[start_idx+len-1]){
         curr_idx = start_idx+len-1;
@@ -137,8 +168,12 @@ class trajectory
         percent
         );
 
-        if ((deltaT >= trajtimes[start_idx+len-1]) & wrap & channel==3){
-          start();
+        if (deltaT >= trajtimes[start_idx+len-1] & channel==maxChannels-1){
+          Serial.println("_TRAJ: End");
+          finished = true;
+          if (wrap ){
+            start();
+          }
         }
 
         //Serial.print("_SETPOINT: ");
@@ -155,5 +190,3 @@ class trajectory
 
 
 #endif
-
-
