@@ -19,7 +19,7 @@
 
 
 // Use raw USB communication as an HID object - Comment out for Serial communication
-#define COMMS_USB
+//#define COMMS_USB
 
 //Define the type of sensor to use (only one can be true)
 #define SENSOR_ANALOG true
@@ -47,8 +47,8 @@
 
 //Set valve pins
   //int valvePins[][2]= { {6,9}, {10,11} };
-  int valvePins[][2]= { {23,22}, {21,20}, {2,3}, {4,5}, {6,7}, {8,9}, {10,14}, {29,30} };
-  int valveOffset=229;
+  int valvePins[][2]=  {{23,22},  {21,20},  {2,3},    {4,5},     {6,7},    {8,9},    {10,14},  {29,30}  };
+  int valveOffset[][2]={{227,226},{224,224},{225,225},{225,225}, {225,225},{225,225},{225,225},{225,225}};
 
 //Set Button pins
   int buttonPins[]={26,27,28};

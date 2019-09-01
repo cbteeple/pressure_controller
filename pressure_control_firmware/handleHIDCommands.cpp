@@ -36,7 +36,7 @@ void handleHIDCommands::initialize(int num) {
 //PRIVATE FUNCTIONS
 
 //METHOD DEPRICATED
-#ifdef RawHID
+//#ifdef RawHID
 bool handleHIDCommands::getCommand() {
 
   int n = RawHID.recv(in_buffer, 1); // 0 timeout = do not wait
@@ -69,7 +69,7 @@ void handleHIDCommands::sendString(String bc_string){
 
 }
 
-#endif
+//#endif
 
 
 
