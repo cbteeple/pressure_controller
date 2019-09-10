@@ -16,8 +16,8 @@
 
 
 //Include the config file from the system you are using
-#include "config/config_pneumatic_teensy.h"
-//#include "config/config_pneumatic_teensy8.h"
+//#include "config/config_pneumatic_teensy.h"
+#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_vacuum.h"
 
 
@@ -341,28 +341,39 @@ void loop() {
 //PRINT DATA OUT FUNCTION
 #ifdef COMMS_USB
   void printData(){
+  handleCommands.sendString(generateSetpointStr());
   handleCommands.sendString(generateDataStr());
-  
 }
 
 #else
   void printData(){
-  
-   Serial.println(generateDataStr());
-  
+  Serial.println(generateSetpointStr());
+  Serial.println(generateDataStr());
 }
 #endif
 
 
-String generateDataStr(){
-String send_str = "";
+String generateSetpointStr(){
+  String send_str = "";
   send_str+=String(currentTime);
+  send_str+=('\t');
+  send_str+="0";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
     send_str+=('\t'); 
     send_str+=String(setpoint_local[i],3);
+  }
+  return send_str;
+}
+
+
+String generateDataStr(){
+  String send_str = "";
+  send_str+=String(currentTime);
+  send_str+=('\t');
+  send_str+="1";
+  for (int i=0; i<MAX_NUM_CHANNELS; i++){
     send_str+=('\t'); 
-    send_str+=String(pressures[i],3);
-    
+    send_str+=String(pressures[i],3);  
   }
   return send_str;
 }
