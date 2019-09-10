@@ -17,7 +17,8 @@
 
 //Include the config file from the system you are using
 //#include "config/config_pneumatic_teensy.h"
-#include "config/config_pneumatic_teensy8.h"
+//#include "config/config_pneumatic_teensy8.h"
+#include "config/config_pneumatic_teensy7.h"
 //#include "config/config_vacuum.h"
 
 
