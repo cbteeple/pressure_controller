@@ -28,7 +28,7 @@
 #define ADC_MAX_VOLTS 3.3
 
 #define SENSOR_MODEL 3
-#define MAX_NUM_CHANNELS 8
+#define MAX_NUM_CHANNELS 7
 
 //Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
