@@ -1,0 +1,22 @@
+# Top-level settings
+settings:
+    traj_type: 'interp'  # Types include: 'waveform', 'interp'
+    wrap: false
+
+
+# Place all of the type-specific settings in here
+config:
+    subsample_num: 90 #Total number of subsamples
+    
+    num_cycles: 3 
+
+
+    interp_type: none   # can be: 'linear', 'cubic'
+    setpoints: # Setpoints are only used if you are doing an interpolation
+        # [time, finger1, finger2, n/c, n/c]
+        - [0.0,   0, 0, 0,  0]
+        - [1.0,    -20, 0, 0,  0]
+        - [2.0,   0, -20, 0,  0]
+        - [3.0,     0, 0, -20, 0]
+        - [4.0,     0, 0, 0, -20]
+        - [5.0,     0, 0, 0, 0]

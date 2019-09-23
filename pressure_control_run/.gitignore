@@ -1,7 +1,7 @@
 /data/*
 
-/trajectories/*
-/trajectories/*/
-!/trajectories/example/
+/traj_setup/*
+/traj_setup/*/
+!/traj_setup/example/
 
 *.traj

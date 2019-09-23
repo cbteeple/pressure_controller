@@ -11,7 +11,8 @@ import os
 import matplotlib.pyplot as plt
 import numbers
 
-trajFolder = "trajectories"
+traj_folder = "traj_setup"
+out_folder  = "traj_built"
 
 
 
@@ -19,14 +20,15 @@ trajFolder = "trajectories"
 class trajBuilder:
     def __init__(self, filename, folder):
         self.filename = filename
-        self.trajFolder = folder
+        self.traj_folder = folder
+        self.out_folder = out_folder
         self.getSettings()
 
 
 
     def getSettings(self):
         # Read in the setpoint file
-        inFile=os.path.join(self.trajFolder,self.filename+".yaml")
+        inFile=os.path.join(self.traj_folder,self.filename+".yaml")
         with open(inFile) as f:
             # use safe_load instead of load
             inStuff = yaml.safe_load(f)
@@ -45,7 +47,7 @@ class trajBuilder:
         outDict['setpoints']= outTraj
         outDict['wrap']= self.settings.get("wrap")
 
-        outFile=os.path.join(self.trajFolder,self.filename+"_raw.yaml")
+        outFile=os.path.join(self.out_folder,self.filename+".traj")
         with open(outFile, 'w') as f:
             yaml.dump(outDict, f, default_flow_style=None)
 
@@ -289,7 +291,7 @@ class trajBuilder:
 if __name__ == '__main__':
     if len(sys.argv)==2:
 
-        build = trajBuilder(sys.argv[1], trajFolder)
+        build = trajBuilder(sys.argv[1], traj_folder)
         build.go()
 
     else:

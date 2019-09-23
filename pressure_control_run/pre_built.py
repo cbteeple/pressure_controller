@@ -10,7 +10,7 @@ from pynput.keyboard import Key, Listener
 speedFactor=1.0
 dataBack=True
 saveData = True
-trajFolder = "trajectories"
+traj_folder = "traj_built"
 
 restartFlag = False
 
@@ -26,7 +26,7 @@ def serialRead(ser):
 class PressureController:
     def __init__(self, devname,baudrate):
         self.s = serial.Serial(devname,baudrate)
-        self.trajFolder  = trajFolder
+        self.traj_folder  = traj_folder
         self.speedFactor = speedFactor
         self.saveData = saveData
 
@@ -44,7 +44,7 @@ class PressureController:
     # Read in the trajectory and store it in a list of arrays
     def getTraj(self,filename):
         # Read in the setpoint file
-        inFile=os.path.join(trajFolder,filename+"_raw.yaml")
+        inFile=os.path.join(traj_folder,filename+".traj")
         with open(inFile,'r') as f:
             # use safe_load instead of load
             trajIn = yaml.safe_load(f)
@@ -69,7 +69,7 @@ class PressureController:
         self.out_file = open("%s_%s.txt" % (outFile,i), "w+")
 
 
-        #inFile=os.path.join(trajFolder,filename+".traj")
+        #inFile=os.path.join(traj_folder,filename+".traj")
         #with open(inFile,'r') as f:
         #    lines = f.readlines()
         #    f.close()
