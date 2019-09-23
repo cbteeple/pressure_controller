@@ -9,6 +9,7 @@ import scipy.signal as signal
 import sys
 import os
 import matplotlib.pyplot as plt
+import numbers
 
 trajFolder = "trajectories"
 
@@ -64,10 +65,26 @@ class trajBuilder:
 
 
     def doWaveform(self):
-        freq = float(self.config.get("waveform_freq"))
+        freq_in = self.config.get("waveform_freq")
+
+        # Convert the frequency to floats
+        if isinstance(freq_in, numbers.Number):
+            freq = float(freq_in)
+        elif isinstance(freq_in, list):
+            freq = []
+            for item in freq_in:
+                freq.append(float(item))
+
+
         press_max = np.array(self.config.get("waveform_max"))
         press_min = np.array(self.config.get("waveform_min"))
         waveform_type = self.config.get("waveform_type")
+
+
+        traj_setpoints = self.config.get("setpoints",None)
+        prefix = traj_setpoints.get("prefix",None)
+        suffix = traj_setpoints.get("suffix",None)
+
 
         channels =  self.config.get("channels")
         num_cycles = float(self.config.get("num_cycles"))
@@ -77,9 +94,28 @@ class trajBuilder:
 
         # Make the waveform
         traj = []
-        if waveform_type == "square":
+        if waveform_type == "square-sampled":
             time_samp = np.linspace(0,num_cycles/freq, self.subsample_num+1 )
             traj = signal.square(2.0*np.pi * freq*time_samp)
+
+        elif waveform_type == "square":
+            time_samp_0 = np.linspace(0, num_cycles/freq, num_cycles +1)
+
+            time_samp_1 = np.linspace(1/freq -0.51/freq, num_cycles/freq - 0.51/freq, num_cycles )
+            time_samp = np.append(time_samp_0, time_samp_1)
+
+            time_samp_2 = np.linspace(1/freq -0.50/freq ,num_cycles/freq - 0.50/freq, num_cycles)
+            time_samp = np.append(time_samp, time_samp_2)
+
+            time_samp_3 = np.linspace(1/freq -0.01/freq ,num_cycles/freq - 0.01/freq, num_cycles)
+            time_samp = np.append(time_samp, time_samp_3)
+
+            time_samp = np.sort(time_samp)
+
+            traj = np.array([-1,-1,1,1])
+            traj = np.tile(traj,int(num_cycles))
+            traj = np.append(traj, traj[0])
+
 
         elif waveform_type == "sin":
             time_samp = np.linspace(0,num_cycles/freq, self.subsample_num+1 )
@@ -126,10 +162,25 @@ class trajBuilder:
         out_traj  = np.matmul(np.asmatrix(traj).T,np.asmatrix(press_amp))
         press_off_all=np.tile(press_off,(len(traj),1))
         out_traj = press_off_all +out_traj
+
+
         out_traj_whole = np.append(out_times,out_traj,axis=1)
 
-        
-        plt.plot(time_samp,out_traj)
+
+        if prefix is not None:
+            prefix = np.asarray(prefix)
+            # Update the times
+            out_traj_whole[:,0] = out_traj_whole[:,0] + prefix[-1,0]
+
+            # Append to the array
+            out_traj_whole = np.append(prefix,out_traj_whole,axis=0);
+
+        if suffix is not None:
+            suffix = np.asarray(suffix)        
+            suffix[:,0] = suffix[:,0] + out_traj_whole[-1,0]
+            out_traj_whole = np.append(out_traj_whole,suffix,axis=0);
+
+        plt.plot(out_traj_whole[:,0],out_traj_whole[:,1:])
         plt.show()
 
         self.saveOut(out_traj_whole.tolist())
@@ -157,6 +208,9 @@ class trajBuilder:
             # Add the last entry to finish out the trajectory
             allOut.append(traj_setpoints[-1])
 
+
+        
+
         elif interp_type == "cubic":
             traj_setpoints = np.array(traj_setpoints)
             times=traj_setpoints[:,0]
@@ -179,6 +233,13 @@ class trajBuilder:
 
         else:
             allOut = traj_setpoints
+
+            traj_setpoints_graph = np.array(traj_setpoints)
+            times=traj_setpoints_graph[:,0]
+            pres=traj_setpoints_graph[:,1:]
+
+            plt.plot(times,pres)
+            plt.show()
 
 
         
