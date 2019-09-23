@@ -35,12 +35,13 @@ class PressureController:
 
         time.sleep(1)
 
-        self.s.write("echo;0"+'\n')
+        self.s.write("echo;1"+'\n')
         self.s.write("load"+'\n')
         #self.s.write("load"+'\n')
         self.s.write("set;0"+'\n')
         self.s.write("trajwrap;%d"%(wrap)+'\n')
         self.s.write("mode;2"+'\n')
+        self.s.write("echo;0"+'\n')
         #s.write('on')
 
         time.sleep(0.5)
