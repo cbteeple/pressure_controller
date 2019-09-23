@@ -48,6 +48,11 @@ class trajBuilder:
         outDict['wrap']= self.settings.get("wrap")
 
         outFile=os.path.join(self.out_folder,self.filename+".traj")
+
+        dirname = os.path.dirname(outFile)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        
         with open(outFile, 'w') as f:
             yaml.dump(outDict, f, default_flow_style=None)
 
