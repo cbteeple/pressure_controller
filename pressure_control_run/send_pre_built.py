@@ -23,7 +23,7 @@ def serialRead(ser):
 
 
 
-class PressureController:
+class TrajSend:
     def __init__(self, devname,baudrate):
         self.s = serial.Serial(devname,baudrate)
         self.traj_folder  = traj_folder
@@ -60,21 +60,6 @@ class PressureController:
         
 
 
-    def createOutFile(self,filename):
-        outFile=os.path.join('data',filename)
-        i = 0
-        while os.path.exists("%s_%s.txt" % (outFile,i) ):
-            i += 1
-
-        self.out_file = open("%s_%s.txt" % (outFile,i), "w+")
-
-
-        #inFile=os.path.join(traj_folder,filename+".traj")
-        #with open(inFile,'r') as f:
-        #    lines = f.readlines()
-        #    f.close()
-        #
-        #    self.traj = [[float(x) for x in line.split('\t')] for line in lines]
 
     def sendTraj(self):
         lastTime = 0.0
@@ -99,15 +84,9 @@ class PressureController:
             #time.sleep(entry[0]-lastTime)
             #lastTime=entry[0]
             
-    def startTraj(self):
-        self.s.write("trajstart"+'\n')
-        if dataBack:
-            self.s.write("on\n")
 
     def shutdown(self):
-        self.s.write("off\n")
-        self.s.write("trajstop"+'\n')
-        self.s.write("mode;1"+'\n')
+        self.s.write("mode;3"+'\n')
         self.s.write("set;0"+'\n')
         self.s.close()
 
@@ -122,39 +101,7 @@ class PressureController:
                 self.saveStuff(line)
 
 
-    def saveStuff(self, line):
-        self.out_file.write(line+'\n')
     
-
-
-
-
-
-
-def on_press(key):
-    try:
-        print('alphanumeric key {0} pressed'.format(
-            key.char))
-    except AttributeError:
-        print('special key {0} pressed'.format(
-            key))
-    pass
-
-
-def on_release(key):
-    global restartFlag
-    if key == Key.space:
-        print('Restart Trajectory')
-        restartFlag =True
-        print('{0} released'.format( key))
-        print('_RESTART')
-        restartFlag =True
-
-
-listener = Listener(
-    on_press=on_press,
-    on_release=on_release)
-listener.start()
 
 
 
@@ -172,14 +119,14 @@ if __name__ == '__main__':
         
         try:
             # Get the serial object to use
-            inFile=os.path.join("config","serial_config.yaml")
+            inFile=os.path.join("config","comms","serial_config.yaml")
             with open(inFile) as f:
                 # use safe_load instead of load
                 serial_set = yaml.safe_load(f)
                 f.close()
 
             # Create a pressure controller object
-            pres=PressureController(serial_set.get("devname"), serial_set.get("baudrate"))
+            pres=TrajSend(serial_set.get("devname"), serial_set.get("baudrate"))
             pres.getTraj(sys.argv[1])
 
 
@@ -189,16 +136,10 @@ if __name__ == '__main__':
             pres.sendTraj()
             
             pres.readStuff()
-            pres.startTraj()
-            #pres.readStuff()
-            while True:
-                pres.readStuff()
-                if restartFlag is True:
-                    pres.startTraj()
-                    restartFlag = False
+            pres.shutdown()
+            
                 
         except KeyboardInterrupt:
-            listener.stop()
             pres.shutdown()
             
     else:

@@ -140,7 +140,7 @@ class configSender:
 
 
 def get_serial_path():
-    inFile=os.path.join("config","serial_config.yaml")
+    inFile=os.path.join("config","comms","serial_config.yaml")
     with open(inFile) as f:
         # use safe_load instead of load
         serial_set = yaml.safe_load(f)
