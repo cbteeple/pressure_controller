@@ -469,7 +469,7 @@ bool handleSerialCommands::processCommand(globalSettings (&settings), controlSet
 
 
 
-else if (command.startsWith("TRAJWRAP")) {
+ else if (command.startsWith("TRAJWRAP")) {
     if (getStringValue(command, ';', 1).length()) {
       traj.wrap = bool(getStringValue(command, ';', 1).toInt());
     }
