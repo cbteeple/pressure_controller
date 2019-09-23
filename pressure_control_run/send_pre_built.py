@@ -11,6 +11,7 @@ speedFactor=1.0
 dataBack=True
 saveData = True
 traj_folder = "traj_built"
+curr_flag_file = os.path.join("traj_built","last_sent.txt")
 
 restartFlag = False
 
@@ -43,6 +44,7 @@ class TrajSend:
 
     # Read in the trajectory and store it in a list of arrays
     def getTraj(self,filename):
+        self.filename = filename
         # Read in the setpoint file
         inFile=os.path.join(traj_folder,filename+".traj")
         with open(inFile,'r') as f:
@@ -90,6 +92,9 @@ class TrajSend:
         self.s.write("set;0"+'\n')
         self.s.close()
 
+
+        self.out_file = open(curr_flag_file, "w+")
+        self.out_file.write(self.filename)
         self.out_file.close()
         
     

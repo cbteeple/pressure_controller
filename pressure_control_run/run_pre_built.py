@@ -2,6 +2,7 @@
 
 import serial
 import time
+from datetime import datetime
 import sys
 import os
 import yaml
@@ -11,6 +12,8 @@ speedFactor=1.0
 dataBack=True
 saveData = True
 traj_folder = "traj_built"
+curr_flag_file = os.path.join("traj_built","last_sent.txt")
+
 
 restartFlag = False
 
@@ -41,12 +44,19 @@ class PressureController:
 
         time.sleep(0.5)
 
-        self.createOutFile(filename)
+
+        with open(curr_flag_file,'r') as f:
+            # use safe_load instead of load
+            outfile = f.read()
+            f.close()
+
+        self.createOutFile(outfile)
       
         
 
 
     def createOutFile(self,filename):
+        filename = filename.replace(".traj",".txt")
         outFile=os.path.join('data',filename)
         i = 0
         while os.path.exists("%s_%s.txt" % (outFile,i) ):
