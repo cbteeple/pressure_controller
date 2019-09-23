@@ -72,7 +72,7 @@ class PressureController:
         time.sleep(0.1)
         self.readStuff()
 
-        self.sendCommand("set",0)
+        self.sendCommand("set",0,0)
         time.sleep(0.1)
         self.readStuff()
 
@@ -95,14 +95,14 @@ class PressureController:
 
 
     def setPressure(self, press):
-        self.sendCommand('set', press)
+        self.sendCommand('set', press.insert(0.5,0))
 
 
     def startPressMode(self):
         self.sendCommand("mode",1)
 
     def shutdown(self):
-        self.s.write("set;0"+'\n')
+        self.s.write("set;0;0"+'\n')
         self.s.close()
         
     

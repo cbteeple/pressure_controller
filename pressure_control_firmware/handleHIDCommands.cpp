@@ -509,6 +509,18 @@ bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettin
     }
   }
 
+
+
+    else if (command.startsWith("TRAJWRAP")) {
+    if (getStringValue(command, ';', 1).length()) {
+      traj.wrap = bool(getStringValue(command, ';', 1).toInt());
+    }
+    if (broadcast) {
+      bc_string += ("TRAJWRAP: ");
+      bc_string += String(traj.wrap);
+    }
+  }
+
   //[index];[time];[set0];[set1];[set2];[set3]
   else if (command.startsWith("TRAJSET")) {
     if (getStringValue(command, ';', numSensors + 2).length()) {

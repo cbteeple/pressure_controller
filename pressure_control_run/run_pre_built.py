@@ -27,7 +27,7 @@ def serialRead(ser):
 
 
 class PressureController:
-    def __init__(self, devname,baudrate):
+    def __init__(self, devname,baudrate,wrap):
         self.s = serial.Serial(devname,baudrate)
         self.traj_folder  = traj_folder
         self.speedFactor = speedFactor
@@ -39,6 +39,7 @@ class PressureController:
         self.s.write("load"+'\n')
         #self.s.write("load"+'\n')
         self.s.write("set;0"+'\n')
+        self.s.write("trajwrap;%d"%(wrap)+'\n')
         self.s.write("mode;2"+'\n')
         #s.write('on')
 
@@ -137,12 +138,12 @@ listener.start()
 
 
 if __name__ == '__main__':
-    if 2<= len(sys.argv)<=3:
+    if 1<= len(sys.argv)<=2:
 
-        if len(sys.argv)==3:
-            speedFact = 1.0/float(sys.argv[2])
+        if len(sys.argv)==2:
+            wrap = bool(sys.argv[1])
         else:
-            speedFact= 1.0
+            wrap = False
         
         try:
 
@@ -156,7 +157,7 @@ if __name__ == '__main__':
                 f.close()
 
             # Create a pressure controller object
-            pres=PressureController(serial_set.get("devname"), serial_set.get("baudrate"))
+            pres=PressureController(serial_set.get("devname"), serial_set.get("baudrate"), wrap)
 
             
             pres.startTraj()
