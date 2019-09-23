@@ -4,4 +4,6 @@
 /traj_setup/*/
 !/traj_setup/example/
 
-*.traj
+/traj_built/*
+/traj_built/*/
+!/traj_built/example/
