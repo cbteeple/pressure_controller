@@ -3,3 +3,5 @@
 /trajectories/*
 /trajectories/*/
 !/trajectories/example/
+
+*.traj
