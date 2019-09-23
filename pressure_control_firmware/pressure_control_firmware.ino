@@ -18,8 +18,8 @@
 //Include the config file from the system you are using
 //#include "config/config_pneumatic_teensy.h"
 //#include "config/config_pneumatic_teensy8.h"
-#include "config/config_pneumatic_teensy7.h"
-//#include "config/config_vacuum.h"
+//#include "config/config_pneumatic_teensy7.h"
+#include "config/config_vacuum.h"
 
 
 
@@ -30,7 +30,7 @@ sensorSettings senseSettings[MAX_NUM_CHANNELS];
 valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
 
 //Create an object to handle serial commands
-#ifdef COMMS_USB
+#ifdef USB_RAWHID
   #include "handleHIDCommands.h"
   handleHIDCommands handleCommands;
   #define VENDOR_ID               0x16C0
@@ -39,7 +39,7 @@ valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
   #define RAWHID_USAGE            0x0200  // recommended: 0x0100 to 0xFFFF
 
 #endif
-#ifndef COMMS_USB
+#ifndef USB_RAWHID
   #include "handleSerialCommands.h"
   handleSerialCommands handleCommands;
 #endif
@@ -340,7 +340,7 @@ void loop() {
 
 
 //PRINT DATA OUT FUNCTION
-#ifdef COMMS_USB
+#ifdef USB_RAWHID
   void printData(){
   handleCommands.sendString(generateSetpointStr());
   handleCommands.sendString(generateDataStr());
