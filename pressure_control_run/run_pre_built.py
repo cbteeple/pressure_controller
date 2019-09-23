@@ -56,8 +56,13 @@ class PressureController:
 
 
     def createOutFile(self,filename):
-        filename = filename.replace(".traj",".txt")
         outFile=os.path.join('data',filename)
+
+        dirname = os.path.dirname(outFile)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
+        
         i = 0
         while os.path.exists("%s_%s.txt" % (outFile,i) ):
             i += 1
@@ -140,6 +145,15 @@ if __name__ == '__main__':
             speedFact= 1.0
         
         try:
+
+
+
+            # Get the serial object to use
+            inFile=os.path.join("config","comms","serial_config.yaml")
+            with open(inFile) as f:
+                # use safe_load instead of load
+                serial_set = yaml.safe_load(f)
+                f.close()
 
             # Create a pressure controller object
             pres=PressureController(serial_set.get("devname"), serial_set.get("baudrate"))

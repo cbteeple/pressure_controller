@@ -153,6 +153,8 @@ def get_serial_path():
 if __name__ == '__main__':
     if len(sys.argv)==2:
         serial_set = get_serial_path()
+        
+        print(serial_set)
 
         # Create a config object
         pres=configSender(serial_set.get("devname"), serial_set.get("baudrate"))
@@ -167,6 +169,8 @@ if __name__ == '__main__':
         pres.shutdown()
     elif len(sys.argv)==1:
         serial_set = get_serial_path()
+
+        print(serial_set)
         
         # Create a config object
         pres=configSender(serial_set.get("devname"), serial_set.get("baudrate"))

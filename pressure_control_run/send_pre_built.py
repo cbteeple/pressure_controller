@@ -8,8 +8,6 @@ import yaml
 from pynput.keyboard import Key, Listener
 
 speedFactor=1.0
-dataBack=True
-saveData = True
 traj_folder = "traj_built"
 curr_flag_file = os.path.join("traj_built","last_sent.txt")
 
@@ -29,7 +27,6 @@ class TrajSend:
         self.s = serial.Serial(devname,baudrate)
         self.traj_folder  = traj_folder
         self.speedFactor = speedFactor
-        self.saveData = saveData
 
         time.sleep(1)
 
@@ -56,9 +53,7 @@ class TrajSend:
         # Get data from the file
         #self.settings = trajIn.get("settings")
         self.traj = trajIn.get("setpoints")
-        self.wrap = trajIn.get("wrap")
-
-        self.createOutFile(filename)
+        self.wrap = trajIn.get("wrap",False)
         
 
 
@@ -93,6 +88,10 @@ class TrajSend:
         self.s.close()
 
 
+        dirname = os.path.dirname(curr_flag_file)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
         self.out_file = open(curr_flag_file, "w+")
         self.out_file.write(self.filename)
         self.out_file.close()
@@ -102,8 +101,6 @@ class TrajSend:
         if self.s.in_waiting:  # Or: while ser.inWaiting():
             line = self.s.readline().strip()
             print(line)
-            if self.saveData:
-                self.saveStuff(line)
 
 
     
