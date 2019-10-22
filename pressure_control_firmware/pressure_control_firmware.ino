@@ -18,7 +18,8 @@
 //#include "config/config_pneumatic_teensy.h"
 //#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_pneumatic_teensy7.h"
-#include "config/config_vacuum.h"
+//#include "config/config_vacuum.h"
+#include "config/config_hydraulic.h"
 
 //DON'T FORGET TO CHANGE THE NUMBER OF CHANNELS IN THE TRAJ PART OF ALLSETTINGS.H
 //   This is due to poor programming on my part, and I can't find a way around this without major structural reform
@@ -103,11 +104,11 @@ unsigned long currentTime=0;
 //______________________________________________________________________
 void setup() {
   //Start serial
-    Serial.begin(2000000);
+    Serial.begin(115200);
     //Serial.flush();
     Serial.setTimeout(2);
 
-    analogReadResolution(ADC_RES);
+   int adc_res = setADCRes(ADC_RES);
 
 
   //Buttons:
@@ -155,7 +156,7 @@ void setup() {
 
       if(SENSOR_ANALOG){
         senseSettings[i].sensorPin=senseChannels[i];
-        senseSettings[i].adc_res=ADC_RES;
+        senseSettings[i].adc_res=adc_res;
         senseSettings[i].adc_max_volts=ADC_MAX_VOLTS;
       }
       else if(SENSOR_I2C){
@@ -468,4 +469,21 @@ void ventUntilReset(){
     ctrlSettings[i].valveDirect = -1.0;
     valves[i].go( ctrlSettings[i].valveDirect );
   }
-  }
+}
+
+
+
+#ifdef TEENSYDUINO
+int setADCRes(int adc_res){
+  analogReadResolution(adc_res);
+  return adc_res;
+}
+
+#else
+int setADCRes(int adc_res){
+  // Set back to the default
+  adc_res = 10;
+  return adc_res;
+}
+
+#endif

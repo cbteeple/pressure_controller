@@ -89,6 +89,9 @@ void analog_PressureSensor::getData(void){
   else if (sensorType==4){
     pressure = ( float(pressure_volts-output_offset) * float(pressure_max-pressure_min) / float(output_max-output_min) ) + pressure_min;
   }
+  else if (sensorType==99){
+    pressure = pressure_volts;
+  }
   
 
   if (!firstCall){
