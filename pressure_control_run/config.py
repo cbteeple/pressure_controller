@@ -83,7 +83,7 @@ class configSender:
             time.sleep(0.1)
             self.readStuff()
             
-            self.sendCommand("mode",1)
+            self.sendCommand("mode",3)
             time.sleep(0.1)
             self.readStuff()
             

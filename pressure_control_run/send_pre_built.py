@@ -5,13 +5,13 @@ import time
 import sys
 import os
 import yaml
-from pynput.keyboard import Key, Listener
 
 speedFactor=1.0
 traj_folder = "traj_built"
 curr_flag_file = os.path.join("traj_built","last_sent.txt")
 
 restartFlag = False
+board_teensy= False
 
 # Read in data from the pressure controller (this seems not to work yet)
 def serialRead(ser):
@@ -27,17 +27,22 @@ class TrajSend:
         self.s = serial.Serial(devname,baudrate)
         self.traj_folder  = traj_folder
         self.speedFactor = speedFactor
+        self.send_wait = 0.05;
+        self.board_teensy= board_teensy
 
-        time.sleep(1)
+        time.sleep(2.0)
 
-        self.s.write("echo;0"+'\n')
-        self.s.write("load"+'\n')
+        self.s.write("echo;1"+'\n')
         #self.s.write("load"+'\n')
-        self.s.write("set;0"+'\n')
-        self.s.write("mode;2"+'\n')
+        self.s.write("set;0;0"+'\n')
+        self.s.write("mode;3"+'\n')
         #s.write('on')
 
+        
         time.sleep(0.5)
+        for i in range(50):
+            self.readStuff()
+            time.sleep(0.05)
 
     # Read in the trajectory and store it in a list of arrays
     def getTraj(self,filename):
@@ -63,19 +68,25 @@ class TrajSend:
         configstring = "trajconfig;%d;%d;%d" %(0,len(self.traj),self.wrap)
         print(configstring)
         self.s.write(configstring+'\n')
+        for i in range(3):
+            self.readStuff()
+            time.sleep(0.05)
+        num_channels=len(self.traj[0])
         for idx, entry in enumerate(self.traj):
             # Send a string to the pressure controller
-            string="trajset;%d;%0.3f;%0.3f;%0.3f;%0.3f;%0.3f" %(
-                idx,
-                self.speedFactor*entry[0],
-                entry[1],
-                entry[2],
-                entry[3],
-                entry[4])
+            string="trajset;%d;%0.3f"%(idx, self.speedFactor*entry[0]);
+            for i in range(num_channels-1):
+                string+=";%0.3f" %(entry[i+1])
             print(string)
             self.s.write(string+'\n')
             
             time.sleep(0.05)
+            
+            if not self.board_teensy:
+                time.sleep(0.5)
+                for i in range(3):
+                    self.readStuff()
+                    time.sleep(self.send_wait)
 
             # Sleep for a short time before the next send action
             #time.sleep(entry[0]-lastTime)
@@ -84,7 +95,7 @@ class TrajSend:
 
     def shutdown(self):
         self.s.write("mode;3"+'\n')
-        self.s.write("set;0"+'\n')
+        self.s.write("set;0;0"+'\n')
         self.s.close()
 
 
@@ -137,7 +148,8 @@ if __name__ == '__main__':
             # Upload the trajectory and start it
             pres.sendTraj()
             
-            pres.readStuff()
+            for i in range(50):
+                pres.readStuff()
             pres.shutdown()
             
                 
