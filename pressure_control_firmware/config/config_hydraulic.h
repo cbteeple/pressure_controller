@@ -1,4 +1,4 @@
-
+#include "Arduino.h"
 //CONFIG FOR PNEUMATIC PRESSURE SYSTEM
 
 
@@ -24,6 +24,7 @@
 #define SENSOR_ANALOG true
 #define SENSOR_I2C false
 #define ADC_RES 10
+#define ADC_MAX_VOLTS 5.0
 
 #define SENSOR_MODEL 1
 #define MAX_NUM_CHANNELS 6
@@ -45,7 +46,7 @@
 //Set valve pins
   //int valvePins[][2]= { {6,9}, {10,11} };
   int valvePins[][2]= { {4,5}, {6,7}, {8,9}, {10,11}, {12,13}, {44,45} };
-  int valveOffset=205;
+  int valveOffset[][2]={{205,205},{205,205},{205,205},{205,205}};
 
 //Set Button pins
   int buttonPins[]={2,18,19};
