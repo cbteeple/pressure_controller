@@ -27,7 +27,7 @@
 #define ADC_MAX_VOLTS 5.0
 
 #define SENSOR_MODEL 1
-#define MAX_NUM_CHANNELS 6
+#define MAX_NUM_CHANNELS 3
 
 //Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
@@ -41,12 +41,14 @@
   int muxAddr=0x70;
 
 //Set sensor pins
-  int senseChannels[]={A0,A1,A2,A3,A4,A5,A6,A7,A8};
+  //int senseChannels[]={A0,A1,A2,A3,A4,A5,A6,A7,A8};
+  int senseChannels[]={A1,A2,A3};
 
 //Set valve pins
   //int valvePins[][2]= { {6,9}, {10,11} };
-  int valvePins[][2]= { {4,5}, {6,7}, {8,9}, {10,11}, {12,13}, {44,45} };
-  int valveOffset[][2]={{205,205},{205,205},{205,205},{205,205}};
+  //int valvePins[][2]= { {4,5}, {6,7}, {8,9}, {10,11}, {12,13}, {44,45} };
+  int valvePins[][2]= { {6,7}, {8,9}, {10,11}};
+  int valveOffset[][2]={{205,205},{205,205},{205,205}};
 
 //Set Button pins
   int buttonPins[]={2,18,19};
