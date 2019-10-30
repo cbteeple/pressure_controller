@@ -317,6 +317,7 @@ void loop() {
         
       }
       else{
+        valves[i].go(0);
         //pressures[i]=0;
       }
     }
