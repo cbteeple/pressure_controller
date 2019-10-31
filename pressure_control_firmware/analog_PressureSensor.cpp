@@ -14,14 +14,18 @@ void analog_PressureSensor::initialize(sensorSettings &senseSet){
   adc_max_counts = pow(2.0,senseSet.adc_res);
   adc_max_volts = senseSet.adc_max_volts;
 
-  setCalibration(sensorType);
+  setCalibration(senseSet.output_max*senseSet.adc_mult,
+                 senseSet.output_min*senseSet.adc_mult, 
+                 senseSet.output_offset*senseSet.adc_mult,
+                 senseSet.pressure_max,
+                 senseSet.pressure_min);
 }
 
 
 
-void analog_PressureSensor::initialize(sensorSettings &senseSet,int a, int b, int c, int d){
+void analog_PressureSensor::initialize(sensorSettings &senseSet,float a, float b, float c, float d, float e){
   sensePin=senseSet.sensorPin; 
-  setCalibration(a,b,c,d);
+  setCalibration(a,b,c,d,e);
 }
 
 
@@ -61,11 +65,12 @@ void analog_PressureSensor::setCalibration(int sensorType_in){
 }
 
 
-void analog_PressureSensor::setCalibration(int a, int b, int c, int d){
+void analog_PressureSensor::setCalibration(float a, float b, float c, float d, float e){
   output_max = a;
   output_min = b;
-  pressure_max = c;
-  pressure_min = d;
+  output_offset = c;
+  pressure_max = d;
+  pressure_min = e;
 }
 
 
@@ -80,7 +85,7 @@ void analog_PressureSensor::getData(void){
   pressureLast=pressure;
 
                     
-  float pressure_volts = float(analogRead(sensePin))*adc_max_volts/adc_max_counts;
+  float pressure_volts = float(analogRead(sensePin))*adc_max_volts/float(adc_max_counts);
 
   //Choose the correct calibration curve
   if (sensorType<4){

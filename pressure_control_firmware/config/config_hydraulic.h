@@ -23,10 +23,12 @@
 //Define the type of sensor to use (only one can be true)
 #define SENSOR_ANALOG true
 #define SENSOR_I2C false
+#include "sensors/SSCDANN060PGAA5.h"
+
 #define ADC_RES 10
 #define ADC_MAX_VOLTS 5.0
+float   ADC_MULT = 1.0;
 
-#define SENSOR_MODEL 1
 #define MAX_NUM_CHANNELS 3
 
 //Define the type of controller to use (only one can be true)

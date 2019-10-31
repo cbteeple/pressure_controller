@@ -18,8 +18,8 @@
 //#include "config/config_pneumatic_teensy.h"
 //#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_pneumatic_teensy7.h"
-//#include "config/config_vacuum.h"
-#include "config/config_hydraulic.h"
+#include "config/config_vacuum.h"
+//#include "config/config_hydraulic.h"
 
 //DON'T FORGET TO CHANGE THE NUMBER OF CHANNELS IN THE TRAJ PART OF ALLSETTINGS.H
 //   This is due to poor programming on my part, and I can't find a way around this without major structural reform
@@ -158,6 +158,13 @@ void setup() {
         senseSettings[i].sensorPin=senseChannels[i];
         senseSettings[i].adc_res=adc_res;
         senseSettings[i].adc_max_volts=ADC_MAX_VOLTS;
+        senseSettings[i].adc_mult = ADC_MULT;
+        senseSettings[i].output_min=sensor_output_min;
+        senseSettings[i].output_max=sensor_output_max;
+        senseSettings[i].output_offset=sensor_output_offset;
+        senseSettings[i].pressure_min=sensor_pressure_min;
+        senseSettings[i].pressure_max=sensor_pressure_max;
+
       }
       else if(SENSOR_I2C){
         senseSettings[i].sensorAddr= sensorAddr;
@@ -211,8 +218,22 @@ bool traj_reset = traj.reset;
 
 unsigned long curr_time=0;
 
+bool firstcall = true;
+
 //______________________________________________________________________
 void loop() {
+  if (firstcall){
+        Serial.println(senseSettings[0].sensorModel);
+        Serial.println(senseSettings[0].adc_res);
+        Serial.println(senseSettings[0].adc_max_volts);
+        Serial.println(senseSettings[0].adc_mult);
+        Serial.println(senseSettings[0].output_min*senseSettings[0].adc_mult);
+        Serial.println(senseSettings[0].output_max*senseSettings[0].adc_mult);
+        Serial.println(senseSettings[0].output_offset*senseSettings[0].adc_mult);
+        Serial.println(senseSettings[0].pressure_min);
+        Serial.println(senseSettings[0].pressure_max);
+        firstcall=false;   
+  }
   //Serial.println("_words need to be here (for some reason)");
   //Handle serial commands
 

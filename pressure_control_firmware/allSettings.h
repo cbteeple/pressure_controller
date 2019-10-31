@@ -32,7 +32,16 @@ class sensorSettings
     //Analog stuff
     int sensorPin;
     int adc_res;
-    int adc_max_volts;
+    float adc_max_volts;
+    float adc_mult;
+
+    float output_min;
+    float output_max;
+    float output_offset;
+    
+    float pressure_min; //PSI
+    float pressure_max; //PSI
+    
 };
 
 class valveSettings

@@ -32,8 +32,8 @@ class analog_PressureSensor
   public:
     analog_PressureSensor(){};
     void initialize(sensorSettings &);
-    void initialize(sensorSettings &,int,int,int,int);
-    void setCalibration(int, int, int, int);
+    void initialize(sensorSettings &,float,float,float,float, float);
+    void setCalibration(float, float, float, float, float);
     void setSmoothing(float);
     void getData(void);
     float getPressure(void);
