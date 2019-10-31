@@ -1,0 +1,92 @@
+warning: LF will be replaced by CRLF in pressure_control_firmware/allSettings.h.
+The file will have its original line endings in your working directory.
+warning: LF will be replaced by CRLF in pressure_control_firmware/analog_PressureSensor.cpp.
+The file will have its original line endings in your working directory.
+warning: LF will be replaced by CRLF in pressure_control_firmware/analog_PressureSensor.h.
+The file will have its original line endings in your working directory.
+warning: LF will be replaced by CRLF in pressure_control_firmware/pressure_control_firmware.ino.
+The file will have its original line endings in your working directory.
+[1mdiff --git a/pressure_control_firmware/analog_PressureSensor.cpp b/pressure_control_firmware/analog_PressureSensor.cpp[m
+[1mindex 76870c7..bea3d99 100644[m
+[1m--- a/pressure_control_firmware/analog_PressureSensor.cpp[m
+[1m+++ b/pressure_control_firmware/analog_PressureSensor.cpp[m
+[36m@@ -29,42 +29,6 @@[m [mvoid analog_PressureSensor::initialize(sensorSettings &senseSet,float a, float b[m
+ }[m
+ [m
+ [m
+[31m-void analog_PressureSensor::setCalibration(int sensorType_in){[m
+[31m-[m
+[31m-  sensorType = sensorType_in;[m
+[31m-   if (sensorType==1){[m
+[31m-      output_max = 4.5;[m
+[31m-      output_min = 0.5;[m
+[31m-      output_offset = 0.5;[m
+[31m-      pressure_max = 50;[m
+[31m-      pressure_min = 0;[m
+[31m-   }[m
+[31m-   else if (sensorType==2){[m
+[31m-      output_max = 4.5;[m
+[31m-      output_min = 0.5;[m
+[31m-      output_offset = 0.5;[m
+[31m-      pressure_max = 100;[m
+[31m-      pressure_min = 0;[m
+[31m-   }[m
+[31m-   else if (sensorType==3){[m
+[31m-    //Teensy [m
+[31m-      output_max = 4.5*0.6666;[m
+[31m-      output_min = 0.5*0.6666;[m
+[31m-      output_offset = 0.5*0.6666;[m
+[31m-      pressure_max = 60;[m
+[31m-      pressure_min = 0;[m
+[31m-   }[m
+[31m-   else if (sensorType==4){[m
+[31m-    //Teensy [m
+[31m-      output_max = 4.5*0.6666666;[m
+[31m-      output_min = 0.5*0.6666666;[m
+[31m-      output_offset = 0.5*0.6666666;[m
+[31m-      pressure_max = 30; //PSI[m
+[31m-      pressure_min = -30; //PSI[m
+[31m-   }[m
+[31m-}[m
+[31m-[m
+[31m-[m
+ void analog_PressureSensor::setCalibration(float a, float b, float c, float d, float e){[m
+   output_max = a;[m
+   output_min = b;[m
+[1mdiff --git a/pressure_control_firmware/analog_PressureSensor.h b/pressure_control_firmware/analog_PressureSensor.h[m
+[1mindex 6969af1..f0c9ce4 100644[m
+[1m--- a/pressure_control_firmware/analog_PressureSensor.h[m
+[1m+++ b/pressure_control_firmware/analog_PressureSensor.h[m
+[36m@@ -19,8 +19,7 @@[m [mclass analog_PressureSensor[m
+     float output_offset;[m
+     float pressure_max;[m
+     float pressure_min;[m
+[31m-    void setCalibration(int);[m
+[31m-    bool firstCall=true;[m
+[32m+[m[32m    bool firstcall=false;[m
+     float alpha = 0.01;[m
+     [m
+ [m
+[1mdiff --git a/pressure_control_firmware/pressure_control_firmware.ino b/pressure_control_firmware/pressure_control_firmware.ino[m
+[1mindex 2645122..9c47521 100644[m
+[1m--- a/pressure_control_firmware/pressure_control_firmware.ino[m
+[1m+++ b/pressure_control_firmware/pressure_control_firmware.ino[m
+[36m@@ -222,18 +222,6 @@[m [mbool firstcall = true;[m
+ [m
+ //______________________________________________________________________[m
+ void loop() {[m
+[31m-  if (firstcall){[m
+[31m-        Serial.println(senseSettings[0].sensorModel);[m
+[31m-        Serial.println(senseSettings[0].adc_res);[m
+[31m-        Serial.println(senseSettings[0].adc_max_volts);[m
+[31m-        Serial.println(senseSettings[0].adc_mult);[m
+[31m-        Serial.println(senseSettings[0].output_min*senseSettings[0].adc_mult);[m
+[31m-        Serial.println(senseSettings[0].output_max*senseSettings[0].adc_mult);[m
+[31m-        Serial.println(senseSettings[0].output_offset*senseSettings[0].adc_mult);[m
+[31m-        Serial.println(senseSettings[0].pressure_min);[m
+[31m-        Serial.println(senseSettings[0].pressure_max);[m
+[31m-        firstcall=false;   [m
+[31m-  }[m
+   //Serial.println("_words need to be here (for some reason)");[m
+   //Handle serial commands[m
+ [m

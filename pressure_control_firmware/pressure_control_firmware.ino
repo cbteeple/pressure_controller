@@ -222,18 +222,6 @@ bool firstcall = true;
 
 //______________________________________________________________________
 void loop() {
-  if (firstcall){
-        Serial.println(senseSettings[0].sensorModel);
-        Serial.println(senseSettings[0].adc_res);
-        Serial.println(senseSettings[0].adc_max_volts);
-        Serial.println(senseSettings[0].adc_mult);
-        Serial.println(senseSettings[0].output_min*senseSettings[0].adc_mult);
-        Serial.println(senseSettings[0].output_max*senseSettings[0].adc_mult);
-        Serial.println(senseSettings[0].output_offset*senseSettings[0].adc_mult);
-        Serial.println(senseSettings[0].pressure_min);
-        Serial.println(senseSettings[0].pressure_max);
-        firstcall=false;   
-  }
   //Serial.println("_words need to be here (for some reason)");
   //Handle serial commands
 
