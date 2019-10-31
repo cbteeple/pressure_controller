@@ -19,8 +19,7 @@ class analog_PressureSensor
     float output_offset;
     float pressure_max;
     float pressure_min;
-    void setCalibration(int);
-    bool firstCall=true;
+    bool firstcall=true;
     float alpha = 0.01;
     
 

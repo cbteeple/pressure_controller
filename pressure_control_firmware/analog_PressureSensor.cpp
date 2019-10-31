@@ -29,42 +29,6 @@ void analog_PressureSensor::initialize(sensorSettings &senseSet,float a, float b
 }
 
 
-void analog_PressureSensor::setCalibration(int sensorType_in){
-
-  sensorType = sensorType_in;
-   if (sensorType==1){
-      output_max = 4.5;
-      output_min = 0.5;
-      output_offset = 0.5;
-      pressure_max = 50;
-      pressure_min = 0;
-   }
-   else if (sensorType==2){
-      output_max = 4.5;
-      output_min = 0.5;
-      output_offset = 0.5;
-      pressure_max = 100;
-      pressure_min = 0;
-   }
-   else if (sensorType==3){
-    //Teensy 
-      output_max = 4.5*0.6666;
-      output_min = 0.5*0.6666;
-      output_offset = 0.5*0.6666;
-      pressure_max = 60;
-      pressure_min = 0;
-   }
-   else if (sensorType==4){
-    //Teensy 
-      output_max = 4.5*0.6666666;
-      output_min = 0.5*0.6666666;
-      output_offset = 0.5*0.6666666;
-      pressure_max = 30; //PSI
-      pressure_min = -30; //PSI
-   }
-}
-
-
 void analog_PressureSensor::setCalibration(float a, float b, float c, float d, float e){
   output_max = a;
   output_min = b;
