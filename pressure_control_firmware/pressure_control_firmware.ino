@@ -17,9 +17,9 @@
 //Include the config file from the system you are using
 //#include "config/config_pneumatic_teensy.h"
 //#include "config/config_pneumatic_teensy8.h"
-#include "config/config_pneumatic_teensy7.h"
+//#include "config/config_pneumatic_teensy7.h"
 //#include "config/config_vacuum.h"
-//#include "config/config_hydraulic.h"
+#include "config/config_hydraulic.h"
 
 //DON'T FORGET TO CHANGE THE NUMBER OF CHANNELS IN THE TRAJ PART OF ALLSETTINGS.H
 //   This is due to poor programming on my part, and I can't find a way around this without major structural reform

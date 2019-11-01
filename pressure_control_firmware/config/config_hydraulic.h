@@ -23,7 +23,7 @@
 //Define the type of sensor to use (only one can be true)
 #define SENSOR_ANALOG true
 #define SENSOR_I2C false
-#include "sensors/SSCDANN060PGAA5.h"
+#include "sensors/M5231-000005-050PG.h"
 
 #define ADC_RES 10
 #define ADC_MAX_VOLTS 5.0
@@ -48,8 +48,8 @@ float   ADC_MULT = 1.0;
 
 //Set valve pins
   //int valvePins[][2]= { {6,9}, {10,11} };
-  //int valvePins[][2]= { {4,5}, {6,7}, {8,9}, {10,11}, {12,13}, {44,45} };
-  int valvePins[][2]= { {6,7}, {8,9}, {10,11}};
+  //int valvePins[][2]= { {44,45} {4,5}, {6,7}, {8,9}, {10,11}, {12,13} };
+  int valvePins[][2]= { {4,5}, {6,7}, {8,9}};
   int valveOffset[][2]={{205,205},{205,205},{205,205}};
 
 //Set Button pins
