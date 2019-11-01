@@ -1,7 +1,7 @@
 # Channels - turn them on or off
 channels:
     num_channels: 3  # This needs to match the firmware setting
-    states: [1, 1, 1] # 1 for on, 0 for off
+    states: [0, 0, 1] # 1 for on, 0 for off
 
 
 # Loop time for outputting data.
@@ -20,7 +20,7 @@ PID:
 # Set the max and min pressures in software [psi]
 #   If single value, then it will be set for all channels
 #   If a vector of length NUM_CHANNELS, then each channel is set independently
-max_pressure: 20 # The pressure you never want to exceed (watchdog will prevent higher pressures)
+max_pressure: 30 # The pressure you never want to exceed (watchdog will prevent higher pressures)
 min_pressure: -50
 
 #For debugging purposes

@@ -4,6 +4,7 @@ import serial
 import time
 import sys
 import os
+import copy
 import yaml
 import pickle
 import numbers
@@ -72,7 +73,7 @@ class PressureController:
         time.sleep(0.1)
         self.readStuff()
 
-        self.sendCommand("set",0,0)
+        self.sendCommand("set",[0,0])
         time.sleep(0.1)
         self.readStuff()
 
@@ -95,7 +96,9 @@ class PressureController:
 
 
     def setPressure(self, press):
-        self.sendCommand('set', press.insert(0.5,0))
+        press_tmp = copy.deepcopy(press)
+        press_tmp.insert(0,0.5)
+        self.sendCommand('set',press_tmp )
 
 
     def startPressMode(self):

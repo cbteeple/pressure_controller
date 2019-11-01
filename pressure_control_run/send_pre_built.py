@@ -92,13 +92,7 @@ class TrajSend:
             #time.sleep(entry[0]-lastTime)
             #lastTime=entry[0]
             
-
-    def shutdown(self):
-        self.s.write("mode;3"+'\n')
-        self.s.write("set;0;0"+'\n')
-        self.s.close()
-
-
+            
         dirname = os.path.dirname(curr_flag_file)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
@@ -106,6 +100,12 @@ class TrajSend:
         self.out_file = open(curr_flag_file, "w+")
         self.out_file.write(self.filename)
         self.out_file.close()
+            
+
+    def shutdown(self):
+        self.s.write("mode;3"+'\n')
+        self.s.write("set;0;0"+'\n')
+        self.s.close()
         
     
     def readStuff(self):
