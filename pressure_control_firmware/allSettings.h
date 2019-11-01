@@ -74,8 +74,8 @@ class trajectory
 {
   private:
    
-    const static unsigned int maxLen = 100;
-    const static unsigned int maxChannels = 8;
+    const static unsigned int maxLen = 1000;
+    const static unsigned int maxChannels = 4;
     int curr_idx = 1;
 
     float lerp(float a, float b, float f){
