@@ -19,4 +19,4 @@ An object-oriented approach to doing pressure control. Hopefully things are modu
 	- [yaml](https://pyyaml.org/wiki/PyYAMLDocumentation) (`pip install pyyaml`)
 
 ## How to use the code:
-[Instructions on the Wiki!](https://github.com/cbteeple/pressure_controller/wiki)
+[Instructions in the documentation](https://cbteeple.github.io/pressure_controller_docs/)
