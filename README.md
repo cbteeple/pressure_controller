@@ -1,5 +1,9 @@
-# pressure_controller
+# Ctrl-P
 An object-oriented approach to doing pressure control. Hopefully things are modular and can be swapped in an out for different controllers and valve setups.
+
+## Official Documentation
+[Ctrl-P Documentation](https://cbteeple.github.io/pressure_controller_docs/)
+
 
 ## Dependencies
 
