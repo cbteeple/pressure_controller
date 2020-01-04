@@ -1,4 +1,4 @@
-# Ctrl-P
+# Ctrl-P 1.0
 An object-oriented approach to doing pressure control. Hopefully things are modular and can be swapped in an out for different controllers and valve setups.
 
 ## Official Documentation
