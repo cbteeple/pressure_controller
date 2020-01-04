@@ -1,4 +1,4 @@
-# Ctrl-P
+# Ctrl-P 2.0
 An object-oriented approach to doing pressure control. Hopefully things are modular and can be swapped in an out for different controllers and valve setups.
 
 ## Official Documentation
@@ -24,3 +24,18 @@ An object-oriented approach to doing pressure control. Hopefully things are modu
 
 ## How to use the code:
 [Instructions in the documentation](https://cbteeple.github.io/pressure_controller_docs/)
+
+## Updates from version 1.x
+
+### Prefix/suffix support for pre-built trajectories
+
+1. Firmware
+	- separate trajectory into "prefix", "suffix", and "looping" parts.
+	- update firmware to take in start indices for each part + # of cycles (with -1 = inf cycles, 0 = skip loop, 1--N = # of cycles)
+	- add dynamic "# of cycles" function
+	- add dynamic speed multiplier function (with error checking to make sure we never divide by 0 or have traj. with 0 time)
+
+2. Python:
+	- update buidtraj function to save prefix/suffix parts
+	- update sendprebuilt function to send relevant parts + indices
+	- update runprebuilt to send speed + # cycles.
