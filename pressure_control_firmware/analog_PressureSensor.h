@@ -29,6 +29,8 @@ class analog_PressureSensor
     float pressureSmooth;
   
   public:
+    bool  connected=true;
+  
     analog_PressureSensor(){};
     void initialize(sensorSettings &);
     void initialize(sensorSettings &,float,float,float,float, float);

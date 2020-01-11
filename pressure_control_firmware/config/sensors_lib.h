@@ -79,6 +79,8 @@ class SensorRawAnalogInput
     float pressure_min = 1;
 };
 
+
+// No sensor connected
 class SensorDisconnected
 {
   public:
