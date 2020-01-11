@@ -1,3 +1,4 @@
+// These are the sensors used in version 1.0 of the vacuum control board
 
 int SENSOR_MODEL=4;
 

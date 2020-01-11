@@ -1,3 +1,5 @@
+// Return the direct analog input values 
+// For debugging purposes only. DO NOT CONNECT VALVES WHEN USING THIS
 
 int SENSOR_MODEL=99;
 
