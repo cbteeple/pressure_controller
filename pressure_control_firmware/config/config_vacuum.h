@@ -58,6 +58,8 @@ float   ADC_MULT = 0.6666666;
 
 // Set Button pins
   int buttonPins[]={26,27,28};
+  int robotPins[] ={26,27,28};
+  int extPins[]   ={};
 
 // Default controller settings
   float pid_start[]={0.1,0.001,0}; 
