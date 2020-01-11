@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "sensors_lib.h"
 //CONFIG FOR PNEUMATIC PRESSURE SYSTEM
 
 
@@ -20,47 +21,50 @@
 //#define COMMS_USB
 
 
-//Define the type of sensor to use (only one can be true)
+// Define the type of sensor to use (only one can be true)
 #define SENSOR_ANALOG true
 #define SENSOR_I2C false
-#include "sensors/M5231-000005-050PG.h"
 
-#define ADC_RES 10
-#define ADC_MAX_VOLTS 5.0
-float   ADC_MULT = 1.0;
+//Define the sensor types
+SensorSSCSNBN030PDAC5 controlSensorType;
+SensorSSCDANN150PGAA5 masterSensorType;
 
-#define MAX_NUM_CHANNELS 3
+// Define mcu analog input properties
+#define ADC_RES 13
+#define ADC_MAX_VOLTS 3.3
+float   ADC_MULT = 0.6666666;
 
-//Define the type of controller to use (only one can be true)
+#define MAX_NUM_CHANNELS 4
+
+// Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
 #define CONTROL_P false
 #define CONTROL_PID true
 
-//Set default settings for things
-//If using i2c sensors...
+
+// Set default settings for things
+// If using i2c sensors...
   int sensorAddr=0x58;
-  bool useMux=true;
+  bool useMux=false;
   int muxAddr=0x70;
 
-//Set sensor pins
-  //int senseChannels[]={A0,A1,A2,A3,A4,A5,A6,A7,A8};
-  int senseChannels[]={A1,A2,A3};
+// Set sensor pins
+  int senseChannels[]={A21,A20,A19,A18,A17,A16,A15,A14};
+  int masterSenseChannel = A22;
 
-//Set valve pins
-  //int valvePins[][2]= { {6,9}, {10,11} };
-  //int valvePins[][2]= { {44,45} {4,5}, {6,7}, {8,9}, {10,11}, {12,13} };
-  int valvePins[][2]= { {4,5}, {6,7}, {8,9}};
-  int valveOffset[][2]={{205,205},{205,205},{205,205}};
+// Set valve pins
+  int valvePins[][2]= { {23,22}, {21,20}, {2,3}, {4,5}, {6,7}, {8,9}, {10,14}, {29,30} };
+  int valveOffset[][2]={{227,226},{224,224},{225,225},{225,225}, {225,225}, {225,225}, {225,225}, {225,225}, {225,225}, {225,225}};
 
-//Set Button pins
-  int buttonPins[]={2,18,19};
+// Set Button pins
+  int buttonPins[]={26,27,28};
 
-
-
-//Default controller settings
-  float pid_start[]={0.6,0.03,0}; 
+// Default controller settings
+  float pid_start[]={0.1,0.001,0}; 
   float deadzone_start=0.0;
   float setpoint_start=0;
   float integratorResetTime_start = -1;
   float minPressure_start = 0; //[psi]
-  float maxPressure_start = 7; //[psi]
+  float maxPressure_start = 28; //[psi]
+
+// TODO: Update all pins to actual correct ones

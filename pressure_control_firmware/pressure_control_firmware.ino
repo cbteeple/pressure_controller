@@ -8,6 +8,8 @@
 #include "proportional.h"
 #include "pidFull.h"
 #include "interp_lin.h"
+#include "trajectory.h"
+#include "trajectory_control.h"
 
 
 
@@ -18,19 +20,22 @@
 //#include "config/config_pneumatic_teensy.h"
 //#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_pneumatic_teensy7.h"
-#include "config/config_vacuum.h"
+//#include "config/config_vacuum.h"
+#include "config/config_V_3_4.h"
 //#include "config/config_hydraulic.h"
 
-//DON'T FORGET TO CHANGE THE NUMBER OF CHANNELS IN THE TRAJ PART OF ALLSETTINGS.H
-//   This is due to poor programming on my part, and I can't find a way around this without major structural reform
-//   Sorry!!! -Clark
 
 
-//Create a new settings object
+//Create a new settings objects
 globalSettings settings;
 controlSettings ctrlSettings[MAX_NUM_CHANNELS];
 sensorSettings senseSettings[MAX_NUM_CHANNELS];
+sensorSettings masterSenseSettings;
 valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
+
+//Create new trajectory objects
+Trajectory traj[MAX_NUM_CHANNELS];
+TrajectoryControl trajCtrl;
 
 //Create an object to handle serial commands
 #ifdef USB_RAWHID
@@ -52,7 +57,7 @@ eepromHandler saveHandler;
 Button  buttons[3] { {buttonPins[0]}, { buttonPins[1] }, { buttonPins[2] } };
 handleButtons buttonHandler(MAX_NUM_CHANNELS);
 
-trajectory traj;
+
 
 i2c_Mux mux(muxAddr);
 
@@ -63,6 +68,10 @@ i2c_Mux mux(muxAddr);
   int senseChannels[]={0,1,2,3,4,5,6,7};
   i2c_PressureSensor sensors[MAX_NUM_CHANNELS];
 #endif
+
+analog_PressureSensor masterSensor;
+
+
 
 int ave_len=10;
 float pressures[MAX_NUM_CHANNELS];
@@ -152,18 +161,18 @@ void setup() {
 
 
       //Initialize sensor settings
-      senseSettings[i].sensorModel=SENSOR_MODEL;
+      senseSettings[i].sensorModel=controlSensorType.model;
 
       if(SENSOR_ANALOG){
         senseSettings[i].sensorPin=senseChannels[i];
         senseSettings[i].adc_res=adc_res;
         senseSettings[i].adc_max_volts=ADC_MAX_VOLTS;
         senseSettings[i].adc_mult = ADC_MULT;
-        senseSettings[i].output_min=sensor_output_min;
-        senseSettings[i].output_max=sensor_output_max;
-        senseSettings[i].output_offset=sensor_output_offset;
-        senseSettings[i].pressure_min=sensor_pressure_min;
-        senseSettings[i].pressure_max=sensor_pressure_max;
+        senseSettings[i].output_min=controlSensorType.output_min;
+        senseSettings[i].output_max=controlSensorType.output_max;
+        senseSettings[i].output_offset=controlSensorType.output_offset;
+        senseSettings[i].pressure_min=controlSensorType.pressure_min;
+        senseSettings[i].pressure_max=controlSensorType.pressure_max;
 
       }
       else if(SENSOR_I2C){
@@ -180,6 +189,18 @@ void setup() {
       }
     }
 
+    // Initialize master sensor
+    masterSenseSettings.sensorModel=masterSensorType.model;
+    masterSenseSettings.sensorPin=masterSenseChannel;
+    masterSenseSettings.adc_res=adc_res;
+    masterSenseSettings.adc_max_volts=ADC_MAX_VOLTS;
+    masterSenseSettings.adc_mult = ADC_MULT;
+    masterSenseSettings.output_min=masterSensorType.output_min;
+    masterSenseSettings.output_max=masterSensorType.output_max;
+    masterSenseSettings.output_offset=masterSensorType.output_offset;
+    masterSenseSettings.pressure_min=masterSensorType.pressure_min;
+    masterSenseSettings.pressure_max=masterSensorType.pressure_max;
+
 
   //Initialize the pressure sensor and control objects
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
@@ -189,7 +210,10 @@ void setup() {
       controllers[i].initialize(ctrlSettings[i]);
     }
 
-    
+    masterSensor.initialize(masterSenseSettings);
+
+    trajCtrl.initialize(traj, MAX_NUM_CHANNELS);
+
     settings.looptime =0;
     settings.lcdLoopTime = 333;
     settings.outputsOn=false;
@@ -213,8 +237,8 @@ void setup() {
 bool lcdOverride = false;
 float setpoint_local[MAX_NUM_CHANNELS];
 
-bool runtraj = traj.running;
-bool traj_reset = traj.reset;
+bool run_traj = false;
+bool traj_reset = false;
 
 unsigned long curr_time=0;
 
@@ -225,13 +249,16 @@ void loop() {
   //Serial.println("_words need to be here (for some reason)");
   //Handle serial commands
 
-  traj.CurrTime = micros();
-  runtraj = traj.running;
-  traj_reset = traj.reset;
   curr_time = micros();
+
+
+  run_traj = trajCtrl.all_running;
+  traj_reset = trajCtrl.reset;
+  
+
   
   
-  bool newSettings=handleCommands.go(settings, ctrlSettings,traj);
+  bool newSettings=handleCommands.go(settings, ctrlSettings, traj, trajCtrl );
   String buttonMessage= buttonHandler.go(buttons,settings, ctrlSettings); 
 
   if (buttonMessage =="r"){
@@ -259,9 +286,9 @@ void loop() {
 
       //if we are in mode 2, set the setpoint to be a linear interpolation between trajectory points
         if (ctrlSettings[i].controlMode==2){
-          if (runtraj){
+          if (run_traj){
             //Set setpoint
-            setpoint_local[i] = traj.interp(i);
+            setpoint_local[i] = traj[i].interp(curr_time);
             controllers[i].setSetpoint(setpoint_local[i]);
           }
           if (traj_reset){

@@ -3,14 +3,16 @@
 #include "handleHIDCommands.h"
 #include "allSettings.h"
 #include "eeprom_handler.h"
+#include "trajectory.h"
+#include "trajectory_control.h"
 
 //_________________________________________________________
 //PUBLIC FUNCTIONS
-bool handleHIDCommands::go(globalSettings (&settings), controlSettings *ctrlSettings, trajectory (&traj)) {
+bool handleHIDCommands::go(globalSettings (&settings), controlSettings *ctrlSettings, Trajectory *traj, TrajectoryControl (&trajCtrl)) {
   bool newCommand = getCommand(); //getCommand();
   bool newSettings = false;
   if (newCommand) {
-    newSettings = processCommand(settings, ctrlSettings, traj);
+    newSettings = processCommand(settings, ctrlSettings, traj, trajCtrl);
     command = "";
   }
   return newSettings;
@@ -75,7 +77,7 @@ void handleHIDCommands::sendString(String bc_string){
 
 
 
-bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettings *ctrlSettings, trajectory (&traj)) {
+bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettings *ctrlSettings, Trajectory *traj, TrajectoryControl (&trajCtrl)) {
   bool newSettings = false;
   String bc_string = "_";
 
@@ -123,28 +125,28 @@ bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettin
     if (broadcast) {
       bc_string += ("TRAJSTART: Trajectory Started");
     }
-    traj.start();
+    trajCtrl.start(); //TODO: This is wrong - need to invoke this on traj_control
   }
 
   else if (command.startsWith("TRAJSTOP")) {
     if (broadcast) {
       bc_string += ("TRAJSTOP: Trajectory Stopped");
     }
-    traj.stop();
+    trajCtrl.stop();
   }
 
    else if (command.startsWith("TRAJPAUSE")) {
     if (broadcast) {
       bc_string += ("TRAJPAUSE: Trajectory Paused");
     }
-    traj.pause();
+    trajCtrl.pause();
   }
 
   else if (command.startsWith("TRAJRESUME")) {
     if (broadcast) {
       bc_string += ("TRAJRESUME: Trajectory Resumed");
     }
-    traj.resume();
+    trajCtrl.resume();
   }
 
 
@@ -493,19 +495,19 @@ bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettin
   //[trajectory length] [trajectory starting index] [wrap mode]
   else if (command.startsWith("TRAJCONFIG")) {
     if (getStringValue(command, ';', 3).length()) {
-      traj.start_idx = constrain(getStringValue(command, ';', 1).toInt(), 0, 999);
-      traj.len = constrain(getStringValue(command, ';', 2).toInt(), 1, 1000);
-      traj.wrap = bool(getStringValue(command, ';', 3).toInt());
+      trajCtrl.start_idx = constrain(getStringValue(command, ';', 1).toInt(), 0, 999);
+      trajCtrl.len = constrain(getStringValue(command, ';', 2).toInt(), 1, 1000);
+      trajCtrl.wrap = bool(getStringValue(command, ';', 3).toInt());
     }
     if (broadcast) {
       bc_string += ("TRAJCONFIG: start = ");
-      bc_string += String(traj.start_idx);
+      bc_string += String(trajCtrl.start_idx);
       bc_string += ('\t');
       bc_string += ("len = ");
-      bc_string += String(traj.len);
+      bc_string += String(trajCtrl.len);
       bc_string += ('\t');
       bc_string += ("wrap = ");
-      bc_string += String(traj.wrap);
+      bc_string += String(trajCtrl.wrap);
     }
   }
 
@@ -513,11 +515,11 @@ bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettin
 
     else if (command.startsWith("TRAJWRAP")) {
     if (getStringValue(command, ';', 1).length()) {
-      traj.wrap = bool(getStringValue(command, ';', 1).toInt());
+      trajCtrl.wrap = bool(getStringValue(command, ';', 1).toInt());
     }
     if (broadcast) {
       bc_string += ("TRAJWRAP: ");
-      bc_string += String(traj.wrap);
+      bc_string += String(trajCtrl.wrap);
     }
   }
 
@@ -531,7 +533,10 @@ bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettin
         row[i] = getStringValue(command, ';', i + 1).toFloat();
       }
 
-      traj.setLine(row);
+      for (int i = 0; i < numSensors; i++){
+        traj[i].setLine(int(row[0]),float(row[1]),float(row[i+2]));
+      }
+
 
       if (broadcast) {
         bc_string += ("TRAJSET: ");
@@ -547,12 +552,13 @@ bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettin
     else {
       if (broadcast) {
         bc_string += ("TRAJSET:");
-        for (int i = traj.start_idx; i < (traj.start_idx + traj.len); i++) {
+        
+        for (int i = traj[0].start_idx; i < (traj[0].start_idx + traj[0].len); i++) {
           bc_string += ('\n');
-          bc_string += String(traj.trajtimes[i]);
+          bc_string += String(traj[0].trajtimes[i]);
           bc_string += ('\t');
           for (int j = 0; j < numSensors; j++) {
-            bc_string += String(traj.trajpts[i][j]);
+            bc_string += String(traj[j].trajpts[i]);
             bc_string += ('\t');
           }
         }
