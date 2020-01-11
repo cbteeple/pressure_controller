@@ -10,7 +10,7 @@
 //PUBLIC FUNCTIONS
 /*
 bool handleHIDCommands::go(globalSettings (&settings), controlSettings *ctrlSettings, Trajectory *traj, TrajectoryControl (&trajCtrl)) {
-  bool newCommand = getCommand(); //getCommand();
+  bool newCommand = readCommand(); //readCommand();
   bool newSettings = false;
   if (newCommand) {
     newSettings = processCommand(settings, ctrlSettings, traj, trajCtrl);
@@ -21,7 +21,7 @@ bool handleHIDCommands::go(globalSettings (&settings), controlSettings *ctrlSett
 */
 
 bool handleHIDCommands::go() {
-  bool newCommand = getCommand(); //getCommand();
+  bool newCommand = readCommand(); //readCommand();
   bool newSettings = false;
   if (newCommand) {
     newSettings = processCommand();
@@ -55,7 +55,7 @@ void handleHIDCommands::initialize(int num, globalSettings *settings_in, control
 
 //METHOD DEPRICATED
 #ifdef USB_RAWHID
-bool handleHIDCommands::getCommand() {
+bool handleHIDCommands::readCommand() {
 
   int n = RawHID.recv(in_buffer, 1); // 0 timeout = do not wait
   if (n > 0) {
@@ -92,74 +92,121 @@ void handleHIDCommands::sendString(String bc_string){
 
 
 
-
 //bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettings *ctrlSettings, Trajectory *traj, TrajectoryControl (&trajCtrl)) {
 bool handleHIDCommands::processCommand() {
   bool newSettings = false;
-  String bc_string = "_";
+  bc_string = "_";
 
-  //______________________________________________________________
-  //Handle changes in setpoint first so it's a fast operation
-  if (command.startsWith("SET")) {
-    if (getStringValue(command, ';', numSensors + 1).length()) {
-      for (int i = 0; i < numSensors; i++) {
-        ctrlSettings[i].settime = constrain(getStringValue(command, ';', 1).toFloat(), 0, 1000);
-        ctrlSettings[i].setpoint = constrain(getStringValue(command, ';', i + 2).toFloat(),
-                                             ctrlSettings[i].minPressure,
-                                             ctrlSettings[i].maxPressure);
-      }
-      newSettings = true;
-      if (broadcast) {
-        bc_string += "NEW ";
-      }
-    }
-    else if (getStringValue(command, ';', 2).length()) {
-      float allset = getStringValue(command, ';', 2).toFloat();
-      for (int i = 0; i < numSensors; i++) {
-        ctrlSettings[i].settime = constrain(getStringValue(command, ';', 1).toFloat(), 0, 1000);
-        ctrlSettings[i].setpoint = constrain(allset,
-                                             ctrlSettings[i].minPressure,
-                                             ctrlSettings[i].maxPressure);
-      }
-      newSettings = true;
-      if (broadcast) {
-        bc_string += "NEW ";
-      }
-    }
-    if (broadcast) {
-      bc_string += "SET: ";
-      bc_string += String(ctrlSettings[0].settime, 4);
-      for (int i = 0; i < numSensors; i++) {
-        bc_string += '\t';
-        bc_string += String(ctrlSettings[i].setpoint, 4);
-      }
-    }
+  String cmdStr = getStringValue(command, ';', 0);
+  auto iter = command_map.find(cmdStr);
+  if(iter == command_map.end()){
+    Unrecognized();
+  }
+  else{
+    (*iter->second)();
   }
 
 
+  //End the line with a newline
+  if (broadcast) {
+    sendString(bc_string);
+    //Serial.println(bc_string);
+  }
 
-  else if (command.startsWith("TRAJSTART")) {
+  return newSettings;
+}
+
+
+
+
+String handleHIDCommands::getStringValue(String data, char separator, int index)
+{
+  int found = 0;
+  int strIndex[] = {0, -1};
+  int maxIndex = data.length() - 1;
+
+  for (int i = 0; i <= maxIndex && found <= index; i++) {
+    if (data.charAt(i) == separator || i == maxIndex) {
+      found++;
+      strIndex[0] = strIndex[1] + 1;
+      strIndex[1] = (i == maxIndex) ? i + 1 : i;
+    }
+  }
+
+  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+
+
+
+
+
+
+
+
+/*
+WORKER FUNCTIONS
+*/
+
+void handleHIDCommands::SetSetpoint(){
+  if (getStringValue(command, ';', numSensors + 1).length()) {
+    for (int i = 0; i < numSensors; i++) {
+      ctrlSettings[i].settime = constrain(getStringValue(command, ';', 1).toFloat(), 0, 1000);
+      ctrlSettings[i].setpoint = constrain(getStringValue(command, ';', i + 2).toFloat(),
+                                           ctrlSettings[i].minPressure,
+                                           ctrlSettings[i].maxPressure);
+    }
+    newSettings = true;
+    if (broadcast) {
+      bc_string += "NEW ";
+    }
+  }
+  else if (getStringValue(command, ';', 2).length()) {
+    float allset = getStringValue(command, ';', 2).toFloat();
+    for (int i = 0; i < numSensors; i++) {
+      ctrlSettings[i].settime = constrain(getStringValue(command, ';', 1).toFloat(), 0, 1000);
+      ctrlSettings[i].setpoint = constrain(allset,
+                                           ctrlSettings[i].minPressure,
+                                           ctrlSettings[i].maxPressure);
+    }
+    newSettings = true;
+    if (broadcast) {
+      bc_string += "NEW ";
+    }
+  }
+  if (broadcast) {
+    bc_string += "SET: ";
+    bc_string += String(ctrlSettings[0].settime, 4);
+    for (int i = 0; i < numSensors; i++) {
+      bc_string += '\t';
+      bc_string += String(ctrlSettings[i].setpoint, 4);
+    }
+  }
+}
+
+
+
+void handleHIDCommands::TrajStart(){
     if (broadcast) {
       bc_string += ("TRAJSTART: Trajectory Started");
     }
     trajCtrl.start(); //TODO: This is wrong - need to invoke this on traj_control
   }
 
-  else if (command.startsWith("TRAJSTOP")) {
+void handleHIDCommands::TrajStop(){
     if (broadcast) {
       bc_string += ("TRAJSTOP: Trajectory Stopped");
     }
     trajCtrl.stop();
   }
 
-   else if (command.startsWith("TRAJPAUSE")) {
+void handleHIDCommands::TrajPause() {
     if (broadcast) {
       bc_string += ("TRAJPAUSE: Trajectory Paused");
     }
     trajCtrl.pause();
   }
 
-  else if (command.startsWith("TRAJRESUME")) {
+void handleHIDCommands::TrajResume() {
     if (broadcast) {
       bc_string += ("TRAJRESUME: Trajectory Resumed");
     }
@@ -168,19 +215,20 @@ bool handleHIDCommands::processCommand() {
 
 
 
-  else if (command.startsWith("OFF")) {
+void handleHIDCommands::DataOff() {
     settings.outputsOn = false;
     if (broadcast) {
       bc_string += "OFF: Outputs Off";
     }
   }
-  else if (command.startsWith("ON")) {
+
+void handleHIDCommands::DataOn() {
     settings.outputsOn = true;
     if (broadcast) {
       bc_string += "ON: Outputs On";
     }
   }
-  else if (command.startsWith("TIME")) {
+void handleHIDCommands::SetDataTime() {
     if (getStringValue(command, ';', 1).length()) {
       settings.looptime = getStringValue(command, ';', 1).toInt();
       newSettings = true;
@@ -194,7 +242,7 @@ bool handleHIDCommands::processCommand() {
     }
   }
 
-  else if (command.startsWith("LCDTIME")) {
+void handleHIDCommands::SetLCDTime() {
     if (getStringValue(command, ';', 1).length()) {
       settings.lcdLoopTime = getStringValue(command, ';', 1).toInt();
       newSettings = true;
@@ -209,7 +257,7 @@ bool handleHIDCommands::processCommand() {
   }
 
   
-  else if (command.startsWith("INTSTART")) {
+void handleHIDCommands::StartIntegrator() {
       if (getStringValue(command, ';', numSensors).length()) {
         for (int i = 0; i < numSensors; i++) {
           ctrlSettings[i].integralStart = getStringValue(command, ';', i + 1).toFloat();
@@ -243,15 +291,9 @@ bool handleHIDCommands::processCommand() {
 
 
 
-
-
-
-
-
-
   //____________________________________________________________
   //Handle MAXIMUM Software Pressure Limits
-  else if (command.startsWith("MAXP")) {
+void handleHIDCommands::SetMaxPressure() {
     if (getStringValue(command, ';', numSensors).length()) {
       for (int i = 0; i < numSensors; i++) {
         ctrlSettings[i].maxPressure = getStringValue(command, ';', i + 1).toFloat();
@@ -281,7 +323,7 @@ bool handleHIDCommands::processCommand() {
   }
   //____________________________________________________________
   //Handle MINIMUM Software Pressure Limits
-  else if (command.startsWith("MINP")) {
+void handleHIDCommands::SetMinPressure() {
     if (getStringValue(command, ';', numSensors).length()) {
       for (int i = 0; i < numSensors; i++) {
         ctrlSettings[i].minPressure = getStringValue(command, ';', i + 1).toFloat();
@@ -311,7 +353,7 @@ bool handleHIDCommands::processCommand() {
   }
 
 
-  else if (command.startsWith("VALVE")) {
+void handleHIDCommands::SetValves() {
     if (getStringValue(command, ';', numSensors).length()) {
       for (int i = 0; i < numSensors; i++) {
         ctrlSettings[i].valveDirect = getStringValue(command, ';', i + 1).toFloat();
@@ -342,7 +384,7 @@ bool handleHIDCommands::processCommand() {
 
 
 
-  else if (command.startsWith("WINDOW")) {
+void handleHIDCommands::SetWindow() {
     if (getStringValue(command, ';', numSensors).length()) {
       for (int i = 0; i < numSensors; i++) {
         ctrlSettings[i].deadzone = getStringValue(command, ';', i + 1).toFloat();
@@ -362,7 +404,7 @@ bool handleHIDCommands::processCommand() {
     }
 
   }
-  else if (command.startsWith("PID")) {
+void handleHIDCommands::SetPID() {
     int channel = 0;
     if (getStringValue(command, ';', 4).length()) {
       channel = getStringValue(command, ';', 1).toInt();
@@ -391,7 +433,7 @@ bool handleHIDCommands::processCommand() {
       }
     }
   }
-  else if (command.startsWith("MODE")) {
+void handleHIDCommands::SetMode() {
     if (getStringValue(command, ';', numSensors).length()) {
       for (int i = 0; i < numSensors; i++) {
         ctrlSettings[i].controlMode = getStringValue(command, ';', i + 1).toInt();
@@ -421,7 +463,7 @@ bool handleHIDCommands::processCommand() {
   }
 
 
-  else if (command.startsWith("SAVE")) {
+void handleHIDCommands::Save() {
     for (int i = 0; i < numSensors; i++) {
       saveHandler.saveCtrl(ctrlSettings[i], i);
     }
@@ -433,7 +475,7 @@ bool handleHIDCommands::processCommand() {
   }
 
 
-  else if (command.startsWith("LOAD")) {
+void handleHIDCommands::Load() {
     for (int i = 0; i < numSensors; i++) {
       float set_temp = ctrlSettings[i].setpoint;
       saveHandler.loadCtrl(ctrlSettings[i], i);
@@ -450,7 +492,7 @@ bool handleHIDCommands::processCommand() {
   }
 
 
-  else if (command.startsWith("DEFSAVE")) {
+void handleHIDCommands::SaveDefault() {
     for (int i = 0; i < numSensors; i++) {
       saveHandler.saveDefaultCtrl(ctrlSettings[i], i);
     }
@@ -461,7 +503,7 @@ bool handleHIDCommands::processCommand() {
   }
 
 
-  else if (command.startsWith("DEFLOAD")) {
+void handleHIDCommands::LoadDefault() {
     for (int i = 0; i < numSensors; i++) {
       saveHandler.loadDefaultCtrl(ctrlSettings[i], i);
     }
@@ -475,7 +517,7 @@ bool handleHIDCommands::processCommand() {
   }
 
 
-  else if (command.startsWith("CHAN")) {
+void handleHIDCommands::SetChannels() {
     if (getStringValue(command, ';', numSensors).length()) {
       for (int i = 0; i < numSensors; i++) {
         ctrlSettings[i].channelOn = bool(getStringValue(command, ';', i + 1).toInt());
@@ -510,7 +552,7 @@ bool handleHIDCommands::processCommand() {
 
   //
   //[trajectory length] [trajectory starting index] [wrap mode]
-  else if (command.startsWith("TRAJCONFIG")) {
+void handleHIDCommands::TrajConfig() {
     if (getStringValue(command, ';', 3).length()) {
       trajCtrl.start_idx = constrain(getStringValue(command, ';', 1).toInt(), 0, 999);
       trajCtrl.len = constrain(getStringValue(command, ';', 2).toInt(), 1, 1000);
@@ -530,7 +572,7 @@ bool handleHIDCommands::processCommand() {
 
 
 
-    else if (command.startsWith("TRAJWRAP")) {
+void handleHIDCommands::TrajWrap() {
     if (getStringValue(command, ';', 1).length()) {
       trajCtrl.wrap = bool(getStringValue(command, ';', 1).toInt());
     }
@@ -541,7 +583,7 @@ bool handleHIDCommands::processCommand() {
   }
 
   //[index];[time];[set0];[set1];[set2];[set3]
-  else if (command.startsWith("TRAJSET")) {
+void handleHIDCommands::TrajSet() {
     if (getStringValue(command, ';', numSensors + 2).length()) {
 
       float row[numSensors + 2];
@@ -589,7 +631,7 @@ bool handleHIDCommands::processCommand() {
 
 
 
-  else if (command.startsWith("ECHO")) {
+void handleHIDCommands::SetEcho() {
     
     if (getStringValue(command, ';', 1).length()) {
       broadcast = bool(getStringValue(command, ';', 1).toInt());
@@ -606,39 +648,9 @@ bool handleHIDCommands::processCommand() {
 
 
   //Unrecognized
-  else {
+void handleHIDCommands::Unrecognized() {
     newSettings = false;
     if (broadcast) {
       bc_string += ("UNREC: Unrecognized Command");
     }
   }
-
-
-  //End the line with a newline
-  if (broadcast) {
-    sendString(bc_string);
-    //Serial.println(bc_string);
-  }
-
-  return newSettings;
-}
-
-
-
-
-String handleHIDCommands::getStringValue(String data, char separator, int index)
-{
-  int found = 0;
-  int strIndex[] = {0, -1};
-  int maxIndex = data.length() - 1;
-
-  for (int i = 0; i <= maxIndex && found <= index; i++) {
-    if (data.charAt(i) == separator || i == maxIndex) {
-      found++;
-      strIndex[0] = strIndex[1] + 1;
-      strIndex[1] = (i == maxIndex) ? i + 1 : i;
-    }
-  }
-
-  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
-}
