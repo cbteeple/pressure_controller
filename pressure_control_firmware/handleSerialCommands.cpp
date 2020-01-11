@@ -2,17 +2,17 @@
 #include "Arduino.h"
 #include "handleSerialCommands.h"
 #include "allSettings.h"
-#include "eeprom_handler.h"
 #include "trajectory.h"
 #include "trajectory_control.h"
+#include "eeprom_handler.h"
 
 //_________________________________________________________
 //PUBLIC FUNCTIONS
-bool handleSerialCommands::go(globalSettings (&settings), controlSettings *ctrlSettings, Trajectory *traj, TrajectoryControl (&trajCtrl)) {
+bool handleSerialCommands::go() {
   bool newCommand = getCommandByChar(); //getCommand();
   bool newSettings = false;
   if (newCommand) {
-    newSettings = processCommand(settings, ctrlSettings, traj, trajCtrl);
+    newSettings = processCommand();
     command = "";
   }
   return newSettings;
@@ -27,11 +27,17 @@ void handleSerialCommands::stopBroadcast() {
 }
 
 
-void handleSerialCommands::initialize(int num) {
-  numSensors = num;
+void handleSerialCommands::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in) {
+  numSensors   = num;
+  settings     = settings_in;
+  ctrlSettings = ctrlSettings_in;
+  traj         = traj_in;
+  trajCtrl     = trajCtrl_in;
   // reserve 200 bytes for the inputString:
   command.reserve(200);
 }
+
+
 
 
 //_________________________________________________________
@@ -72,7 +78,7 @@ bool handleSerialCommands::getCommandByChar() {
 
 
 
-bool handleSerialCommands::processCommand(globalSettings (&settings), controlSettings *ctrlSettings, Trajectory *traj, TrajectoryControl (&trajCtrl)) {
+bool handleSerialCommands::processCommand() {
   bool newSettings = false;
   String bc_string = "_";
 

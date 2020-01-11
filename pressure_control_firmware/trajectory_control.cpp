@@ -12,7 +12,6 @@ TODO:
     (since we never expect to run trajectories backward)
   - Update all trajectory functions in the HID and SERIAL libraries to work with new classes
   - Pass this controller class to HID and SERIAL libraries as well as trajectory array
-  - Add initialize function to the setup of main file
   - Troubleshoot the new library structure. 
 
 

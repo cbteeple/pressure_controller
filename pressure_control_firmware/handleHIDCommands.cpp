@@ -2,17 +2,29 @@
 #include "Arduino.h"
 #include "handleHIDCommands.h"
 #include "allSettings.h"
-#include "eeprom_handler.h"
 #include "trajectory.h"
 #include "trajectory_control.h"
+#include "eeprom_handler.h"
 
 //_________________________________________________________
 //PUBLIC FUNCTIONS
+/*
 bool handleHIDCommands::go(globalSettings (&settings), controlSettings *ctrlSettings, Trajectory *traj, TrajectoryControl (&trajCtrl)) {
   bool newCommand = getCommand(); //getCommand();
   bool newSettings = false;
   if (newCommand) {
     newSettings = processCommand(settings, ctrlSettings, traj, trajCtrl);
+    command = "";
+  }
+  return newSettings;
+}
+*/
+
+bool handleHIDCommands::go() {
+  bool newCommand = getCommand(); //getCommand();
+  bool newSettings = false;
+  if (newCommand) {
+    newSettings = processCommand();
     command = "";
   }
   return newSettings;
@@ -27,8 +39,12 @@ void handleHIDCommands::stopBroadcast() {
 }
 
 
-void handleHIDCommands::initialize(int num) {
-  numSensors = num;
+void handleHIDCommands::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in) {
+  numSensors   = num;
+  settings     = settings_in;
+  ctrlSettings = ctrlSettings_in;
+  traj         = traj_in;
+  trajCtrl     = trajCtrl_in;
   // reserve 200 bytes for the inputString:
   command.reserve(200);
 }
@@ -77,7 +93,8 @@ void handleHIDCommands::sendString(String bc_string){
 
 
 
-bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettings *ctrlSettings, Trajectory *traj, TrajectoryControl (&trajCtrl)) {
+//bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettings *ctrlSettings, Trajectory *traj, TrajectoryControl (&trajCtrl)) {
+bool handleHIDCommands::processCommand() {
   bool newSettings = false;
   String bc_string = "_";
 

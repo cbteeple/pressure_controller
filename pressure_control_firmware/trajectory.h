@@ -11,6 +11,9 @@ class Trajectory
    
     // Define setup variables
     const static unsigned int maxLen = 1024;
+    const static unsigned int maxPrefixLen = 128;
+    const static unsigned int maxSuffixLen = 128;
+    
     //const static unsigned int maxChannels = 1;
     int curr_idx = 1;
 
@@ -31,6 +34,12 @@ class Trajectory
     bool reset=false;
     float trajpts [maxLen];
     float trajtimes [maxLen];
+    float prefixpts [maxPrefixLen];
+    float prefixtimes [maxPrefixLen];
+    float suffixpts [maxSuffixLen];
+    float suffixtimes [maxSuffixLen];
+
+
     float final_time;
     
     // constructor (empty)
@@ -38,7 +47,9 @@ class Trajectory
 
     // load the trajectory into memory
     bool setLength(int);
-    bool setLine(int, float ,float);
+    bool setLine(int, int, float ,float);
+    bool setPrefixLine(int, float ,float);
+    bool setSuffixLine(int, float ,float);
 
     // Define control functions
     void start();
@@ -49,7 +60,7 @@ class Trajectory
     // Define the interp function
     float interp(float);
 
-    void updateFinalTime();
+    void updateFinalTimes();
 
 };
 

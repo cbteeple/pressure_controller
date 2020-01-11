@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include "allSettings.h"
-#include "eeprom_handler.h"
 #include "trajectory.h"
 #include "trajectory_control.h"
+#include "eeprom_handler.h"
 
 
 #ifndef __handleSerialCommands_H__
@@ -17,14 +17,20 @@ class handleSerialCommands
     bool broadcast = false;
     eepromHandler saveHandler;
 
+    // All of the settings pointers
+    globalSettings *settings;
+    controlSettings *ctrlSettings;
+    Trajectory *traj;
+    TrajectoryControl *trajCtrl;
+
     bool getCommand();
     bool getCommandByChar();
-    bool processCommand(globalSettings &, controlSettings *,  Trajectory* , TrajectoryControl &);
+    bool processCommand();
     String getStringValue(String, char, int);
   
   public:
-    void initialize(int);
-    bool go(globalSettings &, controlSettings *, Trajectory* , TrajectoryControl &);
+    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *);
+    bool go();
     void startBroadcast();
     void stopBroadcast();
 };
