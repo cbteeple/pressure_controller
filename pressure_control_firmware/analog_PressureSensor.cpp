@@ -11,14 +11,19 @@ void analog_PressureSensor::initialize(sensorSettings &senseSet){
   sensorType=senseSet.sensorModel;
   sensePin=senseSet.sensorPin;
 
-  adc_max_counts = pow(2.0,senseSet.adc_res);
-  adc_max_volts = senseSet.adc_max_volts;
-
-  setCalibration(senseSet.output_max*senseSet.adc_mult,
-                 senseSet.output_min*senseSet.adc_mult, 
-                 senseSet.output_offset*senseSet.adc_mult,
-                 senseSet.pressure_max,
-                 senseSet.pressure_min);
+  if (sensorType==100){
+    connected = false;
+  }
+  else{
+    adc_max_counts = pow(2.0,senseSet.adc_res);
+    adc_max_volts = senseSet.adc_max_volts;
+  
+    setCalibration(senseSet.output_max*senseSet.adc_mult,
+                   senseSet.output_min*senseSet.adc_mult, 
+                   senseSet.output_offset*senseSet.adc_mult,
+                   senseSet.pressure_max,
+                   senseSet.pressure_min);
+  }
 }
 
 
@@ -45,29 +50,38 @@ void analog_PressureSensor::setSmoothing(float alpha_in){
 
 
 void analog_PressureSensor::getData(void){
-  //Get the data
-  pressureLast=pressure;
 
-                    
-  float pressure_volts = float(analogRead(sensePin))*adc_max_volts/float(adc_max_counts);
-
-  //Choose the correct calibration curve
-  if (sensorType<4){
-    pressure = float(pressure_volts-output_offset)*float(pressure_max-pressure_min)/float(output_max-output_min);
-  }
-  else if (sensorType==4){
-    pressure = ( float(pressure_volts-output_offset) * float(pressure_max-pressure_min) / float(output_max-output_min) ) + pressure_min;
-  }
-  else if (sensorType==99){
-    pressure = pressure_volts;
-  }
+  if (connected){  
+    //Get the data
+    pressureLast=pressure;
   
-
-  if (!firstCall){
-    pressureSmooth=alpha*pressure+ (1-alpha)*pressureLast;
+                      
+    float pressure_volts = float(analogRead(sensePin))*adc_max_volts/float(adc_max_counts);
+  
+    //Choose the correct calibration curve
+    if (sensorType<4){
+      pressure = float(pressure_volts-output_offset)*float(pressure_max-pressure_min)/float(output_max-output_min);
+    }
+    else if (sensorType==4){
+      pressure = ( float(pressure_volts-output_offset) * float(pressure_max-pressure_min) / float(output_max-output_min) ) + pressure_min;
+    }
+    else if (sensorType==99){
+      pressure = pressure_volts;
+    }
+    else if (sensorType==100){
+      pressure = 0;
+    }
+    
+  
+    if (!firstCall){
+      pressureSmooth=alpha*pressure+ (1-alpha)*pressureLast;
+    }
+    else{
+      firstCall=false;
+    }
   }
   else{
-    firstCall=false;
+    pressure = 0;
   }
   
 }

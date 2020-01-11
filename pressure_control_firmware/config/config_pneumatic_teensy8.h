@@ -26,6 +26,7 @@
 #define SENSOR_I2C false
 
 SensorSSCDANN060PGAA5 controlSensorType;
+SensorDisconnected masterSensorType;
 
 #define ADC_RES 13
 #define ADC_MAX_VOLTS 3.3

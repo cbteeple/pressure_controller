@@ -27,7 +27,7 @@
 
 //Define the sensor types
 SensorSSCSNBN030PDAC5 controlSensorType;
-SensorSSCDANN150PGAA5 masterSensorType;
+SensorDisconnected masterSensorType;
 
 // Define mcu analog input properties
 #define ADC_RES 13

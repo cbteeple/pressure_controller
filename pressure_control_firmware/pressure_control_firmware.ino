@@ -21,7 +21,7 @@
 //#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_pneumatic_teensy7.h"
 //#include "config/config_vacuum.h"
-#include "config/config_V_3_4.h"
+#include "config/config_V_3_4_no_master.h"
 //#include "config/config_hydraulic.h"
 
 
@@ -325,8 +325,10 @@ void loop() {
         }
 
         //NOT THIS
-        sensors[i].getData();
-        pressures[i] = sensors[i].getPressure();
+        if (sensors[i].connected){
+          sensors[i].getData();
+          pressures[i] = sensors[i].getPressure();
+        }
 
 
         //Software Watchdog - If pressure exceeds max, vent forever until the mode gets reset.
