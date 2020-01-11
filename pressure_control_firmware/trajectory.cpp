@@ -29,9 +29,23 @@ bool Trajectory::setLength(int len_in){
 };
 
 
+bool Trajectory::setLength(int traj_len_in, int prefix_len_in , int suffix_len_in){
+  bool error = false;
+  if (len_in<=maxLen){
+    len = traj_len_in;
+  }
+  else{
+    error = true;  
+  }
+  return error;
+  
+};
+
+
 /*
 Set a line in the trajectory
 INPUTS:
+    whichTraj - designated which trajectory segment to store the current line in
     idx    - the line index to overwrite
     time   - the associated trajectory time with this point
     value  - the pressure value to store
@@ -43,16 +57,49 @@ OUTPUTS:
 EXAMPLE:
 error = setLine(idx, time, row);
 */
-bool Trajectory::setLine(int idx, float time, float value){
-  if (idx<0 | idx>maxLen | time<0.0){
-    return true;
+bool Trajectory::setLine(int whichTraj, int idx, float time, float value){
+  switch whichTraj{
+    case 0:{
+      if (idx<0 | idx>maxLen | time<0.0){
+        return true;
+      }
+      trajtimes[idx] = time;
+      trajpts[idx]   = value;
+    }
+    case -99:{
+      if (idx<0 | idx>maxPrefixLen | time<0.0){
+        return true;
+      }
+      prefixtimes[idx] = time;
+      prefixpts[idx]   = value;
+    }
+    case 99:{
+      if (idx<0 | idx>maxSuffixLen | time<0.0){
+        return true;
+      }
+      suffixtimes[idx] = time;
+      suffixpts[idx]   = value;
+    }
+
   }
 
-  trajtimes[idx] = time;
-  trajpts[idx]   = value;
-  updateFinalTime();
+  updateFinalTimes();
   return false;
 };
+
+
+bool Trajectory::setTrajLine(int idx, float time, float value){
+  return setLine(0, idx, time, value);
+}
+
+bool Trajectory::setPrefixLine(int idx, float time, float value){
+  return setLine(-99, idx, time, value);
+}
+
+bool Trajectory::setSuffixLine(int idx, float time, float value){
+  return setLine(99, idx, time, value);
+}
+
 
 
 /*
@@ -175,7 +222,7 @@ float Trajectory::lerp(float a, float b, float f){
 }
 
 
-void Trajectory::updateFinalTime(){
+void Trajectory::updateFinalTimes(){
   final_time = trajtimes[start_idx+len-1];
 }
 

@@ -10,9 +10,6 @@
 #include "interp_lin.h"
 #include "trajectory.h"
 #include "trajectory_control.h"
-
-
-
 #include <EasyLCD.h>
 
 
@@ -26,7 +23,7 @@
 
 
 
-//Create a new settings objects
+//Create new settings objects
 globalSettings settings;
 controlSettings ctrlSettings[MAX_NUM_CHANNELS];
 sensorSettings senseSettings[MAX_NUM_CHANNELS];
@@ -137,7 +134,7 @@ void setup() {
     }
   
     buttonHandler.initialize();
-    handleCommands.initialize(MAX_NUM_CHANNELS);
+    handleCommands.initialize(MAX_NUM_CHANNELS,settings, ctrlSettings, traj, trajCtrl);
     handleCommands.startBroadcast();
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
       
@@ -258,7 +255,8 @@ void loop() {
 
   
   
-  bool newSettings=handleCommands.go(settings, ctrlSettings, traj, trajCtrl );
+  //bool newSettings=handleCommands.go(settings, ctrlSettings, traj, trajCtrl );
+  bool newSettings=handleCommands.go();
   String buttonMessage= buttonHandler.go(buttons,settings, ctrlSettings); 
 
   if (buttonMessage =="r"){
