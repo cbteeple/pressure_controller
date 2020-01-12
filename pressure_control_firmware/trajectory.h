@@ -21,18 +21,12 @@ class Trajectory
     
   public:
     // Define times
-    unsigned long StartTime=0;
-    unsigned long CurrTime=0;
-    unsigned long ResumeTime=0;
+    float CurrTime=0;
     
     // Define important variables
-    int len = 20;
-    int prefix_len=0;
-    int suffix_len=0;
-    int start_idx = 0;
-    bool wrap = false;
+    int len[3] = {2,20,2};
     bool running = false;
-    bool finished = false;
+    bool finished[3] = {false, false, false};
     bool reset=false;
     float trajpts [maxLen];
     float trajtimes [maxLen];
@@ -40,9 +34,14 @@ class Trajectory
     float prefixtimes [maxPrefixLen];
     float suffixpts [maxSuffixLen];
     float suffixtimes [maxSuffixLen];
+    int current_idx[3]={0,0,0};
+    int current_traj = 1;
+    int start_idx = 0;
 
 
-    float final_time;
+    float final_time=0;
+    float final_prefix_time=0;
+    float final_suffix_time=0;
     
     // constructor (empty)
     Trajectory(){};
@@ -57,6 +56,9 @@ class Trajectory
 
     // Define control functions
     void start();
+    void startTraj();
+    void startPrefix();
+    void startSuffix();
     void stop();
     void pause();
     void resume();

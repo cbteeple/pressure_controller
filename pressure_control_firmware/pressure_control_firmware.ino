@@ -247,18 +247,19 @@ bool firstcall = true;
 void loop() {
   //Serial.println("_words need to be here (for some reason)");
   //Handle serial commands
-
+  delay(100); //artificial delay of loop time
   curr_time = micros();
 
 
   run_traj = trajCtrl.all_running;
   traj_reset = trajCtrl.reset;
+  trajCtrl.CurrTime = curr_time;
   
 
   
   
   //bool newSettings=handleCommands.go(settings, ctrlSettings, traj, trajCtrl );
-
+  
   bool newSettings=handleCommands.go();
   String buttonMessage= buttonHandler.go(buttons,settings, ctrlSettings); 
 
@@ -289,7 +290,7 @@ void loop() {
         if (ctrlSettings[i].controlMode==2){
           if (run_traj){
             //Set setpoint
-            setpoint_local[i] = traj[i].interp(curr_time);
+            setpoint_local[i] = trajCtrl.interp(curr_time,i);
             controllers[i].setSetpoint(setpoint_local[i]);
           }
           if (traj_reset){
@@ -360,6 +361,10 @@ void loop() {
         //pressures[i]=0;
       }
     }
+
+  if (ctrlSettings[0].controlMode==2){
+    trajCtrl.setUpNext();
+  }
 
   //Print out data at close to the correct rate
   currentTime=millis();

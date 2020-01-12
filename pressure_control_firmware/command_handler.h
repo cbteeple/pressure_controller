@@ -52,13 +52,19 @@ class CommandHandler
     void SetChannels();
     void TrajConfig();
     void TrajWrap();
-    void TrajSet();
     void SetEcho();
     void Unrecognized();
 
+    void TrajSet();
+    void PrefixSet();
+    void SuffixSet();
+    void TrajLineSet(int);
+
+
+
     
     // Define the map to refer to the worker functions
-    const static unsigned int num_commands= 25;
+    const static unsigned int num_commands= 27;
     String str_vec[num_commands]={"SET",
                                   "TRAJSTART",
                                   "TRAJSTOP",
@@ -85,6 +91,8 @@ class CommandHandler
                                   "TRAJCONFIG",
                                   "TRAJWRAP",
                                   "TRAJSET",
+                                  "PREFSET",
+                                  "SUFFSET",
                                   "ECHO"};
 
     FunctionPointer fun_vec[num_commands]={&SetSetpoint,
@@ -113,6 +121,8 @@ class CommandHandler
                                            &TrajConfig,
                                            &TrajWrap,
                                            &TrajSet,
+                                           &PrefixSet,
+                                           &SuffixSet,
                                            &SetEcho};
     
     FunctionPointer fun_default = &Unrecognized;
