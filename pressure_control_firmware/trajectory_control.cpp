@@ -59,33 +59,45 @@ void TrajectoryControl::start(){
     traj[i].startPrefix();
   }
 
-  Serial.println("_TRAJ: Start Prefix");
+  current_message += ("_TRAJ: Start Prefix");
+  current_message += '\n';
 }
 
 
 void TrajectoryControl::startTraj(){
+  StartTime = CurrTime;
   all_running = true;
   current_traj = 1;
   for (int i=0; i<num_channels; i++){
     traj[i].startTraj();
   }
-  Serial.println("_TRAJ: Start Main");
+  current_message += ("_TRAJ: Start Main");
+  current_message += '\n';
 }
 
 /*
 Stop the trajectory and reset to the beginning
 */
 void TrajectoryControl::stop(){
-  all_running=false;
   current_traj = 2;
-  reset=true;
   if (suffix_after_stop){
+    all_running=true;
+    StartTime = CurrTime;
     for(int i=0; i<num_channels; i++){
       traj[i].setSuffixLine(-1, 0.0, traj[i].interp(deltaT)); //set the first line of the suffix to the current setpoint
       traj[i].startSuffix(); //start running the suffix
     }
-    Serial.println("_TRAJ: Start Suffix");
+    current_message +=("_TRAJ: Start Suffix");
+    current_message += '\n';
   }
+  else{
+    fullStop();
+  }
+}
+
+void TrajectoryControl::fullStop(){
+  //reset=true;
+  all_running=false;
 }
 
 
@@ -133,17 +145,20 @@ float TrajectoryControl::interp(float curr_time, int channel){
 }
 
 void TrajectoryControl::setUpNext(){
+  current_message="";
   
   all_finished = isAllFinished();
 
   if (all_running & all_finished){
 
     if (current_traj==0){
-      Serial.println("_TRAJ: End Prefix");
+      current_message += ("_TRAJ: End Prefix");
+      current_message += '\n';
       startTraj();
     }
     else if (current_traj==1){
-      Serial.println("_TRAJ: End Main");
+      current_message += ("_TRAJ: End Main");
+      current_message += '\n';
       if (wrap){
         // Restart all trajectories
         for (int i=0; i<num_channels; i++){
@@ -155,12 +170,10 @@ void TrajectoryControl::setUpNext(){
       }
     }
     else if (current_traj==2){
-      all_running=false;
-      Serial.println("_TRAJ: End Suffix");
-    }
-
-
-    
+      fullStop();
+      current_message += ("_TRAJ: End Suffix");
+      current_message += '\n';
+    }    
   }
 }
 
@@ -169,7 +182,7 @@ void TrajectoryControl::setUpNext(){
 
 bool TrajectoryControl::isAllFinished() {
   for ( int i = 0; i < num_channels; ++i ) {
-     if ( traj[i].finished == false ) {
+     if ( traj[i].finished[current_traj] == false ) {
        return false;
      }
   }

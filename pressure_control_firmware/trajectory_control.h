@@ -34,6 +34,7 @@ class TrajectoryControl
     bool suffix_after_stop = true;
     int current_traj = 0;
     float deltaT=0;
+    String current_message="";
     
     // constructor (empty)
     TrajectoryControl(){};
@@ -48,6 +49,7 @@ class TrajectoryControl
     void start();
     void startTraj();
     void stop();
+    void fullStop();
     void pause();
     void resume();
     

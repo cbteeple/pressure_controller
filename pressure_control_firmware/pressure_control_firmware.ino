@@ -380,6 +380,10 @@ void loop() {
       previousLCDTime=currentTime;
     }
   }
+
+  if(trajCtrl.current_message.length()){
+    printMessage(trajCtrl.current_message);
+  }
     
 }
 
@@ -390,15 +394,25 @@ void loop() {
 //PRINT DATA OUT FUNCTION
 #ifdef USB_RAWHID
   void printData(){
-  handleCommands.sendString(generateSetpointStr());
-  handleCommands.sendString(generateDataStr());
-}
+    handleCommands.sendString(generateSetpointStr());
+    handleCommands.sendString(generateDataStr());
+  }
+
+  void printMessage(String message){
+    handleCommands.sendString(message);
+  }
+
+  
 
 #else
   void printData(){
-  Serial.println(generateSetpointStr());
-  Serial.println(generateDataStr());
-}
+    Serial.println(generateSetpointStr());
+    Serial.println(generateDataStr());
+  }
+
+  void printMessage(String message){
+    Serial.print(message);
+  }
 #endif
 
 
