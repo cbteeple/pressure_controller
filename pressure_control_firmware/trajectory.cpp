@@ -74,7 +74,7 @@ error = setLine(idx, time, row);
 bool Trajectory::setLine(int whichTraj, int idx, float time, float value){
   switch( whichTraj){
     case 0:{
-      if (idx<0 | idx>maxPrefixLen-1 | time<0.0){
+      if ((idx+1)<0 | (idx+1)>maxPrefixLen-1 | time<0.0){
         return true;
       }
       prefixtimes[idx+1] = time;
@@ -87,12 +87,12 @@ bool Trajectory::setLine(int whichTraj, int idx, float time, float value){
       trajtimes[idx] = time;
       trajpts[idx]   = value;
     } break;
-    case 2:{
-      if (idx<0 | idx>maxSuffixLen-1 | time<0.0){
+    case 2:{      
+      if ((idx+1)<0 | (idx+1)>maxSuffixLen-1 | time<0.0){
         return true;
       }
       suffixtimes[idx+1] = time;
-      suffixpts[idx+1]   = value;
+      suffixpts[idx+1]   = value;      
     } break;
 
   }
@@ -224,16 +224,12 @@ float Trajectory::interp(float deltaT){
 
   }
 
-  Serial.println(deltaT,4);
-
 
   float p_set = 0;
   // If the trajectory is not finished, do the interpolation
   if (!finished[current_traj]){
     //If deltaT is larger than the largest time in the trajectory, it must be finished.
     if(deltaT >= times[*curr_len-1]){
-      Serial.println("TRAJECTORY: Time exceeds largest index");
-      Serial.println(times[*curr_len-1],4);
       *curr_idx = *curr_len-1;
       deltaT = times[*curr_len-1];
   
@@ -243,10 +239,8 @@ float Trajectory::interp(float deltaT){
     }
     // If deltaT is in the correct range, do the interpolation
     else{ 
-      Serial.println("TRAJECTORY: find the right index");
-      Serial.println(times[*curr_idx],4);
       while(deltaT>times[*curr_idx]){
-        curr_idx++;
+        *curr_idx=*curr_idx+1;
   
         if (*curr_idx >= *curr_len-1){
           break;
@@ -258,12 +252,6 @@ float Trajectory::interp(float deltaT){
     float percent = (deltaT-times[*curr_idx-1]) / (times[*curr_idx] - times[*curr_idx-1]);
     float a = pts[*curr_idx-1];
     float b = pts[*curr_idx];
-
-    Serial.print(percent,4);
-    Serial.print('\t');
-    Serial.print(a,4);
-    Serial.print('\t');
-    Serial.println(b,4);
     
     p_set=lerp(a, b, percent);
   }
