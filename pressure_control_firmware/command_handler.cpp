@@ -25,7 +25,6 @@ bool CommandHandler::go() {
   bool newSettings = false;
   if (newCommand) {
     newSettings = processCommand();
-    Serial.println("New Command");
     command = "";
   }
   return newSettings;
@@ -40,7 +39,7 @@ void CommandHandler::stopBroadcast() {
 }
 
 
-void CommandHandler::initialize(int num, globalSettings (&settings_in), controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl (&trajCtrl_in)) {
+void CommandHandler::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in) {
   numSensors   = num;
   settings     = settings_in;
   ctrlSettings = ctrlSettings_in;
@@ -166,8 +165,8 @@ String CommandHandler::getStringValue(String data, char separator, int index)
 
 
 CommandHandler::FunctionPointer CommandHandler::findFunction(String str_in){
-  for (int i=0; i<idx;i++){
-    if (str_vec[i] == str_in){
+  for (int i=0; i<num_commands;i++){
+    if (str_in.startsWith(str_vec[i])){
       return fun_vec[i];
     }
   }
@@ -224,48 +223,48 @@ void CommandHandler::TrajStart(){
     if (broadcast) {
       bc_string += ("TRAJSTART: Trajectory Started");
     }
-    trajCtrl.start(); //TODO: This is wrong - need to invoke this on traj_control
+    trajCtrl->start(); //TODO: This is wrong - need to invoke this on traj_control
   }
 
 void CommandHandler::TrajStop(){
     if (broadcast) {
       bc_string += ("TRAJSTOP: Trajectory Stopped");
     }
-    trajCtrl.stop();
+    trajCtrl->stop();
   }
 
 void CommandHandler::TrajPause() {
     if (broadcast) {
       bc_string += ("TRAJPAUSE: Trajectory Paused");
     }
-    trajCtrl.pause();
+    trajCtrl->pause();
   }
 
 void CommandHandler::TrajResume() {
     if (broadcast) {
       bc_string += ("TRAJRESUME: Trajectory Resumed");
     }
-    trajCtrl.resume();
+    trajCtrl->resume();
   }
 
 
 
 void CommandHandler::DataOff() {
-    settings.outputsOn = false;
+    settings->outputsOn = false;
     if (broadcast) {
       bc_string += "OFF: Outputs Off";
     }
   }
 
 void CommandHandler::DataOn() {
-    settings.outputsOn = true;
+    settings->outputsOn = true;
     if (broadcast) {
       bc_string += "ON: Outputs On";
     }
   }
 void CommandHandler::SetDataTime() {
     if (getStringValue(command, ';', 1).length()) {
-      settings.looptime = getStringValue(command, ';', 1).toInt();
+      settings->looptime = getStringValue(command, ';', 1).toInt();
       newSettings = true;
       if (broadcast) {
         bc_string += "NEW ";
@@ -273,13 +272,13 @@ void CommandHandler::SetDataTime() {
     }
     if (broadcast) {
       bc_string += "TIME: ";
-      bc_string += String(settings.looptime);
+      bc_string += String(settings->looptime);
     }
   }
 
 void CommandHandler::SetLCDTime() {
     if (getStringValue(command, ';', 1).length()) {
-      settings.lcdLoopTime = getStringValue(command, ';', 1).toInt();
+      settings->lcdLoopTime = getStringValue(command, ';', 1).toInt();
       newSettings = true;
       if (broadcast) {
         bc_string += "NEW ";
@@ -287,7 +286,7 @@ void CommandHandler::SetLCDTime() {
     }
     if (broadcast) {
       bc_string += "LCDTIME: ";
-      bc_string += String(settings.lcdLoopTime);
+      bc_string += String(settings->lcdLoopTime);
     }
   }
 
@@ -502,7 +501,7 @@ void CommandHandler::Save() {
     for (int i = 0; i < numSensors; i++) {
       saveHandler.saveCtrl(ctrlSettings[i], i);
     }
-    saveHandler.saveGlobal(settings);
+    saveHandler.saveGlobal(*settings);
 
     if (broadcast) {
       bc_string += ("SAVE: Settings saved to onboard storage");
@@ -516,9 +515,9 @@ void CommandHandler::Load() {
       saveHandler.loadCtrl(ctrlSettings[i], i);
       ctrlSettings[i].setpoint = set_temp;
     }
-    bool set_temp = settings.outputsOn;
-    saveHandler.loadGlobal(settings);
-    settings.outputsOn = set_temp;
+    bool set_temp = settings->outputsOn;
+    saveHandler.loadGlobal(*settings);
+    settings->outputsOn = set_temp;
     newSettings = true;
 
     if (broadcast) {
@@ -531,7 +530,7 @@ void CommandHandler::SaveDefault() {
     for (int i = 0; i < numSensors; i++) {
       saveHandler.saveDefaultCtrl(ctrlSettings[i], i);
     }
-    saveHandler.saveDefaultGlobal(settings);
+    saveHandler.saveDefaultGlobal(*settings);
     if (broadcast) {
       bc_string += ("DEFSAVE: Settings saved as default");
     }
@@ -542,9 +541,9 @@ void CommandHandler::LoadDefault() {
     for (int i = 0; i < numSensors; i++) {
       saveHandler.loadDefaultCtrl(ctrlSettings[i], i);
     }
-    bool set_temp = settings.outputsOn;
-    saveHandler.loadDefaultGlobal(settings);
-    settings.outputsOn = set_temp;
+    bool set_temp = settings->outputsOn;
+    saveHandler.loadDefaultGlobal(*settings);
+    settings->outputsOn = set_temp;
     newSettings = true;
     if (broadcast) {
       bc_string += ("DEFLOAD: Settings retrieved from default");
@@ -589,19 +588,19 @@ void CommandHandler::SetChannels() {
   //[trajectory length] [trajectory starting index] [wrap mode]
 void CommandHandler::TrajConfig() {
     if (getStringValue(command, ';', 3).length()) {
-      trajCtrl.start_idx = constrain(getStringValue(command, ';', 1).toInt(), 0, 999);
-      trajCtrl.len = constrain(getStringValue(command, ';', 2).toInt(), 1, 1000);
-      trajCtrl.wrap = bool(getStringValue(command, ';', 3).toInt());
+      trajCtrl->start_idx = constrain(getStringValue(command, ';', 1).toInt(), 0, 999);
+      trajCtrl->len = constrain(getStringValue(command, ';', 2).toInt(), 1, 1000);
+      trajCtrl->wrap = bool(getStringValue(command, ';', 3).toInt());
     }
     if (broadcast) {
       bc_string += ("TRAJCONFIG: start = ");
-      bc_string += String(trajCtrl.start_idx);
+      bc_string += String(trajCtrl->start_idx);
       bc_string += ('\t');
       bc_string += ("len = ");
-      bc_string += String(trajCtrl.len);
+      bc_string += String(trajCtrl->len);
       bc_string += ('\t');
       bc_string += ("wrap = ");
-      bc_string += String(trajCtrl.wrap);
+      bc_string += String(trajCtrl->wrap);
     }
   }
 
@@ -609,11 +608,11 @@ void CommandHandler::TrajConfig() {
 
 void CommandHandler::TrajWrap() {
     if (getStringValue(command, ';', 1).length()) {
-      trajCtrl.wrap = bool(getStringValue(command, ';', 1).toInt());
+      trajCtrl->wrap = bool(getStringValue(command, ';', 1).toInt());
     }
     if (broadcast) {
       bc_string += ("TRAJWRAP: ");
-      bc_string += String(trajCtrl.wrap);
+      bc_string += String(trajCtrl->wrap);
     }
   }
 
