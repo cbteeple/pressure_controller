@@ -247,7 +247,6 @@ bool firstcall = true;
 void loop() {
   //Serial.println("_words need to be here (for some reason)");
   //Handle serial commands
-  delay(100); //artificial delay of loop time
   curr_time = micros();
 
 
