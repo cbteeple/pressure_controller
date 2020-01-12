@@ -10,6 +10,7 @@ import sys
 import os
 import matplotlib.pyplot as plt
 import numbers
+import copy
 
 traj_folder = "traj_setup"
 out_folder  = "traj_built"
@@ -42,9 +43,16 @@ class trajBuilder:
 
 
     # Save yaml files of trajectories generated.
-    def saveOut(self, outTraj):
+    def saveOut(self, outTraj, prefix=None, suffix=None):
         outDict = {}
         outDict['setpoints']= outTraj
+
+        if prefix is not None:
+            outDict['prefix'] = prefix
+
+        if suffix is not None:
+            outDict['suffix'] = suffix
+
 
         outFile=os.path.join(self.out_folder,self.filename+".traj")
 
@@ -87,9 +95,9 @@ class trajBuilder:
         waveform_type = self.config.get("waveform_type")
 
 
-        traj_setpoints = self.config.get("setpoints",None)
-        prefix = traj_setpoints.get("prefix",None)
-        suffix = traj_setpoints.get("suffix",None)
+        setpts = self.config.get("setpoints",None)
+        prefix = setpts.get("prefix",None)
+        suffix = setpts.get("suffix",None)
 
 
         channels =  self.config.get("channels")
@@ -171,32 +179,36 @@ class trajBuilder:
 
 
         out_traj_whole = np.append(out_times,out_traj,axis=1)
+        out_traj_all = copy.deepcopy(out_traj_whole)
 
 
         if prefix is not None:
             prefix = np.asarray(prefix)
             # Update the times
-            out_traj_whole[:,0] = out_traj_whole[:,0] + prefix[-1,0]
+            out_traj_all[:,0] = out_traj_all[:,0] + prefix[-1,0]
 
             # Append to the array
-            out_traj_whole = np.append(prefix,out_traj_whole,axis=0);
+            out_traj_all = np.append(prefix,out_traj_all,axis=0);
 
         if suffix is not None:
             suffix = np.asarray(suffix)        
-            suffix[:,0] = suffix[:,0] + out_traj_whole[-1,0]
-            out_traj_whole = np.append(out_traj_whole,suffix,axis=0);
+            suffix[:,0] = suffix[:,0] + out_traj_all[-1,0]
+            out_traj_all = np.append(out_traj_all,suffix,axis=0);
 
-        plt.plot(out_traj_whole[:,0],out_traj_whole[:,1:])
+        plt.plot(out_traj_all[:,0],out_traj_all[:,1:])
         plt.show()
 
-        self.saveOut(out_traj_whole.tolist())
+        self.saveOut(out_traj_whole.tolist(), prefix, suffix)
 
         print("Trajectory has %d lines"%(out_traj_whole.shape[0]))
 
         
 
     def doInterp(self):
-        traj_setpoints = self.config.get("setpoints",None)
+        setpts = self.config.get("setpoints",None)
+        traj_setpoints = setpts.get("main",  None)
+        prefix = traj_setpoints.get("prefix",None)
+        suffix = traj_setpoints.get("suffix",None)
         num_cycles = float(self.config.get("num_cycles"))
         interp_type = str(self.config.get("interp_type"))
 
@@ -250,7 +262,7 @@ class trajBuilder:
 
         
 
-        self.saveOut(allOut)
+        self.saveOut(allOut, prefix, suffix)
 
         print("Trajectory has %d lines"%(len(allOut)))
 

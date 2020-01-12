@@ -13,9 +13,19 @@ config:
     interp_type: none   # can be: 'linear', 'cubic'
     setpoints: # Setpoints are only used if you are doing an interpolation
         # [time, finger1, finger2, n/c, n/c]
+        main:
         - [0.0,   0, 0, 0,  0]
         - [1.0,    -20, 0, 0,  0]
         - [2.0,   0, -20, 0,  0]
         - [3.0,     0, 0, -20, 0]
         - [4.0,     0, 0, 0, -20]
         - [5.0,     0, 0, 0, 0]
+
+        prefix:
+            - [0.000,   0, 0, 0,  0]
+            - [1.0,    15, 15, 0,  0]
+            - [2.0,    0, 20, 0,  0]
+
+        suffix:
+            - [1.0,  15, 15, 0,  0]
+            - [2.0,  0, 0, 0,  0]
