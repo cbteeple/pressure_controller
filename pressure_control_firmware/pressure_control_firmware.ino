@@ -35,19 +35,20 @@ Trajectory traj[MAX_NUM_CHANNELS];
 TrajectoryControl trajCtrl;
 
 //Create an object to handle serial commands
+#include "command_handler.h"
+CommandHandler handleCommands;
+  
 #ifdef USB_RAWHID
-  #include "handleHIDCommands.h"
-  handleHIDCommands handleCommands;
   #define VENDOR_ID               0x16C0
   #define PRODUCT_ID              0x0486
   #define RAWHID_USAGE_PAGE       0xFFAB  // recommended: 0xFF00 to 0xFFFF
   #define RAWHID_USAGE            0x0200  // recommended: 0x0100 to 0xFFFF
 
 #endif
-#ifndef USB_RAWHID
-  #include "handleSerialCommands.h"
-  handleSerialCommands handleCommands;
-#endif
+//#ifndef USB_RAWHID
+ // #include "handleSerialCommands.h"
+ // handleSerialCommands handleCommands;
+//#endif
 
 eepromHandler saveHandler;
 
