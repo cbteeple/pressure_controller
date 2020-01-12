@@ -39,7 +39,7 @@ void handleHIDCommands::stopBroadcast() {
 }
 
 
-void handleHIDCommands::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in) {
+void handleHIDCommands::initialize(int num, globalSettings (&settings_in), controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl (&trajCtrl_in)) {
   numSensors   = num;
   settings     = settings_in;
   ctrlSettings = ctrlSettings_in;
@@ -47,6 +47,7 @@ void handleHIDCommands::initialize(int num, globalSettings *settings_in, control
   trajCtrl     = trajCtrl_in;
   // reserve 200 bytes for the inputString:
   command.reserve(200);
+
 }
 
 
@@ -94,17 +95,12 @@ void handleHIDCommands::sendString(String bc_string){
 
 //bool handleHIDCommands::processCommand(globalSettings (&settings), controlSettings *ctrlSettings, Trajectory *traj, TrajectoryControl (&trajCtrl)) {
 bool handleHIDCommands::processCommand() {
-  bool newSettings = false;
+  newSettings = false;
   bc_string = "_";
 
   String cmdStr = getStringValue(command, ';', 0);
-  auto iter = command_map.find(cmdStr);
-  if(iter == command_map.end()){
-    Unrecognized();
-  }
-  else{
-    (*iter->second)();
-  }
+  auto work_fun = findFunction(cmdStr);
+  (this->*work_fun)();
 
 
   //End the line with a newline
@@ -139,6 +135,18 @@ String handleHIDCommands::getStringValue(String data, char separator, int index)
 
 
 
+
+
+
+handleHIDCommands::FunctionPointer handleHIDCommands::findFunction(String str_in){
+  for (int i=0; i<idx;i++){
+    if (str_vec[i] == str_in){
+      return fun_vec[i];
+    }
+  }
+  // If nothing is found, return the default
+  return fun_default;
+};
 
 
 
@@ -593,7 +601,7 @@ void handleHIDCommands::TrajSet() {
       }
 
       for (int i = 0; i < numSensors; i++){
-        traj[i].setLine(int(row[0]),float(row[1]),float(row[i+2]));
+        traj[i].setTrajLine(int(row[0]),float(row[1]),float(row[i+2]));
       }
 
 

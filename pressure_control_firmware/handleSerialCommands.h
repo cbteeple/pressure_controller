@@ -18,10 +18,10 @@ class handleSerialCommands
     eepromHandler saveHandler;
 
     // All of the settings pointers
-    globalSettings *settings;
+    globalSettings &settings;
     controlSettings *ctrlSettings;
     Trajectory *traj;
-    TrajectoryControl *trajCtrl;
+    TrajectoryControl &trajCtrl;
 
     bool getCommand();
     bool getCommandByChar();
@@ -29,7 +29,7 @@ class handleSerialCommands
     String getStringValue(String, char, int);
   
   public:
-    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *);
+    void initialize(int, globalSettings &, controlSettings *, Trajectory *, TrajectoryControl &);
     bool go();
     void startBroadcast();
     void stopBroadcast();

@@ -27,6 +27,8 @@ class Trajectory
     
     // Define important variables
     int len = 20;
+    int prefix_len=0;
+    int suffix_len=0;
     int start_idx = 0;
     bool wrap = false;
     bool running = false;
@@ -47,7 +49,9 @@ class Trajectory
 
     // load the trajectory into memory
     bool setLength(int);
+    bool setLength(int, int, int);
     bool setLine(int, int, float ,float);
+    bool setTrajLine(int, float, float);
     bool setPrefixLine(int, float ,float);
     bool setSuffixLine(int, float ,float);
 
