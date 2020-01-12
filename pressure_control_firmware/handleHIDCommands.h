@@ -1,6 +1,5 @@
 #include <stdlib.h>
-#include <ArduinoSTL.h>
-#include <map>
+#include "Arduino.h"
 #include "allSettings.h"
 #include "trajectory.h"
 #include "trajectory_control.h"
@@ -12,16 +11,22 @@
 #define __handleHIDCommands_H__
 
 
+
 class handleHIDCommands
 {
+  typedef void (handleHIDCommands::*FunctionPointer)();
+  //typedef void (*FunctionPointer)(); // function pointer type
   private:
     byte in_buffer[64];
     byte out_buffer[64];   
     int numSensors;
     String command;
     String bc_string = "_";
+    bool newSettings = false;
     bool broadcast = false;
     eepromHandler saveHandler;
+
+    // Function map setup
 
     // Declare all of the worker functions
     void SetSetpoint();
@@ -48,56 +53,90 @@ class handleHIDCommands
     void TrajConfig();
     void TrajWrap();
     void TrajSet();
-    void Echo();
+    void SetEcho();
     void Unrecognized();
 
     
     // Define the map to refer to the worker functions
-    typedef void (*ScriptFunction)(void); // function pointer type
-    typedef std::unordered_map<String, ScriptFunction> script_map;
-    script_map command_map;
+    const static unsigned int num_commands= 25;
+    String str_vec[num_commands]={"SET",
+                                  "TRAJSTART",
+                                  "TRAJSTOP",
+                                  "TRAJPAUSE",
+                                  "TRAJRESUME",
+                                  "OFF",
+                                  "ON",
+                                  "TIME",
+                                  "LCDTIME",
+                                  "INTSTART",
+                                  //
+                                  "MAXP",
+                                  "MINP",
+                                  "VALVE",
+                                  "WINDOW",
+                                  "PID",
+                                  "MODE",
+                                  "SAVE",
+                                  "LOAD",
+                                  "DEFSAVE",
+                                  "DEFLOAD",
+                                  //
+                                  "CHAN",
+                                  "TRAJCONFIG",
+                                  "TRAJWRAP",
+                                  "TRAJSET",
+                                  "ECHO"};
 
-    command_map.emplace("SET",        &SetSetpoint);
-    command_map.emplace("TRAJSTART",  &TrajStart);
-    command_map.emplace("TRAJSTOP",   &TrajStop);
-    command_map.emplace("TRAJPAUSE",  &TrajPause);
-    command_map.emplace("TRAJRESUME", &TrajResume);
-    command_map.emplace("OFF",        &DataOff);
-    command_map.emplace("ON",         &DataOn);
-    command_map.emplace("TIME",       &SetDataTime);
-    command_map.emplace("LCDTIME",    &SetLCDTime);
-    command_map.emplace("INTSTART",   &StartIntegrator);
-    command_map.emplace("MAXP",       &SetMaxPressure);
-    command_map.emplace("MINP",       &SetMinPressure);
-    command_map.emplace("VALVE",      &SetValves);
-    command_map.emplace("WINDOW",     &SetWindow);
-    command_map.emplace("PID",        &SetPID);
-    command_map.emplace("MODE",       &SetMode);
-    command_map.emplace("SAVE",       &Save);
-    command_map.emplace("LOAD",       &Load);
-    command_map.emplace("DEFSAVE",    &SaveDefault);
-    command_map.emplace("DEFLOAD",    &LoadDefault);
-    command_map.emplace("CHAN",       &SetChannels);
-    command_map.emplace("TRAJCONFIG", &TrajConfig);
-    command_map.emplace("TRAJCONFIG", &TrajWrap);
-    command_map.emplace("TRAJSET",    &TrajSet);
-    command_map.emplace("ECHO",       &SetEcho);
-    command_map.emplace("NA",         &Unrecognized);
+    FunctionPointer fun_vec[num_commands]={&SetSetpoint,
+                                           &TrajStart,
+                                           &TrajStop,
+                                           &TrajPause,
+                                           &TrajResume,
+                                           &DataOff,
+                                           &DataOn,
+                                           &SetDataTime,
+                                           &SetLCDTime,
+                                           &StartIntegrator,
+                                           //
+                                           &SetMaxPressure,
+                                           &SetMinPressure,
+                                           &SetValves,
+                                           &SetWindow,
+                                           &SetPID,
+                                           &SetMode,
+                                           &Save,
+                                           &Load,
+                                           &SaveDefault,
+                                           &LoadDefault,
+                                           //
+                                           &SetChannels,
+                                           &TrajConfig,
+                                           &TrajWrap,
+                                           &TrajSet,
+                                           &SetEcho};
+    
+    FunctionPointer fun_default = &Unrecognized;
 
+
+
+    int idx = 0;
 
     // All of the settings pointers
-    globalSettings *settings;
+    globalSettings &settings;
     controlSettings *ctrlSettings;
     Trajectory *traj;
-    TrajectoryControl *trajCtrl;
+    TrajectoryControl &trajCtrl;
 
     int getCommandType();
     bool readCommand();
     bool processCommand();
     String getStringValue(String, char, int);
+
+    FunctionPointer findFunction(String);
   
   public:
-    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *);
+    handleHIDCommands(){};
+    void initialize(int, globalSettings &, controlSettings *, Trajectory *, TrajectoryControl &);
     bool go();
     void startBroadcast();
     void stopBroadcast();

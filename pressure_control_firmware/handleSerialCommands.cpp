@@ -27,7 +27,7 @@ void handleSerialCommands::stopBroadcast() {
 }
 
 
-void handleSerialCommands::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in) {
+void handleSerialCommands::initialize(int num, globalSettings (&settings_in), controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl (&trajCtrl_in)) {
   numSensors   = num;
   settings     = settings_in;
   ctrlSettings = ctrlSettings_in;
@@ -500,7 +500,7 @@ bool handleSerialCommands::processCommand() {
       }
 
       for (int i = 0; i < numSensors; i++){
-        traj[i].setLine(int(row[0]),float(row[1]),float(row[i+2]));
+        traj[i].setTrajLine(int(row[0]),float(row[1]),float(row[i+2]));
       }
 
       if (broadcast) {

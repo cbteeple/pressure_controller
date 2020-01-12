@@ -31,12 +31,30 @@ bool Trajectory::setLength(int len_in){
 
 bool Trajectory::setLength(int traj_len_in, int prefix_len_in , int suffix_len_in){
   bool error = false;
-  if (len_in<=maxLen){
+  if (traj_len_in<=maxLen){
     len = traj_len_in;
   }
   else{
     error = true;  
   }
+  if (prefix_len_in<=maxPrefixLen){
+    prefix_len = prefix_len_in;
+  }
+  else{
+    error = true;  
+  }
+  if (suffix_len_in<=maxSuffixLen){
+    suffix_len = suffix_len_in;
+  }
+  else{
+    error = true;  
+  }
+
+
+
+
+
+  
   return error;
   
 };
@@ -58,7 +76,7 @@ EXAMPLE:
 error = setLine(idx, time, row);
 */
 bool Trajectory::setLine(int whichTraj, int idx, float time, float value){
-  switch whichTraj{
+  switch( whichTraj){
     case 0:{
       if (idx<0 | idx>maxLen | time<0.0){
         return true;
