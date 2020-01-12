@@ -183,17 +183,17 @@ class trajBuilder:
 
 
         if prefix is not None:
-            prefix = np.asarray(prefix)
+            prefix_arr = np.asarray(prefix)
             # Update the times
-            out_traj_all[:,0] = out_traj_all[:,0] + prefix[-1,0]
+            out_traj_all[:,0] = out_traj_all[:,0] + prefix_arr[-1,0]
 
             # Append to the array
-            out_traj_all = np.append(prefix,out_traj_all,axis=0);
+            out_traj_all = np.append(prefix_arr,out_traj_all,axis=0);
 
         if suffix is not None:
-            suffix = np.asarray(suffix)        
-            suffix[:,0] = suffix[:,0] + out_traj_all[-1,0]
-            out_traj_all = np.append(out_traj_all,suffix,axis=0);
+            suffix_arr = np.asarray(suffix)        
+            suffix_arr[:,0] = suffix_arr[:,0] + out_traj_all[-1,0]
+            out_traj_all = np.append(out_traj_all,suffix_arr,axis=0);
 
         plt.plot(out_traj_all[:,0],out_traj_all[:,1:])
         plt.show()
@@ -207,8 +207,8 @@ class trajBuilder:
     def doInterp(self):
         setpts = self.config.get("setpoints",None)
         traj_setpoints = setpts.get("main",  None)
-        prefix = traj_setpoints.get("prefix",None)
-        suffix = traj_setpoints.get("suffix",None)
+        prefix = setpts.get("prefix",None)
+        suffix = setpts.get("suffix",None)
         num_cycles = float(self.config.get("num_cycles"))
         interp_type = str(self.config.get("interp_type"))
 
