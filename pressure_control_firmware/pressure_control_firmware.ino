@@ -11,6 +11,7 @@
 #include "trajectory.h"
 #include "trajectory_control.h"
 #include <EasyLCD.h>
+#include "command_handler.h"
 
 
 //Include the config file from the system you are using
@@ -35,7 +36,7 @@ Trajectory traj[MAX_NUM_CHANNELS];
 TrajectoryControl trajCtrl;
 
 //Create an object to handle serial commands
-#include "command_handler.h"
+
 CommandHandler handleCommands;
   
 #ifdef USB_RAWHID
@@ -135,7 +136,7 @@ void setup() {
     }
   
     buttonHandler.initialize();
-    handleCommands.initialize(MAX_NUM_CHANNELS,settings, ctrlSettings, traj, trajCtrl);
+    handleCommands.initialize(MAX_NUM_CHANNELS, &settings, ctrlSettings, traj, &trajCtrl);
     handleCommands.startBroadcast();
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
       
@@ -257,6 +258,7 @@ void loop() {
   
   
   //bool newSettings=handleCommands.go(settings, ctrlSettings, traj, trajCtrl );
+
   bool newSettings=handleCommands.go();
   String buttonMessage= buttonHandler.go(buttons,settings, ctrlSettings); 
 

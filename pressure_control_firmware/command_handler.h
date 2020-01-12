@@ -122,10 +122,10 @@ class CommandHandler
     int idx = 0;
 
     // All of the settings pointers
-    globalSettings &settings;
+    globalSettings *settings;
     controlSettings *ctrlSettings;
     Trajectory *traj;
-    TrajectoryControl &trajCtrl;
+    TrajectoryControl *trajCtrl;
 
     int getCommandType();
     bool readCommand();
@@ -136,7 +136,7 @@ class CommandHandler
   
   public:
     CommandHandler(){};
-    void initialize(int, globalSettings &, controlSettings *, Trajectory *, TrajectoryControl &);
+    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *);
     bool go();
     void startBroadcast();
     void stopBroadcast();
