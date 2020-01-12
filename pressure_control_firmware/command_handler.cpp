@@ -587,20 +587,23 @@ void CommandHandler::SetChannels() {
   //
   //[trajectory length] [trajectory starting index] [wrap mode]
 void CommandHandler::TrajConfig() {
-    if (getStringValue(command, ';', 3).length()) {
-      trajCtrl->start_idx = constrain(getStringValue(command, ';', 1).toInt(), 0, 999);
-      trajCtrl->len = constrain(getStringValue(command, ';', 2).toInt(), 1, 1000);
-      trajCtrl->wrap = bool(getStringValue(command, ';', 3).toInt());
+    if (getStringValue(command, ';', 4).length()) {
+      trajCtrl->setLength(constrain(getStringValue(command, ';', 1).toInt(), 0, 999),
+                          constrain(getStringValue(command, ';', 2).toInt(), 0, 128),
+                          constrain(getStringValue(command, ';', 3).toInt(), 0, 128));
+      trajCtrl->suffix_after_stop = bool(getStringValue(command, ';', 4).toInt());
     }
     if (broadcast) {
-      bc_string += ("TRAJCONFIG: start = ");
-      bc_string += String(trajCtrl->start_idx);
-      bc_string += ('\t');
+      bc_string += ("TRAJCONFIG: ");
       bc_string += ("len = ");
-      bc_string += String(trajCtrl->len);
+      bc_string += String(trajCtrl->len[0]);
       bc_string += ('\t');
-      bc_string += ("wrap = ");
-      bc_string += String(trajCtrl->wrap);
+      bc_string += String(trajCtrl->len[1]);
+      bc_string += ('\t');
+      bc_string += String(trajCtrl->len[2]);
+      bc_string += ('\t');
+      bc_string += ("suffix after stop = ");
+      bc_string += String(trajCtrl->suffix_after_stop);
     }
   }
 
@@ -617,47 +620,114 @@ void CommandHandler::TrajWrap() {
   }
 
   //[index];[time];[set0];[set1];[set2];[set3]
+
 void CommandHandler::TrajSet() {
-    if (getStringValue(command, ';', numSensors + 2).length()) {
+  TrajLineSet(1);
+}
+void CommandHandler::PrefixSet() {
+  TrajLineSet(0);
+}
+void CommandHandler::SuffixSet() {
+  TrajLineSet(2);
+}
 
-      float row[numSensors + 2];
+  
+void CommandHandler::TrajLineSet(int which_traj) {
+  // If there is at least one channel's worth of data, pad the new row with zeros and add in new data
+  if(getStringValue(command, ';', 3).length()){
 
+    float row[numSensors + 2];
+
+    for (int i = 0; i < numSensors + 2; i++) {
+      String new_entry=getStringValue(command, ';', i + 1);
+      if(new_entry.length()==0){
+        break;  
+      }
+      row[i] = new_entry.toFloat();
+    }
+
+    for (int i = 0; i < numSensors; i++){
+      switch(which_traj){
+        case 0:{
+          traj[i].setPrefixLine(int(row[0]),float(row[1]),float(row[i+2]));
+        } break;
+        case 1:{
+          traj[i].setTrajLine(int(row[0]),float(row[1]),float(row[i+2]));
+        } break;
+        case 2:{
+          traj[i].setSuffixLine(int(row[0]),float(row[1]),float(row[i+2]));
+        } break;
+      }
+    }
+
+    // If we are broadcasting, spit out the line that was just written
+    if (broadcast) {
+      bc_string += ("TRAJSET: ");
+      bc_string += String(which_traj,1);
+      bc_string += ("\t");
       for (int i = 0; i < numSensors + 2; i++) {
-        row[i] = getStringValue(command, ';', i + 1).toFloat();
+        bc_string += ('\t');
+        bc_string += String(row[i], 2);
       }
+    }
+  }
 
-      for (int i = 0; i < numSensors; i++){
-        traj[i].setTrajLine(int(row[0]),float(row[1]),float(row[i+2]));
+  // If there's no new data (or incomplete), spit out the whole trajectory
+  else {
+    if (broadcast) {
+      bc_string += ("TRAJSET:");
+      bc_string += ('\n');
+      bc_string += ("_Prefix:");
+      
+      if (traj[0].len[0] ==0){
+        bc_string += " Empty";
       }
-
-
-      if (broadcast) {
-        bc_string += ("TRAJSET: ");
-        for (int i = 0; i < numSensors + 2; i++) {
+      
+      for (int i = 1; i < (traj[0].len[0]); i++) {
+        bc_string += ('\n');
+        bc_string += String(traj[0].prefixtimes[i]);
+        bc_string += ('\t');
+        for (int j = 0; j < numSensors; j++) {
+          bc_string += String(traj[j].prefixpts[i]);
           bc_string += ('\t');
-          bc_string += String(row[i], 2);
+        }
+      }
+      bc_string += ('\n');
+      bc_string += ("_Trajectory:");
+
+      if (traj[0].len[1] ==0){
+        bc_string += " Empty";
+      }
+
+      for (int i = 0; i < (traj[0].len[1]); i++) {
+        bc_string += ('\n');
+        bc_string += String(traj[0].trajtimes[i]);
+        bc_string += ('\t');
+        for (int j = 0; j < numSensors; j++) {
+          bc_string += String(traj[j].trajpts[i]);
+          bc_string += ('\t');
         }
       }
 
+      bc_string += ('\n');
+      bc_string += ("_Suffix:");
 
-    }
-
-    else {
-      if (broadcast) {
-        bc_string += ("TRAJSET:");
-        
-        for (int i = traj[0].start_idx; i < (traj[0].start_idx + traj[0].len); i++) {
-          bc_string += ('\n');
-          bc_string += String(traj[0].trajtimes[i]);
-          bc_string += ('\t');
-          for (int j = 0; j < numSensors; j++) {
-            bc_string += String(traj[j].trajpts[i]);
-            bc_string += ('\t');
-          }
-        }
+      if (traj[0].len[2] ==0){
+        bc_string += " Empty";
       }
 
+      for (int i = 1; i < (traj[0].len[2]); i++) {
+        bc_string += ('\n');
+        bc_string += String(traj[0].suffixtimes[i]);
+        bc_string += ('\t');
+        for (int j = 0; j < numSensors; j++) {
+          bc_string += String(traj[j].suffixpts[i]);
+          bc_string += ('\t');
+        }
+      }
     }
+
+  }
 
 
   }
