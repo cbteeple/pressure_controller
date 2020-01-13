@@ -27,7 +27,6 @@ class TrajectoryControl
     // Define important variables
     int len[3] = {0,20,0};
     int start_idx = 0;
-    bool wrap = false;
     bool all_running = false;
     bool all_finished = false;
     bool reset=false;
@@ -35,6 +34,8 @@ class TrajectoryControl
     int current_traj = 0;
     float deltaT=0;
     String current_message="";
+    long num_cycles = 1;
+    long curr_cycle = 0;
     
     // constructor (empty)
     TrajectoryControl(){};
@@ -44,6 +45,7 @@ class TrajectoryControl
     // load the trajectory into memory
     bool setLength(int,int,int);
     bool setLine(int, float);
+    bool setSpeed(float);
 
     // Define control functions
     void start();
