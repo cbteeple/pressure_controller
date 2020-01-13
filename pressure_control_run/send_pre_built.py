@@ -94,15 +94,25 @@ class TrajSend:
 
     def sendTraj(self):
         lastTime = 0.0
-        configstring = "trajconfig;%d;%d;%d;%d" %(len(self.prefix),len(self.traj),len(self.suffix),1.0)
+        pre_len=0
+        suf_len=0
+        if self.prefix is not None:
+            pre_len = len(self.prefix)
+        if self.suffix is not None:
+            suf_len = len(self.suffix)
+            
+        configstring = "trajconfig;%d;%d;%d;%d" %(pre_len,len(self.traj),suf_len,1.0)
         print(configstring)
         self.s.write(configstring+'\n')
         for i in range(3):
             self.readStuff()
             time.sleep(0.05)
         self.writeTrajOut(self.traj,   "main")
-        self.writeTrajOut(self.prefix, "prefix")
-        self.writeTrajOut(self.suffix, "suffix")
+        if self.prefix is not None:
+            self.writeTrajOut(self.prefix, "prefix")
+            
+        if self.suffix is not None:
+            self.writeTrajOut(self.suffix, "suffix")
         self.s.write("trajset"+'\n')
 
             # Sleep for a short time before the next send action
