@@ -37,6 +37,7 @@ class Trajectory
     int current_idx[3]={0,0,0};
     int current_traj = 1;
     int start_idx = 0;
+    float stretch_factor=1;
 
 
     float final_time=0;
@@ -53,6 +54,7 @@ class Trajectory
     bool setTrajLine(int, float, float);
     bool setPrefixLine(int, float ,float);
     bool setSuffixLine(int, float ,float);
+    bool setSpeed(float);
 
     // Define control functions
     void start();
