@@ -5,11 +5,6 @@ settings:
 
 # Place all of the type-specific settings in here
 config:
-    subsample_num: 90 #Total number of subsamples
-    
-    num_cycles: 3 
-
-
     interp_type: none   # can be: 'linear', 'cubic'
     setpoints: # Setpoints are only used if you are doing an interpolation
         # [time, finger1, finger2, n/c, n/c]
