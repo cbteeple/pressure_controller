@@ -1,4 +1,4 @@
 # Serial Info
 #devname: /dev/ttyACM0
-devname: COM5
+devname: COM4
 baudrate: 115200 #2000000

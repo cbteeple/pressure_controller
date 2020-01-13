@@ -8,7 +8,6 @@ import os
 import yaml
 from pynput.keyboard import Key, Listener
 
-speedFactor=1.0
 dataBack=True
 saveData = True
 traj_folder = "traj_built"
@@ -27,7 +26,7 @@ def serialRead(ser):
 
 
 class PressureController:
-    def __init__(self, devname,baudrate,wrap):
+    def __init__(self, devname,baudrate,cycles=1,speedFactor=1.0):
         
         if baudrate is None:
             self.s = devname
@@ -36,18 +35,12 @@ class PressureController:
             
         self.traj_folder  = traj_folder
         self.speedFactor = speedFactor
+        self.cycles      = cycles
         self.saveData = saveData
 
         time.sleep(1)
 
-        self.s.write("echo;0"+'\n')
-        #self.s.write("load"+'\n')
-        self.s.write("set;0;0"+'\n')
-        self.s.write("trajwrap;%d"%(wrap)+'\n')
-        self.s.write("mode;2"+'\n')
-        #s.write('on')
 
-        time.sleep(0.5)
 
 
         with open(curr_flag_file,'r') as f:
@@ -57,7 +50,17 @@ class PressureController:
 
         self.createOutFile(outfile)
       
-        
+      
+    def initialize(self):
+        self.s.write("echo;0"+'\n')
+        #self.s.write("load"+'\n')
+        self.s.write("set;0;0"+'\n')
+        self.s.write("trajloop;%d"%(self.cycles)+'\n')
+        self.s.write("trajspeed;%d"%(self.speedFactor)+'\n')
+        self.s.write("mode;2"+'\n')
+        #s.write('on')
+
+        time.sleep(2.5)
 
 
     def createOutFile(self,filename):
@@ -79,9 +82,11 @@ class PressureController:
 
             
     def startTraj(self):
-        self.s.write("trajstart"+'\n')
         if dataBack:
             self.s.write("on\n")
+            
+        self.s.write("trajstart"+'\n')
+        
 
     def shutdown(self):
         self.s.write("off\n")
@@ -113,12 +118,20 @@ class PressureController:
 
 
 if __name__ == '__main__':
-    if 1<= len(sys.argv)<=2:
-
-        if len(sys.argv)==2:
-            wrap = int(sys.argv[1])
+    if 1<= len(sys.argv)<=3:
+        
+        if len(sys.argv)==3:
+            speedFact = float(sys.argv[2])
         else:
-            wrap = False
+            speedFact= 1.0
+
+        if len(sys.argv)>=2:
+            cycles = int(sys.argv[1])
+        else:
+            cycles = 1
+        
+        print(cycles)
+        print(speedFact)
         
         try:
             
@@ -140,10 +153,14 @@ if __name__ == '__main__':
                         print('_RESTART')
                         restartFlag =True
                     
-                    if key == Key.ctrl:
+                    if key == Key.esc:
                         exitFlag=True
+                        # Stop listener
+                        return False
+                        
                 except KeyboardInterrupt:
                     raise
+            
             
             
             listener = Listener(
@@ -162,8 +179,9 @@ if __name__ == '__main__':
                 f.close()
 
             # Create a pressure controller object
-            pres=PressureController(serial_set.get("devname"), serial_set.get("baudrate"), wrap)
+            pres=PressureController(serial_set.get("devname"), serial_set.get("baudrate"), cycles,speedFact)
 
+            pres.initialize();
             
             pres.startTraj()
             #pres.readStuff()
@@ -175,7 +193,8 @@ if __name__ == '__main__':
                 
         except KeyboardInterrupt:
             listener.stop()
+            listener.stop()
             pres.shutdown()
             
     else:
-        print("Please include the filename as the input argument")
+        print("Make sure you sent the right number of arguments")

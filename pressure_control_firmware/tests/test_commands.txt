@@ -1,5 +1,7 @@
 mode;2
 trajconfig;1;3;1;1
+trajloop;5
+trajspeed;2.0
 
 prefset;0;1.0;5;5;5;5;5;5
 suffset;0;1.0;2;2;2;2;2;2
