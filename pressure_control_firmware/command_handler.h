@@ -52,6 +52,8 @@ class CommandHandler
     void SetChannels();
     void TrajConfig();
     void TrajWrap();
+    void SetTrajLoop();
+    void SetTrajSpeed();
     void SetEcho();
     void Unrecognized();
 
@@ -64,7 +66,7 @@ class CommandHandler
 
     
     // Define the map to refer to the worker functions
-    const static unsigned int num_commands= 27;
+    const static unsigned int num_commands= 29;
     String str_vec[num_commands]={"SET",
                                   "TRAJSTART",
                                   "TRAJSTOP",
@@ -89,6 +91,8 @@ class CommandHandler
                                   //
                                   "CHAN",
                                   "TRAJCONFIG",
+                                  "TRAJSPEED",
+                                  "TRAJLOOP",
                                   "TRAJWRAP",
                                   "TRAJSET",
                                   "PREFSET",
@@ -119,6 +123,8 @@ class CommandHandler
                                            //
                                            &SetChannels,
                                            &TrajConfig,
+                                           &SetTrajSpeed,
+                                           &SetTrajLoop,
                                            &TrajWrap,
                                            &TrajSet,
                                            &PrefixSet,

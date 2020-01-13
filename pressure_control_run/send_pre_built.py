@@ -6,7 +6,7 @@ import sys
 import os
 import yaml
 
-speedFactor=1.0
+
 traj_folder = "traj_built"
 curr_flag_file = os.path.join("traj_built","last_sent.txt")
 
@@ -26,7 +26,6 @@ class TrajSend:
     def __init__(self, devname,baudrate):
         self.s = serial.Serial(devname,baudrate)
         self.traj_folder  = traj_folder
-        self.speedFactor = speedFactor
         self.send_wait = 0.05;
         self.board_teensy= board_teensy
 
@@ -77,7 +76,7 @@ class TrajSend:
         for idx, entry in enumerate(traj):
             # Send a string to the pressure controller
                                    
-            string=(cmd_type+";%d;%0.3f")%(idx, self.speedFactor*entry[0]);
+            string=(cmd_type+";%d;%0.3f")%(idx, entry[0]);
             for i in range(num_channels-1):
                 string+=";%0.3f" %(entry[i+1])
             print(string)
@@ -150,12 +149,8 @@ class TrajSend:
 
 
 if __name__ == '__main__':
-    if 2<= len(sys.argv)<=3:
+    if 2<= len(sys.argv)<=2:
 
-        if len(sys.argv)==3:
-            speedFact = 1.0/float(sys.argv[2])
-        else:
-            speedFact= 1.0
         
         try:
             # Get the serial object to use
@@ -170,7 +165,6 @@ if __name__ == '__main__':
             pres.getTraj(sys.argv[1])
 
 
-            pres.speedFactor = speedFact
 
             # Upload the trajectory and start it
             pres.sendTraj()

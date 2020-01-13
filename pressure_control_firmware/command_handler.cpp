@@ -608,16 +608,49 @@ void CommandHandler::TrajConfig() {
   }
 
 
-
 void CommandHandler::TrajWrap() {
-    if (getStringValue(command, ';', 1).length()) {
-      trajCtrl->wrap = bool(getStringValue(command, ';', 1).toInt());
+  if (getStringValue(command, ';', 1).length()) {
+
+      bool wrap = bool(getStringValue(command, ';', 1).toInt());
+    
+      if(wrap){
+        trajCtrl->num_cycles = -1; //Set to loop forever
+      }
+      else{
+        trajCtrl->num_cycles = 1; //Set to just single trajectory
+      }
+    
+      
     }
-    if (broadcast) {
-      bc_string += ("TRAJWRAP: ");
-      bc_string += String(trajCtrl->wrap);
-    }
+  if (broadcast) {
+    bc_string += ("TRAJWRAP: ");
+    bc_string += String(trajCtrl->num_cycles);
   }
+}
+
+
+
+void CommandHandler::SetTrajSpeed() {
+  if (getStringValue(command, ';', 1).length()) {
+      trajCtrl->setSpeed(getStringValue(command, ';', 1).toFloat());
+    }
+  if (broadcast) {
+    bc_string += ("TRAJSPEED: ");
+    bc_string += String(1 / traj[0].stretch_factor, 4);
+  }
+}
+
+
+void CommandHandler::SetTrajLoop() {
+  if (getStringValue(command, ';', 1).length()) {
+      trajCtrl->num_cycles = constrain((getStringValue(command, ';', 1)).toInt(), -1, 1000000);
+    }
+  if (broadcast) {
+    bc_string += ("TRAJLOOP: ");
+    bc_string += String(trajCtrl->num_cycles);
+  }
+}
+
 
   //[index];[time];[set0];[set1];[set2];[set3]
 

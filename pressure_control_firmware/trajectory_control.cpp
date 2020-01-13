@@ -30,6 +30,13 @@ bool TrajectoryControl::setLength(int prefix_len_in, int traj_len_in, int suffix
 }
 
 
+bool TrajectoryControl::setSpeed(float speed_factor_in){
+  for(int i=0; i<num_channels; i++){
+    traj[i].setSpeed(speed_factor_in);
+  }
+}
+
+
 
 
 
@@ -54,6 +61,7 @@ void TrajectoryControl::start(){
   all_running = true;
   StartTime = CurrTime;
   current_traj = 0;
+  curr_cycle = 0;
 
   for(int i=0; i<num_channels; i++){
     traj[i].startPrefix();
@@ -144,6 +152,9 @@ float TrajectoryControl::interp(float curr_time, int channel){
   return p_set;
 }
 
+
+
+
 void TrajectoryControl::setUpNext(){
   current_message="";
   
@@ -159,11 +170,14 @@ void TrajectoryControl::setUpNext(){
     else if (current_traj==1){
       current_message += ("_TRAJ: End Main");
       current_message += '\n';
-      if (wrap){
+      if (num_cycles == -1 ){
         // Restart all trajectories
-        for (int i=0; i<num_channels; i++){
-          startTraj();
-        }
+        startTraj();
+      }
+      else if (curr_cycle<num_cycles-1){
+        // Restart all trajectories
+        startTraj();
+        curr_cycle++;
       }
       else{
         stop();
