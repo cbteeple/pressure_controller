@@ -8,9 +8,18 @@ from scipy.interpolate import CubicSpline
 import scipy.signal as signal
 import sys
 import os
+import matplotlib
 import matplotlib.pyplot as plt
 import numbers
 import copy
+
+
+font = {'family' : 'arial',
+        'weight' : 'normal',
+        'size'   : 14}	
+matplotlib.rc('font', **font)
+plt.clf()
+
 
 traj_folder = "traj_setup"
 out_folder  = "traj_built"
@@ -179,24 +188,8 @@ class trajBuilder:
 
 
         out_traj_whole = np.append(out_times,out_traj,axis=1)
-        out_traj_all = copy.deepcopy(out_traj_whole)
-
-
-        if prefix is not None:
-            prefix_arr = np.asarray(prefix)
-            # Update the times
-            out_traj_all[:,0] = out_traj_all[:,0] + prefix_arr[-1,0]
-
-            # Append to the array
-            out_traj_all = np.append(prefix_arr,out_traj_all,axis=0);
-
-        if suffix is not None:
-            suffix_arr = np.asarray(suffix)        
-            suffix_arr[:,0] = suffix_arr[:,0] + out_traj_all[-1,0]
-            out_traj_all = np.append(out_traj_all,suffix_arr,axis=0);
-
-        plt.plot(out_traj_all[:,0],out_traj_all[:,1:])
-        plt.show()
+        
+        self.plotTraj(out_traj_whole,prefix,suffix)
 
         self.saveOut(out_traj_whole.tolist(), prefix, suffix)
 
@@ -251,16 +244,9 @@ class trajBuilder:
 
         else:
             allOut = traj_setpoints
+            
 
-            traj_setpoints_graph = np.array(traj_setpoints)
-            times=traj_setpoints_graph[:,0]
-            pres=traj_setpoints_graph[:,1:]
-
-            plt.plot(times,pres)
-            plt.show()
-
-
-        
+        self.plotTraj(allOut,prefix,suffix)
 
         self.saveOut(allOut, prefix, suffix)
 
@@ -300,6 +286,28 @@ class trajBuilder:
         
         return seg.tolist()
 
+
+
+    def plotTraj(self, main_traj, prefix=None, suffix=None ):
+        out_traj_all = np.asarray(main_traj)
+
+        if prefix is not None:
+            prefix_arr = np.asarray(prefix)
+            # Update the times
+            out_traj_all[:,0] = out_traj_all[:,0] + prefix_arr[-1,0]
+
+            # Append to the array
+            out_traj_all = np.append(prefix_arr,out_traj_all,axis=0);
+
+        if suffix is not None:
+            suffix_arr = np.asarray(suffix)        
+            suffix_arr[:,0] = suffix_arr[:,0] + out_traj_all[-1,0]
+            out_traj_all = np.append(out_traj_all,suffix_arr,axis=0);
+
+        plt.plot(out_traj_all[:,0],out_traj_all[:,1:])
+        plt.xlabel("Time (s)")
+        plt.ylabel("Pressure (psi)")
+        plt.show()
 
         
 
