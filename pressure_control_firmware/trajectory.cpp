@@ -115,6 +115,20 @@ bool Trajectory::setSuffixLine(int idx, float time, float value){
 }
 
 
+bool Trajectory::setSpeed(float speed_factor){
+  bool error = false;
+  if (speed_factor>0){
+    stretch_factor = 1/speed_factor;
+  }
+  else{
+    error = true;  
+  }
+  return error;
+  
+};
+
+
+
 
 /*
 Start the trajectory from the beginning
@@ -203,11 +217,13 @@ float Trajectory::interp(float deltaT){
   int *curr_len;
   curr_len= &len[current_traj];
 
+  float sf = stretch_factor;
 
   switch(current_traj){
     case 0:{
       times = prefixtimes;
       pts   = prefixpts;
+      sf = 1;
     } break;
     case 1:{
       times = trajtimes;
@@ -216,6 +232,7 @@ float Trajectory::interp(float deltaT){
     case 2:{
       times = suffixtimes;
       pts   = suffixpts;
+      sf = 1;
     } break;
     default:{
       times = trajtimes;
@@ -229,9 +246,9 @@ float Trajectory::interp(float deltaT){
   // If the trajectory is not finished, do the interpolation
   if (!finished[current_traj]){
     //If deltaT is larger than the largest time in the trajectory, it must be finished.
-    if(deltaT >= times[*curr_len-1]){
+    if(deltaT >= sf*times[*curr_len-1]){
       *curr_idx = *curr_len-1;
-      deltaT = times[*curr_len-1];
+      deltaT = sf*times[*curr_len-1];
   
       running=false;
       finished[current_traj] = true;
@@ -239,7 +256,7 @@ float Trajectory::interp(float deltaT){
     }
     // If deltaT is in the correct range, do the interpolation
     else{ 
-      while(deltaT>times[*curr_idx]){
+      while(deltaT>sf*times[*curr_idx]){
         *curr_idx=*curr_idx+1;
   
         if (*curr_idx >= *curr_len-1){
@@ -249,7 +266,7 @@ float Trajectory::interp(float deltaT){
     }
   
     //Do an interpolation
-    float percent = (deltaT-times[*curr_idx-1]) / (times[*curr_idx] - times[*curr_idx-1]);
+    float percent = (deltaT-sf*times[*curr_idx-1]) / (sf*times[*curr_idx] - sf*times[*curr_idx-1]);
     float a = pts[*curr_idx-1];
     float b = pts[*curr_idx];
     
