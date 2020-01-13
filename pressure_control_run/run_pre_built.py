@@ -86,8 +86,8 @@ class PressureController:
     def shutdown(self):
         self.s.write("off\n")
         self.s.write("trajstop"+'\n')
-        self.s.write("mode;1"+'\n')
-        self.s.write("set;0;0"+'\n')
+        #self.s.write("mode;3"+'\n')
+        #self.s.write("set;0;0"+'\n')
         self.s.close()
 
         self.out_file.close()

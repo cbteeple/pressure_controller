@@ -11,7 +11,7 @@ traj_folder = "traj_built"
 curr_flag_file = os.path.join("traj_built","last_sent.txt")
 
 restartFlag = False
-board_teensy= False
+board_teensy= True
 
 # Read in data from the pressure controller (this seems not to work yet)
 def serialRead(ser):
@@ -58,23 +58,26 @@ class TrajSend:
         # Get data from the file
         #self.settings = trajIn.get("settings")
         self.traj = trajIn.get("setpoints")
+        self.prefix = trajIn.get("prefix",None)
+        self.suffix = trajIn.get("suffix",None)
         self.wrap = trajIn.get("wrap",False)
         
 
 
-
-    def sendTraj(self):
-        lastTime = 0.0
-        configstring = "trajconfig;%d;%d;%d" %(0,len(self.traj),self.wrap)
-        print(configstring)
-        self.s.write(configstring+'\n')
-        for i in range(3):
-            self.readStuff()
-            time.sleep(0.05)
-        num_channels=len(self.traj[0])
-        for idx, entry in enumerate(self.traj):
+    def writeTrajOut(self, traj, traj_type="main"):
+        num_channels=len(traj[0])
+        
+        if traj_type is "prefix":
+            cmd_type="prefset";
+        elif traj_type is "suffix":
+            cmd_type="suffset";
+        else:
+            cmd_type="trajset";
+                
+        for idx, entry in enumerate(traj):
             # Send a string to the pressure controller
-            string="trajset;%d;%0.3f"%(idx, self.speedFactor*entry[0]);
+                                   
+            string=(cmd_type+";%d;%0.3f")%(idx, self.speedFactor*entry[0]);
             for i in range(num_channels-1):
                 string+=";%0.3f" %(entry[i+1])
             print(string)
@@ -87,6 +90,20 @@ class TrajSend:
                 for i in range(3):
                     self.readStuff()
                     time.sleep(self.send_wait)
+
+
+    def sendTraj(self):
+        lastTime = 0.0
+        configstring = "trajconfig;%d;%d;%d;%d" %(len(self.prefix),len(self.traj),len(self.suffix),1.0)
+        print(configstring)
+        self.s.write(configstring+'\n')
+        for i in range(3):
+            self.readStuff()
+            time.sleep(0.05)
+        self.writeTrajOut(self.traj,   "main")
+        self.writeTrajOut(self.prefix, "prefix")
+        self.writeTrajOut(self.suffix, "suffix")
+        self.s.write("trajset"+'\n')
 
             # Sleep for a short time before the next send action
             #time.sleep(entry[0]-lastTime)

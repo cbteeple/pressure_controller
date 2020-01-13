@@ -634,6 +634,7 @@ void CommandHandler::SuffixSet() {
   
 void CommandHandler::TrajLineSet(int which_traj) {
   // If there is at least one channel's worth of data, pad the new row with zeros and add in new data
+  String cmd_type[3] ={"PREFSET", "TRAJSET", "SUFFSET"};
   if(getStringValue(command, ';', 3).length()){
 
     float row[numSensors + 2];
@@ -645,6 +646,7 @@ void CommandHandler::TrajLineSet(int which_traj) {
       }
       row[i] = new_entry.toFloat();
     }
+
 
     for (int i = 0; i < numSensors; i++){
       switch(which_traj){
@@ -662,7 +664,8 @@ void CommandHandler::TrajLineSet(int which_traj) {
 
     // If we are broadcasting, spit out the line that was just written
     if (broadcast) {
-      bc_string += ("TRAJSET: ");
+      bc_string += cmd_type[which_traj];
+      bc_string += (": ");
       bc_string += String(which_traj,1);
       bc_string += ("\t");
       for (int i = 0; i < numSensors + 2; i++) {
@@ -675,7 +678,8 @@ void CommandHandler::TrajLineSet(int which_traj) {
   // If there's no new data (or incomplete), spit out the whole trajectory
   else {
     if (broadcast) {
-      bc_string += ("TRAJSET:");
+      bc_string += cmd_type[which_traj];
+      bc_string += (":");
       bc_string += ('\n');
       bc_string += ("_Prefix:");
       

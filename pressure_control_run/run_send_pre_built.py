@@ -16,7 +16,7 @@ saveData = True
 traj_folder = "traj_built"
 curr_flag_file = os.path.join("traj_built","last_sent.txt")
 
-board_teensy = False;
+board_teensy = True;
 
 
 restartFlag = False
