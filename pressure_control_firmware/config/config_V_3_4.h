@@ -29,6 +29,8 @@
 SensorSSCSNBN030PDAC5 controlSensorType;
 SensorSSCDANN150PGAA5 masterSensorType;
 
+#define MASTER_SENSOR true
+
 // Define mcu analog input properties
 #define ADC_RES 13
 #define ADC_MAX_VOLTS 3.3

@@ -1,5 +1,5 @@
-
 #include "Arduino.h"
+#include "sensors_lib.h"
 //CONFIG FOR PNEUMATIC PRESSURE SYSTEM
 
 
@@ -26,6 +26,8 @@
 
 SensorSSCDANN060PGAA5 controlSensorType;
 SensorDisconnected masterSensorType;
+
+#define MASTER_SENSOR false
 
 #define ADC_RES 13
 #define ADC_MAX_VOLTS 3.3
