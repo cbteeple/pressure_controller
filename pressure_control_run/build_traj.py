@@ -202,14 +202,11 @@ class trajBuilder:
         traj_setpoints = setpts.get("main",  None)
         prefix = setpts.get("prefix",None)
         suffix = setpts.get("suffix",None)
-        num_cycles = float(self.config.get("num_cycles"))
         interp_type = str(self.config.get("interp_type"))
-
-        t_step = (traj_setpoints[-1][0]-traj_setpoints[0][0])/self.subsample_num
-
 
 
         if interp_type == "linear":
+            t_step = (traj_setpoints[-1][0]-traj_setpoints[0][0])/self.subsample_num
             # Calculate the longer trajectory
             allOut=[]
             for idx in range(0,len(traj_setpoints)-1):
@@ -223,6 +220,7 @@ class trajBuilder:
         
 
         elif interp_type == "cubic":
+            t_step = (traj_setpoints[-1][0]-traj_setpoints[0][0])/self.subsample_num
             traj_setpoints = np.array(traj_setpoints)
             times=traj_setpoints[:,0]
             pres=traj_setpoints[:,1:]
