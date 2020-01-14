@@ -33,8 +33,8 @@ class TrajSend:
 
         self.s.write("echo;1"+'\n')
         #self.s.write("load"+'\n')
-        self.s.write("set;0;0"+'\n')
-        self.s.write("mode;3"+'\n')
+        #self.s.write("set;0;0"+'\n')
+        #self.s.write("mode;3"+'\n')
         #s.write('on')
 
         
@@ -129,8 +129,8 @@ class TrajSend:
             
 
     def shutdown(self):
-        self.s.write("mode;3"+'\n')
-        self.s.write("set;0;0"+'\n')
+        #self.s.write("mode;3"+'\n')
+        #self.s.write("set;0;0"+'\n')
         self.s.close()
         
     
