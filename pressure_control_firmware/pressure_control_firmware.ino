@@ -28,7 +28,11 @@
 globalSettings settings;
 controlSettings ctrlSettings[MAX_NUM_CHANNELS];
 sensorSettings senseSettings[MAX_NUM_CHANNELS];
-sensorSettings masterSenseSettings;
+
+#if(MASTER_SENSOR)
+  sensorSettings masterSenseSettings;
+#endif
+
 valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
 
 //Create new trajectory objects
@@ -68,8 +72,9 @@ i2c_Mux mux(muxAddr);
   i2c_PressureSensor sensors[MAX_NUM_CHANNELS];
 #endif
 
+#if(MASTER_SENSOR)
 analog_PressureSensor masterSensor;
-
+#endif
 
 
 int ave_len=10;
@@ -189,16 +194,18 @@ void setup() {
     }
 
     // Initialize master sensor
-    masterSenseSettings.sensorModel=masterSensorType.model;
-    masterSenseSettings.sensorPin=masterSenseChannel;
-    masterSenseSettings.adc_res=adc_res;
-    masterSenseSettings.adc_max_volts=ADC_MAX_VOLTS;
-    masterSenseSettings.adc_mult = ADC_MULT;
-    masterSenseSettings.output_min=masterSensorType.output_min;
-    masterSenseSettings.output_max=masterSensorType.output_max;
-    masterSenseSettings.output_offset=masterSensorType.output_offset;
-    masterSenseSettings.pressure_min=masterSensorType.pressure_min;
-    masterSenseSettings.pressure_max=masterSensorType.pressure_max;
+    #if(MASTER_SENSOR)
+      masterSenseSettings.sensorModel=masterSensorType.model;
+      masterSenseSettings.sensorPin=masterSenseChannel;
+      masterSenseSettings.adc_res=adc_res;
+      masterSenseSettings.adc_max_volts=ADC_MAX_VOLTS;
+      masterSenseSettings.adc_mult = ADC_MULT;
+      masterSenseSettings.output_min=masterSensorType.output_min;
+      masterSenseSettings.output_max=masterSensorType.output_max;
+      masterSenseSettings.output_offset=masterSensorType.output_offset;
+      masterSenseSettings.pressure_min=masterSensorType.pressure_min;
+      masterSenseSettings.pressure_max=masterSensorType.pressure_max;
+    #endif
 
 
   //Initialize the pressure sensor and control objects
@@ -209,7 +216,9 @@ void setup() {
       controllers[i].initialize(ctrlSettings[i]);
     }
 
-    masterSensor.initialize(masterSenseSettings);
+    #if(MASTER_SENSOR)
+      masterSensor.initialize(masterSenseSettings);
+    #endif
 
     trajCtrl.initialize(traj, MAX_NUM_CHANNELS);
 

@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "sensors.h"
+#include "sensors_lib.h"
 //CONFIG FOR PNEUMATIC PRESSURE SYSTEM
 
 
@@ -28,6 +28,8 @@
 //Define the sensor types
 SensorASDXRRX030PDAA5 controlSensorType;
 SensorDisconnected masterSensorType;
+
+#define MASTER_SENSOR false
 
 // Define mcu analog input properties
 #define ADC_RES 13
