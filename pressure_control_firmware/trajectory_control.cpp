@@ -87,19 +87,23 @@ void TrajectoryControl::startTraj(){
 Stop the trajectory and reset to the beginning
 */
 void TrajectoryControl::stop(){
-  current_traj = 2;
-  if (suffix_after_stop){
-    all_running=true;
-    StartTime = CurrTime;
-    for(int i=0; i<num_channels; i++){
-      traj[i].setSuffixLine(-1, 0.0, traj[i].interp(deltaT)); //set the first line of the suffix to the current setpoint
-      traj[i].startSuffix(); //start running the suffix
+  // Check if we are currently running some trajectory
+  if (all_running){
+    // If a trajectory is running, perform a controlled stop (transition to the suffix)
+    current_traj = 2;
+    if (suffix_after_stop){
+      all_running=true;
+      StartTime = CurrTime;
+      for(int i=0; i<num_channels; i++){
+        traj[i].setSuffixLine(-1, 0.0, traj[i].interp(deltaT)); //set the first line of the suffix to the current setpoint
+        traj[i].startSuffix(); //start running the suffix
+      }
+      current_message +=("_TRAJ: Start Suffix");
+      current_message += '\n';
     }
-    current_message +=("_TRAJ: Start Suffix");
-    current_message += '\n';
-  }
-  else{
-    fullStop();
+    else{
+      fullStop();
+    }
   }
 }
 
