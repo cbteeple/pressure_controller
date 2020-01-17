@@ -56,7 +56,7 @@ class PressureController:
         #self.s.write("load"+'\n')
         self.s.write("set;0;0"+'\n')
         self.s.write("trajloop;%d"%(self.cycles)+'\n')
-        self.s.write("trajspeed;%d"%(self.speedFactor)+'\n')
+        self.s.write("trajspeed;%0.5f"%(self.speedFactor)+'\n')
         self.s.write("mode;2"+'\n')
         #s.write('on')
 
