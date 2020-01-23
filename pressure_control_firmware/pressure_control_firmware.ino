@@ -367,19 +367,23 @@ void loop() {
         }
 
         //Software Watchdog on input pressure line
-        if (masterPressure > settings.maxPressure){
-          if (!watchdog_triggered){
-            watchdog_triggered=true;
-            watchdog_start_time = curr_time;
-          }
-          else{
-            if ((watchdog_start_time-curr_time)>=settings.watchdogSpikeTime){
-              watchdog_triggered=false;
-              ventUntilReset();
-              watchdog_start_time = 0;
+        #if(MASTER_SENSOR)
+          if (settings.useMasterPressure){
+            if (masterPressure > settings.maxPressure){
+              if (!watchdog_triggered){
+                watchdog_triggered=true;
+                watchdog_start_time = curr_time;
+              }
+              else{
+                if ((watchdog_start_time-curr_time)>=settings.watchdogSpikeTime){
+                  watchdog_triggered=false;
+                  ventUntilReset();
+                  watchdog_start_time = 0;
+                }
+             }         
             }
-         }         
-        }
+          }
+        #endif
 
         //Perform control if the channel is on
         if (ctrlSettings[i].channelOn){
