@@ -817,6 +817,29 @@ void CommandHandler::SetMasterPressure(){
 }
 
 
+  //____________________________________________________________
+  //Handle MAXIMUM Software Pressure Limits for the master pressure
+void CommandHandler::SetMasterMaxPressure() {
+  if (getStringValue(command, ';', 2).length()) {
+
+      float new_max = 
+    
+      settings->maxPressure = getStringValue(command, ';', 1).toFloat();
+      settings->watchdogSpikeTime = constrain(getStringValue(command, ';', 2).toInt(),0,10000);
+      
+      if (broadcast) {
+          bc_string += "NEW ";
+      }
+  }
+    if (broadcast) {
+      bc_string += ("MASTERMAXP: ");
+      bc_string += settings->maxPressure;
+      bc_string += '\t';
+      bc_string += settings->watchdogSpikeTime;
+  }
+}
+
+
   //Unrecognized
 void CommandHandler::Unrecognized() {
     newSettings = false;
