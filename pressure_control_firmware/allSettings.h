@@ -11,6 +11,10 @@ class globalSettings
     unsigned int looptime = 0;
     bool outputsOn=false;
     unsigned int lcdLoopTime = 500;
+    bool useMasterPressure=false;
+    bool masterPressureOutput=false;
+    float maxPressure = 60;
+    unsigned int watchdogSpikeTime = 100;
     
 };
 
