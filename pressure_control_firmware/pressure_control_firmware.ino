@@ -299,14 +299,13 @@ void loop() {
     lcdOverride = true;
   }
 
-
-  // Read the master sensor
-  if (settings.useMasterPressure){
-    if (masterSensor.connected){
-      masterSensor.getData();
-      masterPressure = masterSensor.getPressure();
-    }
-  }
+    #if(MASTER_SENSOR)
+    // Read the master sensor
+      if (masterSensor.connected){
+        masterSensor.getData();
+        masterPressure = masterSensor.getPressure();
+      }
+    #endif
   
   
   //Get pressure readings and do control
