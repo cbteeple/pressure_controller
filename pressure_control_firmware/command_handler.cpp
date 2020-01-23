@@ -788,6 +788,35 @@ void CommandHandler::SetEcho() {
   }
 
 
+
+void CommandHandler::SetMasterPressure(){
+  if (getStringValue(command, ';', 2).length()) {
+      settings->useMasterPressure = bool(getStringValue(command, ';', 1).toInt());
+      settings->masterPressureOutput = bool(getStringValue(command, ';', 2).toInt());
+      
+      if (broadcast) {
+          bc_string += "NEW ";
+      }
+  }
+  else if (getStringValue(command, ';', 1).length()) {
+      bool value = bool(getStringValue(command, ';', 1).toInt());
+      settings->useMasterPressure = value;
+      settings->masterPressureOutput = value;
+      
+      if (broadcast) {
+          bc_string += "NEW ";
+      }
+  }
+
+    if (broadcast) {
+      bc_string += ("MASTERP: ");
+      bc_string += settings->useMasterPressure;
+      bc_string += '\t';
+      bc_string += settings->masterPressureOutput;
+    }
+}
+
+
   //Unrecognized
 void CommandHandler::Unrecognized() {
     newSettings = false;
