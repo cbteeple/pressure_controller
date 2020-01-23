@@ -62,11 +62,14 @@ class CommandHandler
     void SuffixSet();
     void TrajLineSet(int);
 
+    void SetMasterPressure();
+    void SetMasterMaxPressure();
+
 
 
     
     // Define the map to refer to the worker functions
-    const static unsigned int num_commands= 29;
+    const static unsigned int num_commands= 31;
     String str_vec[num_commands]={"SET",
                                   "TRAJSTART",
                                   "TRAJSTOP",
@@ -97,7 +100,9 @@ class CommandHandler
                                   "TRAJSET",
                                   "PREFSET",
                                   "SUFFSET",
-                                  "ECHO"};
+                                  "ECHO",
+                                  "MASTERP",
+                                  "MASTERMAXP"};
 
     FunctionPointer fun_vec[num_commands]={&SetSetpoint,
                                            &TrajStart,
@@ -129,7 +134,9 @@ class CommandHandler
                                            &TrajSet,
                                            &PrefixSet,
                                            &SuffixSet,
-                                           &SetEcho};
+                                           &SetEcho,
+                                           &SetMasterPressure,
+                                           &SetMasterMaxPressure};
     
     FunctionPointer fun_default = &Unrecognized;
 

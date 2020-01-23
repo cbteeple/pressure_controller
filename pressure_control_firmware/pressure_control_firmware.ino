@@ -18,8 +18,9 @@
 //#include "config/config_pneumatic_teensy.h"
 //#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_pneumatic_teensy7.h"
-#include "config/config_vacuum.h"
+//#include "config/config_vacuum.h"
 //#include "config/config_V_3_4_no_master.h"
+#include "config/config_V_3_4.h"
 //#include "config/config_hydraulic.h"
 
 
@@ -79,6 +80,7 @@ analog_PressureSensor masterSensor;
 
 int ave_len=10;
 float pressures[MAX_NUM_CHANNELS];
+float masterPressure;
 float valveSets[MAX_NUM_CHANNELS];
 
 
@@ -205,6 +207,12 @@ void setup() {
       masterSenseSettings.output_offset=masterSensorType.output_offset;
       masterSenseSettings.pressure_min=masterSensorType.pressure_min;
       masterSenseSettings.pressure_max=masterSensorType.pressure_max;
+
+      settings.useMasterPressure=true;
+      settings.masterPressureOutput=true;
+    #else
+      settings.useMasterPressure=false;
+      settings.masterPressureOutput=false;
     #endif
 
 
@@ -252,6 +260,9 @@ unsigned long curr_time=0;
 
 bool firstcall = true;
 
+unsigned long watchdog_start_time = 0;
+bool watchdog_triggered = false;
+
 //______________________________________________________________________
 void loop() {
   //Serial.println("_words need to be here (for some reason)");
@@ -288,6 +299,13 @@ void loop() {
     lcdOverride = true;
   }
 
+    #if(MASTER_SENSOR)
+    // Read the master sensor
+      if (masterSensor.connected){
+        masterSensor.getData();
+        masterPressure = masterSensor.getPressure();
+      }
+    #endif
   
   
   //Get pressure readings and do control
@@ -347,6 +365,29 @@ void loop() {
           
         }
 
+        //Software Watchdog on input pressure line
+        #if(MASTER_SENSOR)
+          if (settings.useMasterPressure){
+            if (masterPressure > settings.maxPressure){
+              if (!watchdog_triggered){
+                watchdog_triggered=true;
+                watchdog_start_time = curr_time;
+              }
+              else{
+                if ((watchdog_start_time-curr_time)>=settings.watchdogSpikeTime){
+                  watchdog_triggered=false;
+                  ventUntilReset();
+                  watchdog_start_time = 0;
+                }
+             }         
+            }
+            else{
+              watchdog_start_time=0;
+              watchdog_triggered=false;
+            }
+          }
+        #endif
+
         //Perform control if the channel is on
         if (ctrlSettings[i].channelOn){
           
@@ -404,6 +445,10 @@ void loop() {
   void printData(){
     handleCommands.sendString(generateSetpointStr());
     handleCommands.sendString(generateDataStr());
+
+    if (settings.masterPressureOutput){
+      handleCommands.sendString(generateMasterStr());
+    }
   }
 
   void printMessage(String message){
@@ -416,6 +461,9 @@ void loop() {
   void printData(){
     Serial.println(generateSetpointStr());
     Serial.println(generateDataStr());
+    if (settings.masterPressureOutput){
+      Serial.println(generateMasterStr());
+    }
   }
 
   void printMessage(String message){
@@ -446,6 +494,17 @@ String generateDataStr(){
     send_str+=('\t'); 
     send_str+=String(pressures[i],3);  
   }
+  return send_str;
+}
+
+String generateMasterStr(){
+  String send_str = "";
+  
+  send_str+=String(currentTime);
+  send_str+=('\t');
+  send_str+="2";
+  send_str+=('\t');  
+  send_str+=String(masterPressure,3); 
   return send_str;
 }
 
