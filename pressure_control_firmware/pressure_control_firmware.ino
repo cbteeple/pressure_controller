@@ -381,6 +381,10 @@ void loop() {
                 }
              }         
             }
+            else{
+              watchdog_start_time=0;
+              watchdog_triggered=false;
+            }
           }
         #endif
 
