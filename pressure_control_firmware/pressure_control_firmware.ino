@@ -19,8 +19,9 @@
 //#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_pneumatic_teensy7.h"
 //#include "config/config_vacuum.h"
-//#include "config/config_V_3_4_no_master.h"
-#include "config/config_V_3_4.h"
+#include "config/config_V_3_4_no_master.h"
+//#include "config/config_V_3_4_microprop.h"
+//#include "config/config_V_3_4.h"
 //#include "config/config_hydraulic.h"
 
 
@@ -479,7 +480,7 @@ String generateSetpointStr(){
   send_str+="0";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
     send_str+=('\t'); 
-    send_str+=String(setpoint_local[i],3);
+    send_str+=String(setpoint_local[i],2);
   }
   return send_str;
 }
@@ -492,7 +493,7 @@ String generateDataStr(){
   send_str+="1";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
     send_str+=('\t'); 
-    send_str+=String(pressures[i],3);  
+    send_str+=String(pressures[i],2);  
   }
   return send_str;
 }
@@ -504,7 +505,7 @@ String generateMasterStr(){
   send_str+=('\t');
   send_str+="2";
   send_str+=('\t');  
-  send_str+=String(masterPressure,3); 
+  send_str+=String(masterPressure,2); 
   return send_str;
 }
 

@@ -29,7 +29,7 @@ class TrajSend:
         self.send_wait = 0.05;
         self.board_teensy= board_teensy
 
-        time.sleep(2.0)
+        time.sleep(0.5)
 
         self.s.write("echo;1"+'\n')
         #self.s.write("load"+'\n')
@@ -41,7 +41,7 @@ class TrajSend:
         time.sleep(0.5)
         for i in range(50):
             self.readStuff()
-            time.sleep(0.05)
+            #time.sleep(0.05)
 
     # Read in the trajectory and store it in a list of arrays
     def getTraj(self,filename):
