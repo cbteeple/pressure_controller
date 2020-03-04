@@ -4,7 +4,7 @@
 
 
 void UnitHandler::unitsEnum(int new_units, float &mult, String &name){
-  switch new_units {
+  switch (new_units) {
     case 0 : { //psi - same as interal pressure
       mult = 1.0;
       name = "psi";
@@ -54,9 +54,9 @@ float UnitHandler::convertToExternal(float pressure_in){
 }
 
 String UnitHandler::getInputName(){
-  return name;
+  return in_name;
 }
 
 String UnitHandler::getOutputName(){
-  return name;
+  return out_name;
 }

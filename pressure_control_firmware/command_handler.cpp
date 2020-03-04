@@ -526,6 +526,9 @@ void CommandHandler::Load() {
     settings->outputsOn = set_temp;
     newSettings = true;
 
+    units->setInputUnits(settings->units[0]);
+    units->setOutputUnits(settings->units[1]);
+
     if (broadcast) {
       bc_string += ("LOAD: Settings retrieved from onboard storage");
     }
@@ -851,25 +854,31 @@ void CommandHandler::SetMasterMaxPressure() {
 
 
 void CommandHandler::SetUnits() {
-  if (getStringValue(command, ';', 1).length()) {
-
-
-      int val = constrain(getStringValue(command, ';', 1).toInt(),0,1000);
-
-      units.setUnits(val);
-      
-      if (broadcast) {
-          bc_string += "NEW ";
-      }
-  }
-  else if (getStringValue(command, ';', 2).length()) {
+  if (getStringValue(command, ';', 2).length()) {
 
 
       int val = constrain(getStringValue(command, ';', 1).toInt(),0,1000);
       int val1 = constrain(getStringValue(command, ';', 2).toInt(),0,1000);
 
-      units.setInputUnits(val);
-      units.setOutputUnits(val1);
+      settings->units[0] = val;
+      settings->units[1] = val1;
+
+      units->setInputUnits(val);
+      units->setOutputUnits(val1);
+      
+      if (broadcast) {
+          bc_string += "NEW ";
+      }
+  }
+  else if (getStringValue(command, ';', 1).length()) {
+
+
+      int val = constrain(getStringValue(command, ';', 1).toInt(),0,1000);
+
+      settings->units[0] = val;
+      settings->units[1] = val;
+
+      units->setUnits(val);
       
       if (broadcast) {
           bc_string += "NEW ";

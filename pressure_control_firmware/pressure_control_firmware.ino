@@ -144,7 +144,7 @@ void setup() {
     for (int idx=0; idx<3; idx++){
       buttons[idx].begin();
     }
-  
+
     buttonHandler.initialize();
     handleCommands.initialize(MAX_NUM_CHANNELS, &settings, ctrlSettings, traj, &trajCtrl, &units);
     handleCommands.startBroadcast();
@@ -236,6 +236,9 @@ void setup() {
     settings.looptime =0;
     settings.lcdLoopTime = 333;
     settings.outputsOn=false;
+
+    units.setInputUnits(settings.units[0]);
+    units.setOutputUnits(settings.units[1]);
 
     // Initialize the LCD
     lcdAttached = lcd.begin();
@@ -593,6 +596,8 @@ void loadSettings(){
   bool set_temp = settings.outputsOn;
   saveHandler.loadGlobal(settings);
   settings.outputsOn=set_temp;
+  units.setInputUnits(settings.units[0]);
+  units.setOutputUnits(settings.units[1]);
 }
 
 
