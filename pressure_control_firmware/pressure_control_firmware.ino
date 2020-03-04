@@ -12,6 +12,7 @@
 #include "trajectory_control.h"
 #include <EasyLCD.h>
 #include "command_handler.h"
+#include "unit_handler.h"
 
 
 //Include the config file from the system you are using
@@ -19,14 +20,16 @@
 //#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_pneumatic_teensy7.h"
 //#include "config/config_vacuum.h"
-//#include "config/config_V_3_4_no_master.h"
-#include "config/config_V_3_4.h"
+#include "config/config_V_3_4_no_master.h"
+//#include "config/config_V_3_4_microprop.h"
+//#include "config/config_V_3_4.h"
 //#include "config/config_hydraulic.h"
 
 
 
 //Create new settings objects
 globalSettings settings;
+UnitHandler units;
 controlSettings ctrlSettings[MAX_NUM_CHANNELS];
 sensorSettings senseSettings[MAX_NUM_CHANNELS];
 
@@ -141,9 +144,9 @@ void setup() {
     for (int idx=0; idx<3; idx++){
       buttons[idx].begin();
     }
-  
+
     buttonHandler.initialize();
-    handleCommands.initialize(MAX_NUM_CHANNELS, &settings, ctrlSettings, traj, &trajCtrl);
+    handleCommands.initialize(MAX_NUM_CHANNELS, &settings, ctrlSettings, traj, &trajCtrl, &units);
     handleCommands.startBroadcast();
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
       
@@ -234,6 +237,9 @@ void setup() {
     settings.lcdLoopTime = 333;
     settings.outputsOn=false;
 
+    units.setInputUnits(settings.units[0]);
+    units.setOutputUnits(settings.units[1]);
+
     // Initialize the LCD
     lcdAttached = lcd.begin();
     if (!lcdAttached){
@@ -247,6 +253,12 @@ void setup() {
     loadSettings();
 
 }
+
+
+
+
+
+
 
 
 
@@ -352,7 +364,6 @@ void loop() {
           mux.setActiveChannel(senseChannels[i]);
         }
 
-        //NOT THIS
         if (sensors[i].connected){
           sensors[i].getData();
           pressures[i] = sensors[i].getPressure();
@@ -479,7 +490,7 @@ String generateSetpointStr(){
   send_str+="0";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
     send_str+=('\t'); 
-    send_str+=String(setpoint_local[i],3);
+    send_str+=String( units.convertToExternal(setpoint_local[i]),2);
   }
   return send_str;
 }
@@ -492,7 +503,7 @@ String generateDataStr(){
   send_str+="1";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
     send_str+=('\t'); 
-    send_str+=String(pressures[i],3);  
+    send_str+=String(units.convertToExternal(pressures[i]),2);  
   }
   return send_str;
 }
@@ -504,7 +515,7 @@ String generateMasterStr(){
   send_str+=('\t');
   send_str+="2";
   send_str+=('\t');  
-  send_str+=String(masterPressure,3); 
+  send_str+=String(units.convertToExternal(masterPressure),2); 
   return send_str;
 }
 
@@ -520,7 +531,7 @@ void lcdUpdate(){
 
     String strTmp="";
     if (ctrlSettings[i].channelOn){  
-      strTmp = String(pressures[i], 1);
+      strTmp = String(units.convertToExternal(pressures[i]), 1);
       if (strTmp.length() <4){
         strTmp =' '+strTmp;
       }
@@ -547,7 +558,7 @@ void lcdUpdateDistributed(){
   
   String strTmp="";
   if (ctrlSettings[i].channelOn){  
-    strTmp = String(pressures[i], 1);
+    strTmp = String(units.convertToExternal(pressures[i]), 1);
     if (strTmp.length() <4){
       strTmp =' '+strTmp;
     }
@@ -585,6 +596,8 @@ void loadSettings(){
   bool set_temp = settings.outputsOn;
   saveHandler.loadGlobal(settings);
   settings.outputsOn=set_temp;
+  units.setInputUnits(settings.units[0]);
+  units.setOutputUnits(settings.units[1]);
 }
 
 

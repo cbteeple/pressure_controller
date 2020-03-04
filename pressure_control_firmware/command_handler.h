@@ -4,6 +4,7 @@
 #include "trajectory.h"
 #include "trajectory_control.h"
 #include "eeprom_handler.h"
+#include "unit_handler.h"
 
 
 
@@ -65,11 +66,13 @@ class CommandHandler
     void SetMasterPressure();
     void SetMasterMaxPressure();
 
+    void SetUnits();
+
 
 
     
     // Define the map to refer to the worker functions
-    const static unsigned int num_commands= 31;
+    const static unsigned int num_commands= 32;
     String str_vec[num_commands]={"SET",
                                   "TRAJSTART",
                                   "TRAJSTOP",
@@ -102,7 +105,9 @@ class CommandHandler
                                   "SUFFSET",
                                   "ECHO",
                                   "MASTERP",
-                                  "MASTERMAXP"};
+                                  "MASTERMAXP",
+                                  //
+                                  "UNITS"};
 
     FunctionPointer fun_vec[num_commands]={&SetSetpoint,
                                            &TrajStart,
@@ -136,7 +141,9 @@ class CommandHandler
                                            &SuffixSet,
                                            &SetEcho,
                                            &SetMasterPressure,
-                                           &SetMasterMaxPressure};
+                                           &SetMasterMaxPressure,
+                                           //
+                                           &SetUnits};
     
     FunctionPointer fun_default = &Unrecognized;
 
@@ -149,6 +156,7 @@ class CommandHandler
     controlSettings *ctrlSettings;
     Trajectory *traj;
     TrajectoryControl *trajCtrl;
+    UnitHandler *units;
 
     int getCommandType();
     bool readCommand();
@@ -159,7 +167,7 @@ class CommandHandler
   
   public:
     CommandHandler(){};
-    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *);
+    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *, UnitHandler *);
     bool go();
     void startBroadcast();
     void stopBroadcast();
