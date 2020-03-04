@@ -15,7 +15,6 @@ class globalSettings
     bool masterPressureOutput=false;
     float maxPressure = 60;
     unsigned int watchdogSpikeTime = 100;
-    
 };
 
 

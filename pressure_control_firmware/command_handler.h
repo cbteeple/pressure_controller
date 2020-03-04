@@ -65,6 +65,8 @@ class CommandHandler
     void SetMasterPressure();
     void SetMasterMaxPressure();
 
+    void SetUnits();
+
 
 
     
@@ -102,7 +104,9 @@ class CommandHandler
                                   "SUFFSET",
                                   "ECHO",
                                   "MASTERP",
-                                  "MASTERMAXP"};
+                                  "MASTERMAXP",
+                                  //
+                                  "UNITS"};
 
     FunctionPointer fun_vec[num_commands]={&SetSetpoint,
                                            &TrajStart,
@@ -136,7 +140,9 @@ class CommandHandler
                                            &SuffixSet,
                                            &SetEcho,
                                            &SetMasterPressure,
-                                           &SetMasterMaxPressure};
+                                           &SetMasterMaxPressure,
+                                           //
+                                           &SetUnits};
     
     FunctionPointer fun_default = &Unrecognized;
 
@@ -149,6 +155,7 @@ class CommandHandler
     controlSettings *ctrlSettings;
     Trajectory *traj;
     TrajectoryControl *trajCtrl;
+    UnitHandler *units;
 
     int getCommandType();
     bool readCommand();
@@ -159,7 +166,7 @@ class CommandHandler
   
   public:
     CommandHandler(){};
-    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *);
+    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *, UnitHandler *);
     bool go();
     void startBroadcast();
     void stopBroadcast();
