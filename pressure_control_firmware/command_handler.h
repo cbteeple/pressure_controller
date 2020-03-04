@@ -4,6 +4,7 @@
 #include "trajectory.h"
 #include "trajectory_control.h"
 #include "eeprom_handler.h"
+#include "unit_handler.h"
 
 
 
@@ -71,7 +72,7 @@ class CommandHandler
 
     
     // Define the map to refer to the worker functions
-    const static unsigned int num_commands= 31;
+    const static unsigned int num_commands= 32;
     String str_vec[num_commands]={"SET",
                                   "TRAJSTART",
                                   "TRAJSTOP",

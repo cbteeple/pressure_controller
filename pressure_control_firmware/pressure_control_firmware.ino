@@ -12,6 +12,7 @@
 #include "trajectory_control.h"
 #include <EasyLCD.h>
 #include "command_handler.h"
+#include "unit_handler.h"
 
 
 //Include the config file from the system you are using

@@ -40,7 +40,7 @@ void CommandHandler::stopBroadcast() {
 }
 
 
-void CommandHandler::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in, unitHandler *units_in) {
+void CommandHandler::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in, UnitHandler *units_in) {
   numSensors   = num;
   settings     = settings_in;
   ctrlSettings = ctrlSettings_in;
@@ -188,7 +188,7 @@ void CommandHandler::SetSetpoint(){
     for (int i = 0; i < numSensors; i++) {
       ctrlSettings[i].settime = constrain(getStringValue(command, ';', 1).toFloat(), 0, 1000);
       float val = getStringValue(command, ';', i + 2).toFloat();
-      ctrlSettings[i].setpoint = constrain(units.convertToInternal(val),
+      ctrlSettings[i].setpoint = constrain(units->convertToInternal(val),
                                            ctrlSettings[i].minPressure,
                                            ctrlSettings[i].maxPressure);
     }
@@ -201,7 +201,7 @@ void CommandHandler::SetSetpoint(){
     float allset = getStringValue(command, ';', 2).toFloat();
     for (int i = 0; i < numSensors; i++) {
       ctrlSettings[i].settime = constrain(getStringValue(command, ';', 1).toFloat(), 0, 1000);
-      ctrlSettings[i].setpoint = constrain(units.convertToInternal(allset),
+      ctrlSettings[i].setpoint = constrain(units->convertToInternal(allset),
                                            ctrlSettings[i].minPressure,
                                            ctrlSettings[i].maxPressure);
     }
@@ -215,7 +215,7 @@ void CommandHandler::SetSetpoint(){
     bc_string += String(ctrlSettings[0].settime, 4);
     for (int i = 0; i < numSensors; i++) {
       bc_string += '\t';
-      bc_string += String(units.convertToExternal(ctrlSettings[i].setpoint), 4);
+      bc_string += String(units->convertToExternal(ctrlSettings[i].setpoint), 4);
     }
   }
 }
@@ -334,7 +334,7 @@ void CommandHandler::SetMaxPressure() {
     if (getStringValue(command, ';', numSensors).length()) {
       for (int i = 0; i < numSensors; i++) {
         float val = getStringValue(command, ';', i + 1).toFloat();
-        ctrlSettings[i].maxPressure = units.convertToInternal(val);
+        ctrlSettings[i].maxPressure = units->convertToInternal(val);
       }
       newSettings = true;
       if (broadcast) {
@@ -344,7 +344,7 @@ void CommandHandler::SetMaxPressure() {
     else if (getStringValue(command, ';', 1).length()) {
       float allset = getStringValue(command, ';', 1).toFloat();
       for (int i = 0; i < numSensors; i++) {
-        ctrlSettings[i].maxPressure = units.convertToInternal(allset);
+        ctrlSettings[i].maxPressure = units->convertToInternal(allset);
       }
       newSettings = true;
       if (broadcast) {
@@ -354,7 +354,7 @@ void CommandHandler::SetMaxPressure() {
     if (broadcast) {
       bc_string += ("MAXP: ");
       for (int i = 0; i < numSensors; i++) {
-        bc_string += String(units.convertToExternal(ctrlSettings[i].maxPressure), 4);
+        bc_string += String(units->convertToExternal(ctrlSettings[i].maxPressure), 4);
         bc_string += ('\t');
       }
     }
@@ -365,7 +365,7 @@ void CommandHandler::SetMinPressure() {
     if (getStringValue(command, ';', numSensors).length()) {
       for (int i = 0; i < numSensors; i++) {
         float val = getStringValue(command, ';', i + 1).toFloat();
-        ctrlSettings[i].minPressure = units.convertToInternal(val);
+        ctrlSettings[i].minPressure = units->convertToInternal(val);
       }
       newSettings = true;
       if (broadcast) {
@@ -375,7 +375,7 @@ void CommandHandler::SetMinPressure() {
     else if (getStringValue(command, ';', 1).length()) {
       float allset = getStringValue(command, ';', 1).toFloat();
       for (int i = 0; i < numSensors; i++) {
-        ctrlSettings[i].minPressure = units.convertToInternal(allset);
+        ctrlSettings[i].minPressure = units->convertToInternal(allset);
       }
       newSettings = true;
       if (broadcast) {
@@ -385,7 +385,7 @@ void CommandHandler::SetMinPressure() {
     if (broadcast) {
       bc_string += ("MINP: ");
       for (int i = 0; i < numSensors; i++) {
-        bc_string += String(units.convertToExternal(ctrlSettings[i].minPressure), 4);
+        bc_string += String(units->convertToExternal(ctrlSettings[i].minPressure), 4);
         bc_string += ('\t');
       }
     }
@@ -427,7 +427,7 @@ void CommandHandler::SetWindow() {
     if (getStringValue(command, ';', numSensors).length()) {
       for (int i = 0; i < numSensors; i++) {
         float val = getStringValue(command, ';', i + 1).toFloat();
-        ctrlSettings[i].deadzone = units.convertToInternal(val);
+        ctrlSettings[i].deadzone = units->convertToInternal(val);
       }
       newSettings = true;
       if (broadcast) {
@@ -438,7 +438,7 @@ void CommandHandler::SetWindow() {
     if (broadcast) {
       bc_string += ("WINDOW: ");
       for (int i = 0; i < numSensors; i++) {
-        bc_string += String(units.convertToExternal(ctrlSettings[i].deadzone), 4);
+        bc_string += String(units->convertToExternal(ctrlSettings[i].deadzone), 4);
         bc_string += ('\t');
       }
     }
@@ -692,17 +692,17 @@ void CommandHandler::TrajLineSet(int which_traj) {
         case 0:{
           traj[i].setPrefixLine(int(row[0]),
                 float(row[1]),
-                units.convertToInternal(float(row[i+2])) );
+                units->convertToInternal(float(row[i+2])) );
         } break;
         case 1:{
           traj[i].setTrajLine(int(row[0]),
                 float(row[1]),
-                units.convertToInternal(float(row[i+2])) );
+                units->convertToInternal(float(row[i+2])) );
         } break;
         case 2:{
           traj[i].setSuffixLine(int(row[0]),
                 float(row[1]),
-                units.convertToInternal(float(row[i+2])) );
+                units->convertToInternal(float(row[i+2])) );
         } break;
       }
     }
@@ -715,7 +715,7 @@ void CommandHandler::TrajLineSet(int which_traj) {
       bc_string += ("\t");
       for (int i = 0; i < numSensors + 2; i++) {
         bc_string += ('\t');
-        bc_string += String(units.convertToExternal(row[i]), 2);
+        bc_string += String(units->convertToExternal(row[i]), 2);
       }
     }
   }
@@ -737,7 +737,7 @@ void CommandHandler::TrajLineSet(int which_traj) {
         bc_string += String(traj[0].prefixtimes[i]);
         bc_string += ('\t');
         for (int j = 0; j < numSensors; j++) {
-          bc_string += String(units.convertToExternal(traj[j].prefixpts[i]));
+          bc_string += String(units->convertToExternal(traj[j].prefixpts[i]));
           bc_string += ('\t');
         }
       }
@@ -753,7 +753,7 @@ void CommandHandler::TrajLineSet(int which_traj) {
         bc_string += String(traj[0].trajtimes[i]);
         bc_string += ('\t');
         for (int j = 0; j < numSensors; j++) {
-          bc_string += String(units.convertToExternal(traj[j].trajpts[i]));
+          bc_string += String(units->convertToExternal(traj[j].trajpts[i]));
           bc_string += ('\t');
         }
       }
@@ -770,7 +770,7 @@ void CommandHandler::TrajLineSet(int which_traj) {
         bc_string += String(traj[0].suffixtimes[i]);
         bc_string += ('\t');
         for (int j = 0; j < numSensors; j++) {
-          bc_string += String(units.convertToExternal(traj[j].suffixpts[i]));
+          bc_string += String(units->convertToExternal(traj[j].suffixpts[i]));
           bc_string += ('\t');
         }
       }
@@ -834,7 +834,7 @@ void CommandHandler::SetMasterPressure(){
 void CommandHandler::SetMasterMaxPressure() {
   if (getStringValue(command, ';', 2).length()) {
       float val = getStringValue(command, ';', 1).toFloat();
-      settings->maxPressure = units.convertToInternal(val);
+      settings->maxPressure = units->convertToInternal(val);
       settings->watchdogSpikeTime = constrain(getStringValue(command, ';', 2).toInt(),0,10000);
       
       if (broadcast) {
@@ -843,7 +843,7 @@ void CommandHandler::SetMasterMaxPressure() {
   }
     if (broadcast) {
       bc_string += ("MASTERMAXP: ");
-      bc_string += units.convertToExternal(settings->maxPressure);
+      bc_string += units->convertToExternal(settings->maxPressure);
       bc_string += '\t';
       bc_string += settings->watchdogSpikeTime;
   }
