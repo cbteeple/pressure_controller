@@ -21,6 +21,7 @@ An object-oriented approach to doing pressure control. Hopefully things are modu
 	- [matplotlib](https://matplotlib.org/) (`pip install matplotlib`)
 	- [pynput](https://pypi.org/project/pynput/) (`pip install pynput`)
 	- [yaml](https://pyyaml.org/wiki/PyYAMLDocumentation) (`pip install pyyaml`)
+	- [sorotraj](https://pypi.org/project/sorotraj/) (`pip install sorotraj`)
 
 ## How to use the code:
 [Instructions in the documentation](https://cbteeple.github.io/pressure_controller_docs/)
