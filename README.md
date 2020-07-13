@@ -10,7 +10,7 @@ The Arduino-based firmware for Ctrl-P pressure control systems.
    
 
 ## Usage:
-[Instructions in the documentation](https://cbteeple.github.io/pressure_controller_docs/)
+[Instructions in the documentation](https://ctrl-p.cbteeple.com/firmware)
 
 
 ## About Ctrl-P
