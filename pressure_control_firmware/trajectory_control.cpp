@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include "Arduino.h"
 
-#include "trajectory.h"
 #include "trajectory_control.h"
 
 
@@ -20,9 +19,7 @@ TODO:
 
 
 bool TrajectoryControl::setLength(int prefix_len_in, int traj_len_in, int suffix_len_in){
-  for(int i=0; i<num_channels; i++){
-    traj[i].setLength(traj_len_in, prefix_len_in, suffix_len_in);
-  }
+
   len[0]=prefix_len_in;
   len[1]=traj_len_in;
   len[2]=suffix_len_in;
@@ -31,9 +28,7 @@ bool TrajectoryControl::setLength(int prefix_len_in, int traj_len_in, int suffix
 
 
 bool TrajectoryControl::setSpeed(float speed_factor_in){
-  for(int i=0; i<num_channels; i++){
-    traj[i].setSpeed(speed_factor_in);
-  }
+
 }
 
 
@@ -46,8 +41,7 @@ INPUTS:
     traj_in         - a vector of trajectory objects
     num_channels_in - the number of channels
 */
-void TrajectoryControl::initialize(Trajectory *traj_in, int num_channels_in){
-  traj = traj_in;
+void TrajectoryControl::initialize(int num_channels_in){
   num_channels = num_channels_in;
 }
 
@@ -63,9 +57,6 @@ void TrajectoryControl::start(){
   current_traj = 0;
   curr_cycle = 0;
 
-  for(int i=0; i<num_channels; i++){
-    traj[i].startPrefix();
-  }
 
   current_message += ("_TRAJ: Start Prefix");
   current_message += '\n';
@@ -76,9 +67,6 @@ void TrajectoryControl::startTraj(){
   StartTime = CurrTime;
   all_running = true;
   current_traj = 1;
-  for (int i=0; i<num_channels; i++){
-    traj[i].startTraj();
-  }
   current_message += ("_TRAJ: Start Main");
   current_message += '\n';
 }
@@ -94,10 +82,6 @@ void TrajectoryControl::stop(){
     if (suffix_after_stop){
       all_running=true;
       StartTime = CurrTime;
-      for(int i=0; i<num_channels; i++){
-        traj[i].setSuffixLine(-1, 0.0, traj[i].interp(deltaT)); //set the first line of the suffix to the current setpoint
-        traj[i].startSuffix(); //start running the suffix
-      }
       current_message +=("_TRAJ: Start Suffix");
       current_message += '\n';
     }
@@ -148,12 +132,7 @@ float TrajectoryControl::interp(float curr_time, int channel){
 
   CurrTime = curr_time;
 
-  //Make sure to interpolate in the correct region
-  deltaT = float(CurrTime-StartTime)/1000000.0;
-  
-  float p_set = traj[channel].interp(deltaT);
-
-  return p_set;
+  return 0.0;
 }
 
 
@@ -199,14 +178,5 @@ void TrajectoryControl::setUpNext(){
 
 
 bool TrajectoryControl::isAllFinished() {
-  for ( int i = 0; i < num_channels; ++i ) {
-     if ( traj[i].finished[current_traj] == false ) {
-       return false;
-     }
-  }
-
   return true;
  }
-
-
-

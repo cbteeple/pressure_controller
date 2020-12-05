@@ -10,9 +10,9 @@ class Trajectory
   private:
    
     // Define setup variables
-    const static unsigned int maxLen = 1024;
-    const static unsigned int maxPrefixLen = 128;
-    const static unsigned int maxSuffixLen = 128;
+    const static unsigned int maxLen = 10;
+    const static unsigned int maxPrefixLen = 5;
+    const static unsigned int maxSuffixLen = 5;
     
     //const static unsigned int maxChannels = 1;
     int curr_idx = 1;
@@ -47,14 +47,6 @@ class Trajectory
     // constructor (empty)
     Trajectory(){};
 
-    // load the trajectory into memory
-    bool setLength(int);
-    bool setLength(int, int, int);
-    bool setLine(int, int, float ,float);
-    bool setTrajLine(int, float, float);
-    bool setPrefixLine(int, float ,float);
-    bool setSuffixLine(int, float ,float);
-    bool setSpeed(float);
 
     // Define control functions
     void start();

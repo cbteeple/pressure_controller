@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "Arduino.h"
-#include "trajectory.h"
 
 #ifndef __trajectory_control_H__
 #define __trajectory_control_H__
@@ -11,13 +10,12 @@ class TrajectoryControl
   private:
    
     // Define setup variables
-    const static unsigned int maxLen = 1024;
+    const static unsigned int maxLen = 10;
     //const static unsigned int maxChannels = 1;
     int curr_idx = 1;
     int num_channels; 
 
-    Trajectory *traj;
-   
+  
   public:
     // Define times
     unsigned long StartTime=0;
@@ -40,7 +38,7 @@ class TrajectoryControl
     // constructor (empty)
     TrajectoryControl(){};
 
-    void initialize(Trajectory *, int);
+    void initialize( int);
 
     // load the trajectory into memory
     bool setLength(int,int,int);

@@ -154,7 +154,6 @@ class CommandHandler
     // All of the settings pointers
     globalSettings *settings;
     controlSettings *ctrlSettings;
-    Trajectory *traj;
     TrajectoryControl *trajCtrl;
     UnitHandler *units;
 
@@ -167,7 +166,7 @@ class CommandHandler
   
   public:
     CommandHandler(){};
-    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *, UnitHandler *);
+    void initialize(int, globalSettings *, controlSettings *, TrajectoryControl *, UnitHandler *);
     bool go();
     void startBroadcast();
     void stopBroadcast();

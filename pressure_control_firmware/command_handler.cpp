@@ -2,8 +2,6 @@
 #include "Arduino.h"
 #include "command_handler.h"
 #include "allSettings.h"
-#include "trajectory.h"
-#include "trajectory_control.h"
 #include "eeprom_handler.h"
 #include "unit_handler.h"
 
@@ -40,11 +38,10 @@ void CommandHandler::stopBroadcast() {
 }
 
 
-void CommandHandler::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in, UnitHandler *units_in) {
+void CommandHandler::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, TrajectoryControl *trajCtrl_in, UnitHandler *units_in) {
   numSensors   = num;
   settings     = settings_in;
   ctrlSettings = ctrlSettings_in;
-  traj         = traj_in;
   trajCtrl     = trajCtrl_in;
   units        = units_in;
   // reserve 200 bytes for the inputString:
@@ -226,28 +223,24 @@ void CommandHandler::TrajStart(){
     if (broadcast) {
       bc_string += ("TRAJSTART: Trajectory Started");
     }
-    trajCtrl->start(); //TODO: This is wrong - need to invoke this on traj_control
   }
 
 void CommandHandler::TrajStop(){
     if (broadcast) {
       bc_string += ("TRAJSTOP: Trajectory Stopped");
     }
-    trajCtrl->stop();
   }
 
 void CommandHandler::TrajPause() {
     if (broadcast) {
       bc_string += ("TRAJPAUSE: Trajectory Paused");
     }
-    trajCtrl->pause();
   }
 
 void CommandHandler::TrajResume() {
     if (broadcast) {
       bc_string += ("TRAJRESUME: Trajectory Resumed");
     }
-    trajCtrl->resume();
   }
 
 
@@ -645,7 +638,7 @@ void CommandHandler::SetTrajSpeed() {
     }
   if (broadcast) {
     bc_string += ("TRAJSPEED: ");
-    bc_string += String(1 / traj[0].stretch_factor, 4);
+    bc_string += String(getStringValue(command, ';', 1).toFloat(), 4);
   }
 }
 
@@ -690,26 +683,6 @@ void CommandHandler::TrajLineSet(int which_traj) {
     }
 
 
-    for (int i = 0; i < numSensors; i++){
-      switch(which_traj){
-        case 0:{
-          traj[i].setPrefixLine(int(row[0]),
-                float(row[1]),
-                units->convertToInternal(float(row[i+2])) );
-        } break;
-        case 1:{
-          traj[i].setTrajLine(int(row[0]),
-                float(row[1]),
-                units->convertToInternal(float(row[i+2])) );
-        } break;
-        case 2:{
-          traj[i].setSuffixLine(int(row[0]),
-                float(row[1]),
-                units->convertToInternal(float(row[i+2])) );
-        } break;
-      }
-    }
-
     // If we are broadcasting, spit out the line that was just written
     if (broadcast) {
       bc_string += cmd_type[which_traj];
@@ -722,65 +695,6 @@ void CommandHandler::TrajLineSet(int which_traj) {
       }
     }
   }
-
-  // If there's no new data (or incomplete), spit out the whole trajectory
-  else {
-    if (broadcast) {
-      bc_string += cmd_type[which_traj];
-      bc_string += (":");
-      bc_string += ('\n');
-      bc_string += ("_Prefix:");
-      
-      if (traj[0].len[0] ==0){
-        bc_string += " Empty";
-      }
-      
-      for (int i = 1; i < (traj[0].len[0]); i++) {
-        bc_string += ('\n');
-        bc_string += String(traj[0].prefixtimes[i]);
-        bc_string += ('\t');
-        for (int j = 0; j < numSensors; j++) {
-          bc_string += String(units->convertToExternal(traj[j].prefixpts[i]));
-          bc_string += ('\t');
-        }
-      }
-      bc_string += ('\n');
-      bc_string += ("_Trajectory:");
-
-      if (traj[0].len[1] ==0){
-        bc_string += " Empty";
-      }
-
-      for (int i = 0; i < (traj[0].len[1]); i++) {
-        bc_string += ('\n');
-        bc_string += String(traj[0].trajtimes[i]);
-        bc_string += ('\t');
-        for (int j = 0; j < numSensors; j++) {
-          bc_string += String(units->convertToExternal(traj[j].trajpts[i]));
-          bc_string += ('\t');
-        }
-      }
-
-      bc_string += ('\n');
-      bc_string += ("_Suffix:");
-
-      if (traj[0].len[2] ==0){
-        bc_string += " Empty";
-      }
-
-      for (int i = 1; i < (traj[0].len[2]); i++) {
-        bc_string += ('\n');
-        bc_string += String(traj[0].suffixtimes[i]);
-        bc_string += ('\t');
-        for (int j = 0; j < numSensors; j++) {
-          bc_string += String(units->convertToExternal(traj[j].suffixpts[i]));
-          bc_string += ('\t');
-        }
-      }
-    }
-
-  }
-
 
   }
 
