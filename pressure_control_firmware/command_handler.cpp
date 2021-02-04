@@ -212,10 +212,10 @@ void CommandHandler::SetSetpoint(){
   }
   if (broadcast) {
     bc_string += "SET: ";
-    bc_string += String(ctrlSettings[0].settime, 4);
+    bc_string += String(ctrlSettings[0].settime, 2);
     for (int i = 0; i < numSensors; i++) {
       bc_string += '\t';
-      bc_string += String(units->convertToExternal(ctrlSettings[i].setpoint), 4);
+      bc_string += String(units->convertToExternal(ctrlSettings[i].setpoint), 2);
     }
   }
 }

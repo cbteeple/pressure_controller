@@ -21,9 +21,9 @@
 //#include "config/config_pneumatic_teensy7.h"
 //#include "config/config_vacuum.h"
 //#include "config/config_V_3_4_no_master.h"
-#include "config/config_V_3_4_fivechannel.h"
+//#include "config/config_V_3_4_fivechannel.h"
 //#include "config/config_V_3_4_microprop.h"
-//#include "config/config_V_3_4.h"
+#include "config/config_V_3_4.h"
 //#include "config/config_hydraulic.h"
 
 
