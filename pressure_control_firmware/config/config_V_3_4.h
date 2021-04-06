@@ -36,7 +36,7 @@ SensorSSCDANN150PGAA5 masterSensorType;
 #define ADC_MAX_VOLTS 3.3
 float   ADC_MULT = 0.6666666;
 
-#define MAX_NUM_CHANNELS 10
+#define MAX_NUM_CHANNELS 8
 
 // Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
@@ -56,7 +56,7 @@ float   ADC_MULT = 0.6666666;
 
 // Set valve pins
   int valvePins[][2]= { {23,22}, {21,20}, {2,3}, {4,5}, {6,7}, {8,9}, {10,14}, {29,30}, {38,37}, {36,35} };
-  int valveOffset[][2]={{227,226},{224,224},{225,225},{225,225}, {225,225}, {225,225}, {225,225}, {225,225}, {225,225}, {225,225}};
+  int valveOffset[][2]={{227,226},{224,224},{225,225},{225,225}, {225,225}, {225,225}, {225,225}, {225,225}, {220,225}, {225,225}};
 
   int masterValvePin = 28;
 

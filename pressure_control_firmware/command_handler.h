@@ -67,12 +67,13 @@ class CommandHandler
     void SetMasterMaxPressure();
 
     void SetUnits();
+    void GetCurrTime();
 
 
 
     
     // Define the map to refer to the worker functions
-    const static unsigned int num_commands= 32;
+    const static unsigned int num_commands= 33;
     String str_vec[num_commands]={"SET",
                                   "TRAJSTART",
                                   "TRAJSTOP",
@@ -107,7 +108,8 @@ class CommandHandler
                                   "MASTERP",
                                   "MASTERMAXP",
                                   //
-                                  "UNITS"};
+                                  "UNITS",
+                                  "CURRTIME",};
 
     FunctionPointer fun_vec[num_commands]={&SetSetpoint,
                                            &TrajStart,
@@ -143,7 +145,8 @@ class CommandHandler
                                            &SetMasterPressure,
                                            &SetMasterMaxPressure,
                                            //
-                                           &SetUnits};
+                                           &SetUnits,
+                                           &GetCurrTime};
     
     FunctionPointer fun_default = &Unrecognized;
 

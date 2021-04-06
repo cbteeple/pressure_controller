@@ -286,6 +286,8 @@ void loop() {
   run_traj = trajCtrl.all_running;
   traj_reset = trajCtrl.reset;
   trajCtrl.CurrTime = curr_time;
+
+  settings.currentTime = currentTime;
   
 
   

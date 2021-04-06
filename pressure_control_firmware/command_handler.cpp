@@ -892,6 +892,12 @@ void CommandHandler::SetUnits() {
   }
 }
 
+void CommandHandler::GetCurrTime() {
+    if (broadcast) {
+      bc_string += "CURRTIME: ";
+      bc_string += settings->currentTime;
+    }
+}
 
 
   //Unrecognized
