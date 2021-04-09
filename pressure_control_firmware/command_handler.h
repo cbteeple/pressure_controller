@@ -22,6 +22,7 @@ class CommandHandler
     byte out_buffer[64];   
     int numSensors;
     String command;
+    String commandStr;
     String bc_string = "_";
     bool newSettings = false;
     bool broadcast = false;

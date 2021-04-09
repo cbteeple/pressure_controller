@@ -128,6 +128,7 @@ bool CommandHandler::processCommand() {
 
   String cmdStr = getStringValue(command, ';', 0);
   auto work_fun = findFunction(cmdStr);
+  commandStr = cmdStr;
   (this->*work_fun)();
 
 
@@ -893,9 +894,22 @@ void CommandHandler::SetUnits() {
 }
 
 void CommandHandler::GetCurrTime() {
-    if (broadcast) {
+    /*if (broadcast) {
       bc_string += "CURRTIME: ";
       bc_string += settings->currentTime;
+    }*/
+
+    if (getStringValue(command, ';', 1).length()) {
+      unsigned int curr_offset = getStringValue(command, ';', 1).toInt();
+      settings->currentTimeOffset = settings->currentTime - curr_offset;
+      newSettings = true;
+      if (broadcast) {
+        bc_string += "NEW ";
+      }
+    }
+    if (broadcast) {
+      bc_string += "CURRTIME: ";
+      bc_string += String(settings->currentTime - settings->currentTimeOffset);
     }
 }
 
@@ -904,6 +918,7 @@ void CommandHandler::GetCurrTime() {
 void CommandHandler::Unrecognized() {
     newSettings = false;
     if (broadcast) {
-      bc_string += ("UNREC: Unrecognized Command");
+      bc_string += ("UNREC: Unrecognized Command: ");
+      bc_string += (commandStr);
     }
   }

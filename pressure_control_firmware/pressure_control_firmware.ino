@@ -16,14 +16,12 @@
 
 
 //Include the config file from the system you are using
-//#include "config/config_pneumatic_teensy.h"
 //#include "config/config_pneumatic_teensy8.h"
-//#include "config/config_pneumatic_teensy7.h"
 //#include "config/config_vacuum.h"
 //#include "config/config_V_3_4_no_master.h"
 //#include "config/config_V_3_4_fivechannel.h"
 //#include "config/config_V_3_4_microprop.h"
-#include "config/config_V_3_4.h"
+//#include "config/config_V_3_4.h"
 //#include "config/config_hydraulic.h"
 
 
@@ -115,6 +113,8 @@ int currLCDIndex=0;
 unsigned long previousTime=0;
 unsigned long previousLCDTime=0;
 unsigned long currentTime=0;
+unsigned long currentTimeLocal = 0;
+unsigned long previousTimeLocal = 0;
 
 
 
@@ -431,7 +431,9 @@ void loop() {
 
   //Print out data at close to the correct rate
   currentTime=millis();
-  if (settings.outputsOn && (currentTime-previousTime>= settings.looptime)){
+  currentTimeLocal = currentTime-settings.currentTimeOffset;
+  previousTimeLocal= previousTime-settings.currentTimeOffset;
+  if (settings.outputsOn && (currentTimeLocal-previousTimeLocal>= settings.looptime)){
     printData();
     previousTime=currentTime;
   }
@@ -488,7 +490,7 @@ void loop() {
 
 String generateSetpointStr(){
   String send_str = "";
-  send_str+=String(currentTime);
+  send_str+=String(currentTimeLocal);
   send_str+=('\t');
   send_str+="0";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
@@ -501,7 +503,7 @@ String generateSetpointStr(){
 
 String generateDataStr(){
   String send_str = "";
-  send_str+=String(currentTime);
+  send_str+=String(currentTimeLocal);
   send_str+=('\t');
   send_str+="1";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
@@ -514,7 +516,7 @@ String generateDataStr(){
 String generateMasterStr(){
   String send_str = "";
   
-  send_str+=String(currentTime);
+  send_str+=String(currentTimeLocal);
   send_str+=('\t');
   send_str+="2";
   send_str+=('\t');  

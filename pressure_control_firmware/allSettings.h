@@ -17,6 +17,7 @@ class globalSettings
     unsigned int watchdogSpikeTime = 100;
     unsigned int units[2] = {0, 0};
     unsigned long currentTime = 0;
+    unsigned long currentTimeOffset = 0;
 };
 
 
