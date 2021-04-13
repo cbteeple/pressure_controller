@@ -40,13 +40,14 @@ void CommandHandler::stopBroadcast() {
 }
 
 
-void CommandHandler::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in, UnitHandler *units_in) {
+void CommandHandler::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in, UnitHandler *units_in, valveSettings *valvePairSettings_in) {
   numSensors   = num;
   settings     = settings_in;
   ctrlSettings = ctrlSettings_in;
   traj         = traj_in;
   trajCtrl     = trajCtrl_in;
   units        = units_in;
+  valvePairSettings = valvePairSettings_in;
   // reserve 200 bytes for the inputString:
   command.reserve(200);
 
@@ -507,6 +508,7 @@ void CommandHandler::SetMode() {
 void CommandHandler::Save() {
     for (int i = 0; i < numSensors; i++) {
       saveHandler.saveCtrl(ctrlSettings[i], i);
+      saveHandler.saveValves(valvePairSettings[i], i);
     }
     saveHandler.saveGlobal(*settings);
 
@@ -521,6 +523,7 @@ void CommandHandler::Load() {
       float set_temp = ctrlSettings[i].setpoint;
       saveHandler.loadCtrl(ctrlSettings[i], i);
       ctrlSettings[i].setpoint = set_temp;
+      saveHandler.loadValves(valvePairSettings[i], i);
     }
     bool set_temp = settings->outputsOn;
     saveHandler.loadGlobal(*settings);
@@ -539,6 +542,7 @@ void CommandHandler::Load() {
 void CommandHandler::SaveDefault() {
     for (int i = 0; i < numSensors; i++) {
       saveHandler.saveDefaultCtrl(ctrlSettings[i], i);
+      saveHandler.saveValves(valvePairSettings[i], i);
     }
     saveHandler.saveDefaultGlobal(*settings);
     if (broadcast) {
@@ -550,6 +554,7 @@ void CommandHandler::SaveDefault() {
 void CommandHandler::LoadDefault() {
     for (int i = 0; i < numSensors; i++) {
       saveHandler.loadDefaultCtrl(ctrlSettings[i], i);
+      saveHandler.loadValves(valvePairSettings[i], i);
     }
     bool set_temp = settings->outputsOn;
     saveHandler.loadDefaultGlobal(*settings);
@@ -910,6 +915,29 @@ void CommandHandler::GetCurrTime() {
     if (broadcast) {
       bc_string += "CURRTIME: ";
       bc_string += String(settings->currentTime - settings->currentTimeOffset);
+    }
+}
+
+void CommandHandler::SetValveOffsets() {
+  int channel = 0;
+    if (getStringValue(command, ';', 3).length()) {
+      channel = getStringValue(command, ';', 1).toInt();
+      for (int i = 0; i < 2; i++) {
+        valvePairSettings[channel].valveOffset[i] = getStringValue(command, ';', i + 2).toFloat();
+      }
+      newSettings = true;
+    }
+    else if (getStringValue(command, ';', 1).length()){
+        channel = getStringValue(command, ';', 1).toInt();
+    }
+    
+    if (broadcast) {
+        bc_string += "VOFFSET: ";
+        bc_string += String(channel);
+        bc_string += '\t';
+        bc_string += String(valvePairSettings[channel].valveOffset[0]);
+        bc_string += '\t';
+        bc_string += String(valvePairSettings[channel].valveOffset[1]);
     }
 }
 

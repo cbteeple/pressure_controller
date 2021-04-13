@@ -21,7 +21,7 @@
 //#include "config/config_V_3_4_no_master.h"
 //#include "config/config_V_3_4_fivechannel.h"
 //#include "config/config_V_3_4_microprop.h"
-//#include "config/config_V_3_4.h"
+#include "config/config_V_3_4.h"
 //#include "config/config_hydraulic.h"
 
 
@@ -147,7 +147,7 @@ void setup() {
     }
 
     buttonHandler.initialize();
-    handleCommands.initialize(MAX_NUM_CHANNELS, &settings, ctrlSettings, traj, &trajCtrl, &units);
+    handleCommands.initialize(MAX_NUM_CHANNELS, &settings, ctrlSettings, traj, &trajCtrl, &units, valvePairSettings);
     handleCommands.startBroadcast();
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
       
@@ -253,6 +253,13 @@ void setup() {
     //Get saved settings
     loadSettings();
 
+    for (int i=0; i<MAX_NUM_CHANNELS; i++){
+      sensors[i].initialize(senseSettings[i]);
+      valves[i].initialize(valvePins[i][0],valvePins[i][1]);
+      valves[i].setSettings(valvePairSettings[i]);
+      controllers[i].initialize(ctrlSettings[i]);
+    }
+
 }
 
 
@@ -288,9 +295,7 @@ void loop() {
   trajCtrl.CurrTime = curr_time;
 
   settings.currentTime = currentTime;
-  
-
-  
+ 
   
   //bool newSettings=handleCommands.go(settings, ctrlSettings, traj, trajCtrl );
   
@@ -326,6 +331,9 @@ void loop() {
   //Get pressure readings and do control
     for (int i=0; i<MAX_NUM_CHANNELS; i++){   
       //Update controller settings if there are new ones
+      if (newSettings){
+          valves[i].setSettings(valvePairSettings[i]);
+      }
 
       //if we are in mode 2, set the setpoint to be a linear interpolation between trajectory points
         if (ctrlSettings[i].controlMode==2){
@@ -597,6 +605,7 @@ void loadSettings(){
     float set_temp = ctrlSettings[i].setpoint;
     saveHandler.loadCtrl(ctrlSettings[i], i);
     ctrlSettings[i].setpoint=set_temp;
+    saveHandler.loadValves(valvePairSettings[i], i);
   }
   bool set_temp = settings.outputsOn;
   saveHandler.loadGlobal(settings);

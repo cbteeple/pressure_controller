@@ -69,12 +69,13 @@ class CommandHandler
 
     void SetUnits();
     void GetCurrTime();
+    void SetValveOffsets();
 
 
 
     
     // Define the map to refer to the worker functions
-    const static unsigned int num_commands= 33;
+    const static unsigned int num_commands= 34;
     String str_vec[num_commands]={"SET",
                                   "TRAJSTART",
                                   "TRAJSTOP",
@@ -110,7 +111,8 @@ class CommandHandler
                                   "MASTERMAXP",
                                   //
                                   "UNITS",
-                                  "CURRTIME",};
+                                  "CURRTIME",
+                                  "VOFFSET",};
 
     FunctionPointer fun_vec[num_commands]={&SetSetpoint,
                                            &TrajStart,
@@ -147,7 +149,8 @@ class CommandHandler
                                            &SetMasterMaxPressure,
                                            //
                                            &SetUnits,
-                                           &GetCurrTime};
+                                           &GetCurrTime,
+                                           &SetValveOffsets};
     
     FunctionPointer fun_default = &Unrecognized;
 
@@ -161,6 +164,7 @@ class CommandHandler
     Trajectory *traj;
     TrajectoryControl *trajCtrl;
     UnitHandler *units;
+    valveSettings *valvePairSettings;
 
     int getCommandType();
     bool readCommand();
@@ -171,7 +175,7 @@ class CommandHandler
   
   public:
     CommandHandler(){};
-    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *, UnitHandler *);
+    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *, UnitHandler *, valveSettings*);
     bool go();
     void startBroadcast();
     void stopBroadcast();

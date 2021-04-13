@@ -6,6 +6,7 @@
 //Create new settings objects
 globalSettings settings;
 controlSettings ctrlSettings[MAX_NUM_CHANNELS];
+valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
 
 eepromHandler saveHandler;
 
@@ -40,6 +41,7 @@ void setup() {
       }
       ctrlSettings[i].deadzone=deadzone_start;
       ctrlSettings[i].integratorResetTime=integratorResetTime_start;
+
     }
 
     settings.looptime =20;
@@ -69,12 +71,8 @@ void loop() {
 void saveSettings() {
   for (int i = 0; i < MAX_NUM_CHANNELS; i++) {
     saveHandler.saveCtrl(ctrlSettings[i], i);
+    saveHandler.saveValves(valvePairSettings[i], i);
   }
   saveHandler.saveGlobal(settings);
   Serial.println("Onboard Memory Initialized");
 }
-
-
-
-
-
