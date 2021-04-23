@@ -36,7 +36,7 @@ SensorSSCDANN150PGAA5 masterSensorType;
 #define ADC_MAX_VOLTS 3.3
 float   ADC_MULT = 0.6666666;
 
-#define MAX_NUM_CHANNELS 8
+#define MAX_NUM_CHANNELS 10
 
 // Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false

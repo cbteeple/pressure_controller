@@ -16,12 +16,12 @@
 
 
 //Include the config file from the system you are using
-#include "config/config_pneumatic_teensy8.h"
+//#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_vacuum.h"
 //#include "config/config_V_3_4_no_master.h"
 //#include "config/config_V_3_4_fivechannel.h"
 //#include "config/config_V_3_4_microprop.h"
-//#include "config/config_V_3_4.h"
+#include "config/config_V_3_4.h"
 //#include "config/config_hydraulic.h"
 
 
@@ -37,6 +37,7 @@ sensorSettings senseSettings[MAX_NUM_CHANNELS];
 #endif
 
 valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
+valveSettings  masterValveSettings;
 
 //Create new trajectory objects
 Trajectory traj[MAX_NUM_CHANNELS];
@@ -88,6 +89,7 @@ float valveSets[MAX_NUM_CHANNELS];
 
 //Set up valve pairs  
 valvePair valves[MAX_NUM_CHANNELS];
+valvePair masterValve;
 
 interpLin setpoint_interp[MAX_NUM_CHANNELS];
 
@@ -212,6 +214,9 @@ void setup() {
       masterSenseSettings.pressure_min=masterSensorType.pressure_min;
       masterSenseSettings.pressure_max=masterSensorType.pressure_max;
 
+      masterValveSettings.valveOffset[0]=0;
+      masterValveSettings.valveOffset[1]=0;
+
       settings.useMasterPressure=true;
       settings.masterPressureOutput=true;
     #else
@@ -230,6 +235,8 @@ void setup() {
 
     #if(MASTER_SENSOR)
       masterSensor.initialize(masterSenseSettings);
+      masterValve.initialize(masterValvePin,masterValvePin);
+      masterValve.setSettings(masterValveSettings);
     #endif
 
     trajCtrl.initialize(traj, MAX_NUM_CHANNELS);
@@ -396,9 +403,9 @@ void loop() {
                 watchdog_start_time = curr_time;
               }
               else{
-                if ((watchdog_start_time-curr_time)>=settings.watchdogSpikeTime){
+                if ((curr_time-watchdog_start_time)>=settings.watchdogSpikeTime){
                   watchdog_triggered=false;
-                  ventUntilReset();
+                  masterValve.pressureValveOff();
                   watchdog_start_time = 0;
                 }
              }         
@@ -406,6 +413,7 @@ void loop() {
             else{
               watchdog_start_time=0;
               watchdog_triggered=false;
+              masterValve.pressureValveOn();
             }
           }
         #endif
