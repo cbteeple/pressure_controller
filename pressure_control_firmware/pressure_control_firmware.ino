@@ -21,7 +21,8 @@
 //#include "config/config_V_3_4_no_master.h"
 //#include "config/config_V_3_4_fivechannel.h"
 //#include "config/config_V_3_4_microprop.h"
-#include "config/config_V_3_4.h"
+//#include "config/config_V_3_4.h"
+#include "config/config_V_3_4_9chan.h"
 //#include "config/config_hydraulic.h"
 
 
@@ -511,7 +512,7 @@ String generateSetpointStr(){
   send_str+="0";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
     send_str+=('\t'); 
-    send_str+=String( units.convertToExternal(setpoint_local[i]),2);
+    send_str+=String( units.convertToExternal(setpoint_local[i]),1);
   }
   return send_str;
 }
@@ -524,7 +525,7 @@ String generateDataStr(){
   send_str+="1";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
     send_str+=('\t'); 
-    send_str+=String(units.convertToExternal(pressures[i]),2);  
+    send_str+=String(units.convertToExternal(pressures[i]),1);  
   }
   return send_str;
 }
@@ -536,7 +537,7 @@ String generateMasterStr(){
   send_str+=('\t');
   send_str+="2";
   send_str+=('\t');  
-  send_str+=String(units.convertToExternal(masterPressure),2); 
+  send_str+=String(units.convertToExternal(masterPressure),1); 
   return send_str;
 }
 
