@@ -603,8 +603,8 @@ void CommandHandler::SetChannels() {
   //[trajectory length] [trajectory starting index] [wrap mode]
 void CommandHandler::TrajConfig() {
     if (getStringValue(command, ';', 4).length()) {
-      trajCtrl->setLength(constrain(getStringValue(command, ';', 1).toInt(), 0, 999),
-                          constrain(getStringValue(command, ';', 2).toInt(), 0, 128),
+      trajCtrl->setLength(constrain(getStringValue(command, ';', 1).toInt(), 0, 128),
+                          constrain(getStringValue(command, ';', 2).toInt(), 0, 1024),
                           constrain(getStringValue(command, ';', 3).toInt(), 0, 128));
       trajCtrl->suffix_after_stop = bool(getStringValue(command, ';', 4).toInt());
     }

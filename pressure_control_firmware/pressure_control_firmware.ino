@@ -18,11 +18,11 @@
 //Include the config file from the system you are using
 //#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_vacuum.h"
-//#include "config/config_V_3_4_no_master.h"
+#include "config/config_V_3_4_no_master.h"
 //#include "config/config_V_3_4_fivechannel.h"
 //#include "config/config_V_3_4_microprop.h"
 //#include "config/config_V_3_4.h"
-#include "config/config_V_3_4_9chan.h"
+//#include "config/config_V_3_4_9chan.h"
 //#include "config/config_hydraulic.h"
 
 
