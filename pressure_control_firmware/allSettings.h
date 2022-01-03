@@ -5,6 +5,14 @@
 #ifndef __allSettings_H__
 #define __allSettings_H__
 
+class internalSettings
+{
+  public:
+    const unsigned int firmware_version[3] = {2,2,1};
+    const unsigned int cmd_spec_version[3] = {2,3,0};
+};
+
+
 class globalSettings
 {
   public:
@@ -74,6 +82,7 @@ class controlSettings
     float maxPressure;
     float minPressure;
     float settime;
+    bool reset=false;
 };
 
 

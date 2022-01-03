@@ -1,3 +1,15 @@
+/* Ctrl-P (Control Pressure) Firmware
+ *    by Clark Teeple (cbteeple@g.harvard.edu, cbteeple@gmail.com)
+ *    https://github.com/cbteeple/pressure_controller
+ * 
+ * 
+ * Setup Instructions:
+ *    1. Initialize EEPROM using the "initialize_onboard_memory" program
+ *       in the utilities folder.
+ *    2. Choose a config file to use, or make your own.
+ *    3. Upload this firmware 
+ */
+
 #include "analog_PressureSensor.h"
 #include "i2c_PressureSensor.h"
 #include "i2c_mux.h"
@@ -29,6 +41,7 @@
 
 //Create new settings objects
 globalSettings settings;
+internalSettings intSettings;
 UnitHandler units;
 controlSettings ctrlSettings[MAX_NUM_CHANNELS];
 sensorSettings senseSettings[MAX_NUM_CHANNELS];
@@ -150,7 +163,7 @@ void setup() {
     }
 
     buttonHandler.initialize();
-    handleCommands.initialize(MAX_NUM_CHANNELS, &settings, ctrlSettings, traj, &trajCtrl, &units, valvePairSettings);
+    handleCommands.initialize(MAX_NUM_CHANNELS, &settings, ctrlSettings, traj, &trajCtrl, &units, valvePairSettings, &intSettings);
     handleCommands.startBroadcast();
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
       
@@ -619,6 +632,7 @@ void loadSettings(){
   bool set_temp = settings.outputsOn;
   saveHandler.loadGlobal(settings);
   settings.outputsOn=set_temp;
+  
   units.setInputUnits(settings.units[0]);
   units.setOutputUnits(settings.units[1]);
 }

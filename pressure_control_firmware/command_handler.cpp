@@ -40,7 +40,7 @@ void CommandHandler::stopBroadcast() {
 }
 
 
-void CommandHandler::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in, UnitHandler *units_in, valveSettings *valvePairSettings_in) {
+void CommandHandler::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in, UnitHandler *units_in, valveSettings *valvePairSettings_in, internalSettings *intSettings_in) {
   numSensors   = num;
   settings     = settings_in;
   ctrlSettings = ctrlSettings_in;
@@ -48,6 +48,7 @@ void CommandHandler::initialize(int num, globalSettings *settings_in, controlSet
   trajCtrl     = trajCtrl_in;
   units        = units_in;
   valvePairSettings = valvePairSettings_in;
+  intSettings = intSettings_in;
   // reserve 200 bytes for the inputString:
   command.reserve(200);
 
@@ -479,6 +480,7 @@ void CommandHandler::SetMode() {
     if (getStringValue(command, ';', numSensors).length()) {
       for (int i = 0; i < numSensors; i++) {
         ctrlSettings[i].controlMode = getStringValue(command, ';', i + 1).toInt();
+        ctrlSettings[i].reset = true;
       }
       newSettings = true;
       if (broadcast) {
@@ -489,6 +491,7 @@ void CommandHandler::SetMode() {
       int allset = getStringValue(command, ';', 1).toInt();
       for (int i = 0; i < numSensors; i++) {
         ctrlSettings[i].controlMode = allset;
+        ctrlSettings[i].reset = true;
       }
       newSettings = true;
       if (broadcast) {
@@ -939,6 +942,42 @@ void CommandHandler::SetValveOffsets() {
         bc_string += '\t';
         bc_string += String(valvePairSettings[channel].valveOffset[1]);
     }
+}
+
+
+void CommandHandler::ResetControllers(){
+  for (int i = 0; i < numSensors; i++) {
+      ctrlSettings[i].reset = true;
+  }
+  newSettings = true;
+  
+  if (broadcast) {
+      bc_string += "RESET: Controllers Reset";
+  }
+}
+
+void CommandHandler::GetFirmwareVersion(){ 
+  if (broadcast) {
+      bc_string += "FIRMWARE: ";
+      for (int i=0; i<3; i++){
+        if (i>0){
+          bc_string +=".";
+        }
+        bc_string += String(intSettings->firmware_version[i]);
+      }
+  }
+}
+
+void CommandHandler::GetCmdSpecVersion(){
+  if (broadcast) {
+      bc_string += "CMDSPEC: ";
+      for (int i=0; i<3; i++){
+        if (i>0){
+          bc_string +=".";
+        }
+        bc_string += String(intSettings->cmd_spec_version[i]);
+      }
+  }
 }
 
 

@@ -73,6 +73,7 @@ class controlSettings
     float maxPressure;
     float minPressure;
     float settime;
+    bool reset = false;
 };
 
 

@@ -71,11 +71,15 @@ class CommandHandler
     void GetCurrTime();
     void SetValveOffsets();
 
+    void ResetControllers();
+    void GetFirmwareVersion();
+    void GetCmdSpecVersion();
+
 
 
     
     // Define the map to refer to the worker functions
-    const static unsigned int num_commands= 34;
+    const static unsigned int num_commands= 37;
     String str_vec[num_commands]={"SET",
                                   "TRAJSTART",
                                   "TRAJSTOP",
@@ -112,7 +116,11 @@ class CommandHandler
                                   //
                                   "UNITS",
                                   "CURRTIME",
-                                  "VOFFSET",};
+                                  "VOFFSET",
+                                  //
+                                  "RESET",
+                                  "FIRMWARE",
+                                  "CMDSPEC",};
 
     FunctionPointer fun_vec[num_commands]={&SetSetpoint,
                                            &TrajStart,
@@ -150,7 +158,11 @@ class CommandHandler
                                            //
                                            &SetUnits,
                                            &GetCurrTime,
-                                           &SetValveOffsets};
+                                           &SetValveOffsets,
+                                           //
+                                           &ResetControllers,
+                                           &GetFirmwareVersion,
+                                           &GetCmdSpecVersion};
     
     FunctionPointer fun_default = &Unrecognized;
 
@@ -165,6 +177,7 @@ class CommandHandler
     TrajectoryControl *trajCtrl;
     UnitHandler *units;
     valveSettings *valvePairSettings;
+    internalSettings *intSettings;
 
     int getCommandType();
     bool readCommand();
@@ -175,7 +188,7 @@ class CommandHandler
   
   public:
     CommandHandler(){};
-    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *, UnitHandler *, valveSettings*);
+    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *, UnitHandler *, valveSettings*, internalSettings *);
     bool go();
     void startBroadcast();
     void stopBroadcast();

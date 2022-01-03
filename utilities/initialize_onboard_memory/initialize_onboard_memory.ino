@@ -1,3 +1,13 @@
+/* Ctrl-P (Control Pressure) Firmware
+ *    by Clark Teeple (cbteeple@g.harvard.edu, cbteeple@gmail.com)
+ *    https://github.com/cbteeple/pressure_controller
+ * 
+ * 
+ * Setup Instructions:
+ *    1. Initialize EEPROM using this program.
+ *    2. Follow instructions to upload the firmware.
+ */
+
 #include "allSettings.h"
 #include "eeprom_handler.h"
 
