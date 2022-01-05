@@ -128,22 +128,29 @@ int currLCDIndex=0;
 //Set up output task manager variables
 unsigned long previousTime=0;
 unsigned long previousLCDTime=0;
+unsigned long previousLEDTime=0;
 unsigned long currentTime=0;
 unsigned long currentTimeLocal = 0;
 unsigned long previousTimeLocal = 0;
+unsigned long led_error_time = 500;
+bool led_pin_state = LOW;
 
 
 
 
 
 //______________________________________________________________________
-void setup() {
+void setup() { 
   //Start serial
-    Serial.begin(115200);
-    //Serial.flush();
-    Serial.setTimeout(2);
+  Serial.begin(115200);
+  //Serial.flush();
+  Serial.setTimeout(2);
+  
+  int adc_res = setADCRes(ADC_RES);
 
-   int adc_res = setADCRes(ADC_RES);
+  //Turn on LED
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
 
 
   //Buttons:
@@ -354,6 +361,12 @@ void loop() {
       //Update controller settings if there are new ones
       if (newSettings){
           valves[i].setSettings(valvePairSettings[i]);
+
+          // If the mode gets reset after a pressure watchdog is triggered, clear error
+          if (ctrlSettings[i].controlMode!=0){
+            intSettings.error_state = 0;
+          }
+          
       }
 
       //if we are in mode 2, set the setpoint to be a linear interpolation between trajectory points
@@ -405,7 +418,7 @@ void loop() {
         //Software Watchdog - If pressure exceeds max, vent forever until the mode gets reset.
         if (pressures[i] > ctrlSettings[i].maxPressure){
           ventUntilReset();
-          
+          intSettings.error_state = 1;
         }
 
         //Software Watchdog on input pressure line
@@ -420,6 +433,7 @@ void loop() {
                 if ((curr_time-watchdog_start_time)>=settings.watchdogSpikeTime){
                   watchdog_triggered=false;
                   masterValve.pressureValveOff();
+                  intSettings.error_state = 2;
                   watchdog_start_time = 0;
                 }
              }         
@@ -428,6 +442,7 @@ void loop() {
               watchdog_start_time=0;
               watchdog_triggered=false;
               masterValve.pressureValveOn();
+              intSettings.error_state = 0;
             }
           }
         #endif
@@ -479,11 +494,42 @@ void loop() {
   if(trajCtrl.current_message.length()){
     printMessage(trajCtrl.current_message);
   }
+
+  handleLed();
     
 }
 
 
 //______________________________________________________________________
+
+// HANDLE LED
+void handleLed(){
+  // If no errors, set LED on.
+  if (intSettings.error_state == 0){
+    led_pin_state = HIGH;
+    digitalWrite(LED_BUILTIN,led_pin_state);
+    return;
+  }
+  // Flash 2x every second if overpressure is measured in the outputs
+  if (intSettings.error_state == 1){
+    led_error_time=500;
+  }
+  
+  // Flash 1x every second if overpressure is measured in the input
+  else if (intSettings.error_state == 2){
+    led_error_time=1000;
+  }
+
+  // Set LED state  
+  if (currentTime-previousLEDTime>= led_error_time/2){
+    led_pin_state = !led_pin_state;
+    digitalWrite(LED_BUILTIN,led_pin_state);
+    previousLEDTime=currentTime;
+    return;
+  }
+  
+}
+
 
 
 //PRINT DATA OUT FUNCTION

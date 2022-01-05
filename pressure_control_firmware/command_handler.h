@@ -74,12 +74,13 @@ class CommandHandler
     void ResetControllers();
     void GetFirmwareVersion();
     void GetCmdSpecVersion();
+    void GetErrorState();
 
 
 
     
     // Define the map to refer to the worker functions
-    const static unsigned int num_commands= 37;
+    const static unsigned int num_commands= 38;
     String str_vec[num_commands]={"SET",
                                   "TRAJSTART",
                                   "TRAJSTOP",
@@ -120,7 +121,8 @@ class CommandHandler
                                   //
                                   "RESET",
                                   "FIRMWARE",
-                                  "CMDSPEC",};
+                                  "CMDSPEC",
+                                  "ERROR",};
 
     FunctionPointer fun_vec[num_commands]={&SetSetpoint,
                                            &TrajStart,
@@ -162,7 +164,8 @@ class CommandHandler
                                            //
                                            &ResetControllers,
                                            &GetFirmwareVersion,
-                                           &GetCmdSpecVersion};
+                                           &GetCmdSpecVersion,
+                                           &GetErrorState};
     
     FunctionPointer fun_default = &Unrecognized;
 

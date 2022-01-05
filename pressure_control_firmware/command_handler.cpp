@@ -980,6 +980,13 @@ void CommandHandler::GetCmdSpecVersion(){
   }
 }
 
+void CommandHandler::GetErrorState(){
+  if (broadcast) {
+    bc_string += "ERROR: ";
+    bc_string += String(intSettings->error_state);
+    }
+}
+
 
   //Unrecognized
 void CommandHandler::Unrecognized() {
