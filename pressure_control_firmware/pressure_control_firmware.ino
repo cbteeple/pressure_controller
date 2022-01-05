@@ -50,6 +50,12 @@ sensorSettings senseSettings[MAX_NUM_CHANNELS];
   sensorSettings masterSenseSettings;
 #endif
 
+#if(MAX_NUM_CHANNELS>6)
+unsigned int data_resolution = 1;
+#else
+unsigned int data_resolution = 3;
+#endif
+
 valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
 valveSettings  masterValveSettings;
 
@@ -571,7 +577,7 @@ String generateSetpointStr(){
   send_str+="0";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
     send_str+=('\t'); 
-    send_str+=String( units.convertToExternal(setpoint_local[i]),1);
+    send_str+=String( units.convertToExternal(setpoint_local[i]),data_resolution);
   }
   return send_str;
 }
@@ -584,7 +590,7 @@ String generateDataStr(){
   send_str+="1";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
     send_str+=('\t'); 
-    send_str+=String(units.convertToExternal(pressures[i]),1);  
+    send_str+=String(units.convertToExternal(pressures[i]),data_resolution);  
   }
   return send_str;
 }
@@ -596,7 +602,7 @@ String generateMasterStr(){
   send_str+=('\t');
   send_str+="2";
   send_str+=('\t');  
-  send_str+=String(units.convertToExternal(masterPressure),1); 
+  send_str+=String(units.convertToExternal(masterPressure),data_resolution); 
   return send_str;
 }
 

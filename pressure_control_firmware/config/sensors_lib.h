@@ -48,6 +48,21 @@ class SensorSSCDANN060PGAA5
 };
 
 
+// Used in version 1.0 of the pressure control board
+class SensorM5231_000005_050PG
+{
+  public:
+    int   model=3;
+
+    float output_max = 4.5;
+    float output_min = 0.5;
+    float output_offset = 0.5;
+
+    float pressure_max = 50; //PSI
+    float pressure_min = 0; //PSI
+};
+
+
 
 // Used in version 1.0 of the vacuum control board
 class SensorASDXRRX030PDAA5

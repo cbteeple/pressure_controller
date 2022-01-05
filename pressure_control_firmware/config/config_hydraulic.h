@@ -26,7 +26,7 @@
 #define SENSOR_I2C false
 
 //Define the sensor types
-SensorSSCDANN060PGAA5 controlSensorType;
+SensorM5231_000005_050PG controlSensorType;
 SensorDisconnected masterSensorType;
 
 #define MASTER_SENSOR false
