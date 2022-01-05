@@ -30,12 +30,12 @@
 //Include the config file from the system you are using
 //#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_vacuum.h"
-//#include "config/config_V_3_4_no_master.h"
+#include "config/config_V_3_4_no_master.h"
 //#include "config/config_V_3_4_fivechannel.h"
 //#include "config/config_V_3_4_microprop.h"
 //#include "config/config_V_3_4.h"
 //#include "config/config_V_3_4_9chan.h"
-#include "config/config_hydraulic.h"
+//#include "config/config_hydraulic.h"
 
 
 
@@ -49,17 +49,6 @@ sensorSettings senseSettings[MAX_NUM_CHANNELS];
 #if(MASTER_SENSOR)
   sensorSettings masterSenseSettings;
 #endif
-
-// Set the data resolution based on the number of channels
-if (MAX_NUM_CHANNELS<=3){
-  const unsigned int data_resolution = 3;
-}
-else if (MAX_NUM_CHANNELS<=7){
-  const unsigned int data_resolution = 2;
-}
-else{
-  const unsigned int data_resolution = 1;
-}
 
 valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
 valveSettings  masterValveSettings;
@@ -397,7 +386,7 @@ void loop() {
           if (newSettings){
             controllers[i].updateSettings(ctrlSettings[i]);
           
-            if (ctrlSettings[i].controlMode==1){
+            if (ctrlSettings[i].controlMode==0 || ctrlSettings[i].controlMode==1){
               setpoint_local[i] = ctrlSettings[i].setpoint;
               controllers[i].setSetpoint(setpoint_local[i]);
             }
@@ -558,6 +547,17 @@ void handleLed(){
     handleCommands.sendString(message);
   }
 
+
+// Set the data resolution based on the number of channels
+if (MAX_NUM_CHANNELS<=4){
+  const unsigned int data_resolution = 3;
+}
+else if (MAX_NUM_CHANNELS<=8){
+  const unsigned int data_resolution = 2;
+}
+else{
+  const unsigned int data_resolution = 1;
+}
   
 
 #else
@@ -572,6 +572,10 @@ void handleLed(){
   void printMessage(String message){
     Serial.print(message);
   }
+
+// Set the data resolution to 3 decimal points (serial can handle that)
+const unsigned int data_resolution = 3;
+
 #endif
 
 
