@@ -10,9 +10,17 @@ class Trajectory
   private:
    
     // Define setup variables
-    const static unsigned int maxLen = 1024;
-    const static unsigned int maxPrefixLen = 128;
-    const static unsigned int maxSuffixLen = 128;
+    // If using a teensy, allow large trajectories
+    #if defined(__arm__) && defined(CORE_TEENSY)
+      const static unsigned int maxLen = 1024;
+      const static unsigned int maxPrefixLen = 128;
+      const static unsigned int maxSuffixLen = 128;
+    // If using anything else, only reserve space for small trajectories
+    #else
+      const static unsigned int maxLen = 100;
+      const static unsigned int maxPrefixLen = 16;
+      const static unsigned int maxSuffixLen = 16;
+    #endif
     
     //const static unsigned int maxChannels = 1;
     int curr_idx = 1;
