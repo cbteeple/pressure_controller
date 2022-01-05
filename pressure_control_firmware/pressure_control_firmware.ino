@@ -50,11 +50,16 @@ sensorSettings senseSettings[MAX_NUM_CHANNELS];
   sensorSettings masterSenseSettings;
 #endif
 
-#if(MAX_NUM_CHANNELS>6)
-unsigned int data_resolution = 1;
-#else
-unsigned int data_resolution = 3;
-#endif
+// Set the data resolution based on the number of channels
+if (MAX_NUM_CHANNELS<=3){
+  const unsigned int data_resolution = 3;
+}
+else if (MAX_NUM_CHANNELS<=7){
+  const unsigned int data_resolution = 2;
+}
+else{
+  const unsigned int data_resolution = 1;
+}
 
 valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
 valveSettings  masterValveSettings;
