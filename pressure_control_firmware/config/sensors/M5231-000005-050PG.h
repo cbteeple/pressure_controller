@@ -1,4 +1,3 @@
-// These are i2c sensors used in the very early stages of prototyping (unused now)
 
 int SENSOR_MODEL=3;
 

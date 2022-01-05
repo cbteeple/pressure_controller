@@ -43,6 +43,15 @@ void eepromHandler::saveDefaultCtrl(controlSettings (&ctrlSettings), int channel
 }
 
 
+void eepromHandler::loadValves(valveSettings (&settings), int channelIdx){
+  EEPROM_readAnything(getSaveLoc(2, channelIdx, false),settings);
+}
+
+void eepromHandler::saveValves(valveSettings (&settings), int channelIdx){
+  EEPROM_writeAnything(getSaveLoc(2, channelIdx, false),settings);
+}
+
+
 
 int eepromHandler::getSaveLoc(int settingType, int channelIdx, bool isDefault){
   int settingsStart = 0;
@@ -53,6 +62,8 @@ int eepromHandler::getSaveLoc(int settingType, int channelIdx, bool isDefault){
               break;
       case 1: settingsStart = defaultGlobalStart;
             break;
+      case 2: settingsStart = valveSaveStart+channelIdx*valveLength;
+            break;
     }
   }
   else{
@@ -60,6 +71,8 @@ int eepromHandler::getSaveLoc(int settingType, int channelIdx, bool isDefault){
       case 0: settingsStart = settingsSaveStart + channelIdx*settingsLength;
               break;
       case 1: settingsStart = globalSaveStart;
+            break;
+      case 2: settingsStart = valveSaveStart+channelIdx*valveLength;
             break;
     }
   }

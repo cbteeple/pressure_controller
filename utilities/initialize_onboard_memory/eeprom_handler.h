@@ -7,11 +7,13 @@
 class eepromHandler
 {
   private:
-    int defaultGlobalStart = 500;
-    int defaultSettingsStart = 550;
+    int defaultGlobalStart = 550;
+    int defaultSettingsStart = 600;
     int globalSaveStart = 0;
-    int settingsSaveStart = 50;
-    int settingsLength = 50; 
+    int valveSaveStart = 50;
+    int valveLength = 4;
+    int settingsSaveStart = 100;
+    int settingsLength = 50;
 
     int getSaveLoc(int, int, bool);
   
@@ -26,6 +28,8 @@ class eepromHandler
     void saveCtrl(controlSettings &, int);
     void loadDefaultCtrl(controlSettings &, int);
     void saveDefaultCtrl(controlSettings &, int);
+    void loadValves(valveSettings &, int);
+    void saveValves(valveSettings &, int);
 };
 
 #endif

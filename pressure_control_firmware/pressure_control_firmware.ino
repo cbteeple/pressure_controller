@@ -1,3 +1,15 @@
+/* Ctrl-P (Control Pressure) Firmware
+ *    by Clark Teeple (cbteeple@g.harvard.edu, cbteeple@gmail.com)
+ *    https://github.com/cbteeple/pressure_controller
+ * 
+ * 
+ * Setup Instructions:
+ *    1. Initialize EEPROM using the "initialize_onboard_memory" program
+ *       in the utilities folder.
+ *    2. Choose a config file to use, or make your own.
+ *    3. Upload this firmware 
+ */
+
 #include "analog_PressureSensor.h"
 #include "i2c_PressureSensor.h"
 #include "i2c_mux.h"
@@ -16,20 +28,20 @@
 
 
 //Include the config file from the system you are using
-//#include "config/config_pneumatic_teensy.h"
 //#include "config/config_pneumatic_teensy8.h"
-//#include "config/config_pneumatic_teensy7.h"
 //#include "config/config_vacuum.h"
-//#include "config/config_V_3_4_no_master.h"
+#include "config/config_V_3_4_no_master.h"
 //#include "config/config_V_3_4_fivechannel.h"
 //#include "config/config_V_3_4_microprop.h"
-#include "config/config_V_3_4.h"
+//#include "config/config_V_3_4.h"
+//#include "config/config_V_3_4_9chan.h"
 //#include "config/config_hydraulic.h"
 
 
 
 //Create new settings objects
 globalSettings settings;
+internalSettings intSettings;
 UnitHandler units;
 controlSettings ctrlSettings[MAX_NUM_CHANNELS];
 sensorSettings senseSettings[MAX_NUM_CHANNELS];
@@ -39,6 +51,7 @@ sensorSettings senseSettings[MAX_NUM_CHANNELS];
 #endif
 
 valveSettings  valvePairSettings[MAX_NUM_CHANNELS];
+valveSettings  masterValveSettings;
 
 //Create new trajectory objects
 Trajectory traj[MAX_NUM_CHANNELS];
@@ -90,6 +103,7 @@ float valveSets[MAX_NUM_CHANNELS];
 
 //Set up valve pairs  
 valvePair valves[MAX_NUM_CHANNELS];
+valvePair masterValve;
 
 interpLin setpoint_interp[MAX_NUM_CHANNELS];
 
@@ -114,20 +128,29 @@ int currLCDIndex=0;
 //Set up output task manager variables
 unsigned long previousTime=0;
 unsigned long previousLCDTime=0;
+unsigned long previousLEDTime=0;
 unsigned long currentTime=0;
+unsigned long currentTimeLocal = 0;
+unsigned long previousTimeLocal = 0;
+unsigned long led_error_time = 500;
+bool led_pin_state = LOW;
 
 
 
 
 
 //______________________________________________________________________
-void setup() {
+void setup() { 
   //Start serial
-    Serial.begin(115200);
-    //Serial.flush();
-    Serial.setTimeout(2);
+  Serial.begin(115200);
+  //Serial.flush();
+  Serial.setTimeout(2);
+  
+  int adc_res = setADCRes(ADC_RES);
 
-   int adc_res = setADCRes(ADC_RES);
+  //Turn on LED
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
 
 
   //Buttons:
@@ -147,7 +170,7 @@ void setup() {
     }
 
     buttonHandler.initialize();
-    handleCommands.initialize(MAX_NUM_CHANNELS, &settings, ctrlSettings, traj, &trajCtrl, &units);
+    handleCommands.initialize(MAX_NUM_CHANNELS, &settings, ctrlSettings, traj, &trajCtrl, &units, valvePairSettings, &intSettings);
     handleCommands.startBroadcast();
     for (int i=0; i<MAX_NUM_CHANNELS; i++){
       
@@ -212,6 +235,9 @@ void setup() {
       masterSenseSettings.pressure_min=masterSensorType.pressure_min;
       masterSenseSettings.pressure_max=masterSensorType.pressure_max;
 
+      masterValveSettings.valveOffset[0]=0;
+      masterValveSettings.valveOffset[1]=0;
+
       settings.useMasterPressure=true;
       settings.masterPressureOutput=true;
     #else
@@ -230,6 +256,8 @@ void setup() {
 
     #if(MASTER_SENSOR)
       masterSensor.initialize(masterSenseSettings);
+      masterValve.initialize(masterValvePin,masterValvePin);
+      masterValve.setSettings(masterValveSettings);
     #endif
 
     trajCtrl.initialize(traj, MAX_NUM_CHANNELS);
@@ -252,6 +280,13 @@ void setup() {
 
     //Get saved settings
     loadSettings();
+
+    for (int i=0; i<MAX_NUM_CHANNELS; i++){
+      sensors[i].initialize(senseSettings[i]);
+      valves[i].initialize(valvePins[i][0],valvePins[i][1]);
+      valves[i].setSettings(valvePairSettings[i]);
+      controllers[i].initialize(ctrlSettings[i]);
+    }
 
 }
 
@@ -286,9 +321,9 @@ void loop() {
   run_traj = trajCtrl.all_running;
   traj_reset = trajCtrl.reset;
   trajCtrl.CurrTime = curr_time;
-  
 
-  
+  settings.currentTime = currentTime;
+ 
   
   //bool newSettings=handleCommands.go(settings, ctrlSettings, traj, trajCtrl );
   
@@ -324,6 +359,15 @@ void loop() {
   //Get pressure readings and do control
     for (int i=0; i<MAX_NUM_CHANNELS; i++){   
       //Update controller settings if there are new ones
+      if (newSettings){
+          valves[i].setSettings(valvePairSettings[i]);
+
+          // If the mode gets reset after a pressure watchdog is triggered, clear error
+          if (ctrlSettings[i].controlMode!=0){
+            intSettings.error_state = 0;
+          }
+          
+      }
 
       //if we are in mode 2, set the setpoint to be a linear interpolation between trajectory points
         if (ctrlSettings[i].controlMode==2){
@@ -342,7 +386,7 @@ void loop() {
           if (newSettings){
             controllers[i].updateSettings(ctrlSettings[i]);
           
-            if (ctrlSettings[i].controlMode==1){
+            if (ctrlSettings[i].controlMode==0 || ctrlSettings[i].controlMode==1){
               setpoint_local[i] = ctrlSettings[i].setpoint;
               controllers[i].setSetpoint(setpoint_local[i]);
             }
@@ -374,7 +418,7 @@ void loop() {
         //Software Watchdog - If pressure exceeds max, vent forever until the mode gets reset.
         if (pressures[i] > ctrlSettings[i].maxPressure){
           ventUntilReset();
-          
+          intSettings.error_state = 1;
         }
 
         //Software Watchdog on input pressure line
@@ -386,9 +430,10 @@ void loop() {
                 watchdog_start_time = curr_time;
               }
               else{
-                if ((watchdog_start_time-curr_time)>=settings.watchdogSpikeTime){
+                if ((curr_time-watchdog_start_time)>=settings.watchdogSpikeTime){
                   watchdog_triggered=false;
-                  ventUntilReset();
+                  masterValve.pressureValveOff();
+                  intSettings.error_state = 2;
                   watchdog_start_time = 0;
                 }
              }         
@@ -396,6 +441,8 @@ void loop() {
             else{
               watchdog_start_time=0;
               watchdog_triggered=false;
+              masterValve.pressureValveOn();
+              intSettings.error_state = 0;
             }
           }
         #endif
@@ -429,7 +476,9 @@ void loop() {
 
   //Print out data at close to the correct rate
   currentTime=millis();
-  if (settings.outputsOn && (currentTime-previousTime>= settings.looptime)){
+  currentTimeLocal = currentTime-settings.currentTimeOffset;
+  previousTimeLocal= previousTime-settings.currentTimeOffset;
+  if (settings.outputsOn && (currentTimeLocal-previousTimeLocal>= settings.looptime)){
     printData();
     previousTime=currentTime;
   }
@@ -445,11 +494,42 @@ void loop() {
   if(trajCtrl.current_message.length()){
     printMessage(trajCtrl.current_message);
   }
+
+  handleLed();
     
 }
 
 
 //______________________________________________________________________
+
+// HANDLE LED
+void handleLed(){
+  // If no errors, set LED on.
+  if (intSettings.error_state == 0){
+    led_pin_state = HIGH;
+    digitalWrite(LED_BUILTIN,led_pin_state);
+    return;
+  }
+  // Flash 2x every second if overpressure is measured in the outputs
+  if (intSettings.error_state == 1){
+    led_error_time=500;
+  }
+  
+  // Flash 1x every second if overpressure is measured in the input
+  else if (intSettings.error_state == 2){
+    led_error_time=1000;
+  }
+
+  // Set LED state  
+  if (currentTime-previousLEDTime>= led_error_time/2){
+    led_pin_state = !led_pin_state;
+    digitalWrite(LED_BUILTIN,led_pin_state);
+    previousLEDTime=currentTime;
+    return;
+  }
+  
+}
+
 
 
 //PRINT DATA OUT FUNCTION
@@ -467,6 +547,17 @@ void loop() {
     handleCommands.sendString(message);
   }
 
+
+// Set the data resolution based on the number of channels
+if (MAX_NUM_CHANNELS<=4){
+  const unsigned int data_resolution = 3;
+}
+else if (MAX_NUM_CHANNELS<=8){
+  const unsigned int data_resolution = 2;
+}
+else{
+  const unsigned int data_resolution = 1;
+}
   
 
 #else
@@ -481,17 +572,21 @@ void loop() {
   void printMessage(String message){
     Serial.print(message);
   }
+
+// Set the data resolution to 3 decimal points (serial can handle that)
+const unsigned int data_resolution = 3;
+
 #endif
 
 
 String generateSetpointStr(){
   String send_str = "";
-  send_str+=String(currentTime);
+  send_str+=String(currentTimeLocal);
   send_str+=('\t');
   send_str+="0";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
     send_str+=('\t'); 
-    send_str+=String( units.convertToExternal(setpoint_local[i]),2);
+    send_str+=String( units.convertToExternal(setpoint_local[i]),data_resolution);
   }
   return send_str;
 }
@@ -499,12 +594,12 @@ String generateSetpointStr(){
 
 String generateDataStr(){
   String send_str = "";
-  send_str+=String(currentTime);
+  send_str+=String(currentTimeLocal);
   send_str+=('\t');
   send_str+="1";
   for (int i=0; i<MAX_NUM_CHANNELS; i++){
     send_str+=('\t'); 
-    send_str+=String(units.convertToExternal(pressures[i]),2);  
+    send_str+=String(units.convertToExternal(pressures[i]),data_resolution);  
   }
   return send_str;
 }
@@ -512,11 +607,11 @@ String generateDataStr(){
 String generateMasterStr(){
   String send_str = "";
   
-  send_str+=String(currentTime);
+  send_str+=String(currentTimeLocal);
   send_str+=('\t');
   send_str+="2";
   send_str+=('\t');  
-  send_str+=String(units.convertToExternal(masterPressure),2); 
+  send_str+=String(units.convertToExternal(masterPressure),data_resolution); 
   return send_str;
 }
 
@@ -593,10 +688,12 @@ void loadSettings(){
     float set_temp = ctrlSettings[i].setpoint;
     saveHandler.loadCtrl(ctrlSettings[i], i);
     ctrlSettings[i].setpoint=set_temp;
+    saveHandler.loadValves(valvePairSettings[i], i);
   }
   bool set_temp = settings.outputsOn;
   saveHandler.loadGlobal(settings);
   settings.outputsOn=set_temp;
+  
   units.setInputUnits(settings.units[0]);
   units.setOutputUnits(settings.units[1]);
 }

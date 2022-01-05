@@ -31,6 +31,13 @@ void pidFull::updateSettings(controlSettings &newSettings){
   else{
     integratorResetOn = true;
   }
+
+  // If main reset is true, rest the controller
+  if (newSettings.reset){
+    resetIntegrator();
+    lastError=0;
+    newSettings.reset=false; // mark reset finished
+  }
 }
 
 

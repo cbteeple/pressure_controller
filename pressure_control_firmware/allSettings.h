@@ -5,6 +5,15 @@
 #ifndef __allSettings_H__
 #define __allSettings_H__
 
+class internalSettings
+{
+  public:
+    const unsigned int firmware_version[3] = {2,3,4};
+    const unsigned int cmd_spec_version[3] = {2,4,0};
+    unsigned int error_state = 0;
+};
+
+
 class globalSettings
 {
   public:
@@ -16,6 +25,8 @@ class globalSettings
     float maxPressure = 60;
     unsigned int watchdogSpikeTime = 100;
     unsigned int units[2] = {0, 0};
+    unsigned long currentTime = 0;
+    unsigned long currentTimeOffset = 0;
 };
 
 
@@ -51,8 +62,8 @@ class sensorSettings
 class valveSettings
 {
   public:
-    int valveOffset[2] = {220, 220};
-    int valveMax[2] = {255, 255};
+    uint8_t valveOffset[2] = {220, 220};
+    uint8_t valveMax[2] = {255, 255};
 };
 
 
@@ -72,6 +83,7 @@ class controlSettings
     float maxPressure;
     float minPressure;
     float settime;
+    bool reset=false;
 };
 
 

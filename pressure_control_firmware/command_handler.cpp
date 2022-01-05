@@ -40,13 +40,15 @@ void CommandHandler::stopBroadcast() {
 }
 
 
-void CommandHandler::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in, UnitHandler *units_in) {
+void CommandHandler::initialize(int num, globalSettings *settings_in, controlSettings *ctrlSettings_in, Trajectory *traj_in, TrajectoryControl *trajCtrl_in, UnitHandler *units_in, valveSettings *valvePairSettings_in, internalSettings *intSettings_in) {
   numSensors   = num;
   settings     = settings_in;
   ctrlSettings = ctrlSettings_in;
   traj         = traj_in;
   trajCtrl     = trajCtrl_in;
   units        = units_in;
+  valvePairSettings = valvePairSettings_in;
+  intSettings = intSettings_in;
   // reserve 200 bytes for the inputString:
   command.reserve(200);
 
@@ -128,6 +130,7 @@ bool CommandHandler::processCommand() {
 
   String cmdStr = getStringValue(command, ';', 0);
   auto work_fun = findFunction(cmdStr);
+  commandStr = cmdStr;
   (this->*work_fun)();
 
 
@@ -477,6 +480,7 @@ void CommandHandler::SetMode() {
     if (getStringValue(command, ';', numSensors).length()) {
       for (int i = 0; i < numSensors; i++) {
         ctrlSettings[i].controlMode = getStringValue(command, ';', i + 1).toInt();
+        ctrlSettings[i].reset = true;
       }
       newSettings = true;
       if (broadcast) {
@@ -487,6 +491,7 @@ void CommandHandler::SetMode() {
       int allset = getStringValue(command, ';', 1).toInt();
       for (int i = 0; i < numSensors; i++) {
         ctrlSettings[i].controlMode = allset;
+        ctrlSettings[i].reset = true;
       }
       newSettings = true;
       if (broadcast) {
@@ -506,6 +511,7 @@ void CommandHandler::SetMode() {
 void CommandHandler::Save() {
     for (int i = 0; i < numSensors; i++) {
       saveHandler.saveCtrl(ctrlSettings[i], i);
+      saveHandler.saveValves(valvePairSettings[i], i);
     }
     saveHandler.saveGlobal(*settings);
 
@@ -520,6 +526,7 @@ void CommandHandler::Load() {
       float set_temp = ctrlSettings[i].setpoint;
       saveHandler.loadCtrl(ctrlSettings[i], i);
       ctrlSettings[i].setpoint = set_temp;
+      saveHandler.loadValves(valvePairSettings[i], i);
     }
     bool set_temp = settings->outputsOn;
     saveHandler.loadGlobal(*settings);
@@ -538,6 +545,7 @@ void CommandHandler::Load() {
 void CommandHandler::SaveDefault() {
     for (int i = 0; i < numSensors; i++) {
       saveHandler.saveDefaultCtrl(ctrlSettings[i], i);
+      saveHandler.saveValves(valvePairSettings[i], i);
     }
     saveHandler.saveDefaultGlobal(*settings);
     if (broadcast) {
@@ -549,6 +557,7 @@ void CommandHandler::SaveDefault() {
 void CommandHandler::LoadDefault() {
     for (int i = 0; i < numSensors; i++) {
       saveHandler.loadDefaultCtrl(ctrlSettings[i], i);
+      saveHandler.loadValves(valvePairSettings[i], i);
     }
     bool set_temp = settings->outputsOn;
     saveHandler.loadDefaultGlobal(*settings);
@@ -597,8 +606,8 @@ void CommandHandler::SetChannels() {
   //[trajectory length] [trajectory starting index] [wrap mode]
 void CommandHandler::TrajConfig() {
     if (getStringValue(command, ';', 4).length()) {
-      trajCtrl->setLength(constrain(getStringValue(command, ';', 1).toInt(), 0, 999),
-                          constrain(getStringValue(command, ';', 2).toInt(), 0, 128),
+      trajCtrl->setLength(constrain(getStringValue(command, ';', 1).toInt(), 0, 128),
+                          constrain(getStringValue(command, ';', 2).toInt(), 0, 1024),
                           constrain(getStringValue(command, ';', 3).toInt(), 0, 128));
       trajCtrl->suffix_after_stop = bool(getStringValue(command, ';', 4).toInt());
     }
@@ -892,12 +901,98 @@ void CommandHandler::SetUnits() {
   }
 }
 
+void CommandHandler::GetCurrTime() {
+    /*if (broadcast) {
+      bc_string += "CURRTIME: ";
+      bc_string += settings->currentTime;
+    }*/
+
+    if (getStringValue(command, ';', 1).length()) {
+      unsigned int curr_offset = getStringValue(command, ';', 1).toInt();
+      settings->currentTimeOffset = settings->currentTime - curr_offset;
+      newSettings = true;
+      if (broadcast) {
+        bc_string += "NEW ";
+      }
+    }
+    if (broadcast) {
+      bc_string += "CURRTIME: ";
+      bc_string += String(settings->currentTime - settings->currentTimeOffset);
+    }
+}
+
+void CommandHandler::SetValveOffsets() {
+  int channel = 0;
+    if (getStringValue(command, ';', 3).length()) {
+      channel = getStringValue(command, ';', 1).toInt();
+      for (int i = 0; i < 2; i++) {
+        valvePairSettings[channel].valveOffset[i] = getStringValue(command, ';', i + 2).toFloat();
+      }
+      newSettings = true;
+    }
+    else if (getStringValue(command, ';', 1).length()){
+        channel = getStringValue(command, ';', 1).toInt();
+    }
+    
+    if (broadcast) {
+        bc_string += "VOFFSET: ";
+        bc_string += String(channel);
+        bc_string += '\t';
+        bc_string += String(valvePairSettings[channel].valveOffset[0]);
+        bc_string += '\t';
+        bc_string += String(valvePairSettings[channel].valveOffset[1]);
+    }
+}
+
+
+void CommandHandler::ResetControllers(){
+  for (int i = 0; i < numSensors; i++) {
+      ctrlSettings[i].reset = true;
+  }
+  newSettings = true;
+  
+  if (broadcast) {
+      bc_string += "RESET: Controllers Reset";
+  }
+}
+
+void CommandHandler::GetFirmwareVersion(){ 
+  if (broadcast) {
+      bc_string += "FIRMWARE: ";
+      for (int i=0; i<3; i++){
+        if (i>0){
+          bc_string +=".";
+        }
+        bc_string += String(intSettings->firmware_version[i]);
+      }
+  }
+}
+
+void CommandHandler::GetCmdSpecVersion(){
+  if (broadcast) {
+      bc_string += "CMDSPEC: ";
+      for (int i=0; i<3; i++){
+        if (i>0){
+          bc_string +=".";
+        }
+        bc_string += String(intSettings->cmd_spec_version[i]);
+      }
+  }
+}
+
+void CommandHandler::GetErrorState(){
+  if (broadcast) {
+    bc_string += "ERROR: ";
+    bc_string += String(intSettings->error_state);
+    }
+}
 
 
   //Unrecognized
 void CommandHandler::Unrecognized() {
     newSettings = false;
     if (broadcast) {
-      bc_string += ("UNREC: Unrecognized Command");
+      bc_string += ("UNREC: Unrecognized Command: ");
+      bc_string += (commandStr);
     }
   }

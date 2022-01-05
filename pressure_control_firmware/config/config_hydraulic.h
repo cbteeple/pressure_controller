@@ -26,49 +26,51 @@
 #define SENSOR_I2C false
 
 //Define the sensor types
-SensorSSCSNBN030PDAC5 controlSensorType;
-SensorSSCDANN150PGAA5 masterSensorType;
+SensorM5231_000005_050PG controlSensorType;
+SensorDisconnected masterSensorType;
 
-#define MASTER_SENSOR true
+#define MASTER_SENSOR false
 
 // Define mcu analog input properties
-#define ADC_RES 13
-#define ADC_MAX_VOLTS 3.3
-float   ADC_MULT = 0.6666666;
+#define ADC_RES 10
+#define ADC_MAX_VOLTS 5.0
+float   ADC_MULT = 1.0;
 
-#define MAX_NUM_CHANNELS 10
+#define MAX_NUM_CHANNELS 3
 
-// Define the type of controller to use (only one can be true)
+//Define the type of controller to use (only one can be true)
 #define CONTROL_BANGBANG false
 #define CONTROL_P false
 #define CONTROL_PID true
 
-
-// Set default settings for things
-// If using i2c sensors...
+//Set default settings for things
+//If using i2c sensors...
   int sensorAddr=0x58;
-  bool useMux=false;
+  bool useMux=true;
   int muxAddr=0x70;
 
-// Set sensor pins
-  int senseChannels[]={A3, A2, A1, A22, A21, A20, A15, A14, A12, A13};
-  int masterSenseChannel = A24;
+//Set sensor pins
+  //int senseChannels[]={A0,A1,A2,A3,A4,A5,A6,A7,A8};
+  int senseChannels[]={A1,A2,A3};
+  int masterSenseChannel = A4;
 
-// Set valve pins
-  int valvePins[][2]= { {23,22}, {21,20}, {2,3}, {4,5}, {6,7}, {8,9}, {10,14}, {29,30}, {38,37}, {36,35} };
-  int valveOffset[][2]={{227,226},{224,224},{225,225},{225,225}, {225,225}, {225,225}, {225,225}, {225,225}, {220,225}, {225,225}};
+//Set valve pins
+  int valvePins[][2]= { {4,5}, {6,7}, {8,9}};
+  int valveOffset[][2]={{205,205},{205,205},{205,205}};
 
-  int masterValvePin = 28;
+  int masterValvePin = 10;
 
-// Set Button pins
-  int buttonPins[]={27,26,25};
-  int robotPins[] ={27,26,25};
-  int extPins[]   ={12,11};
+//Set Button pins
+  int buttonPins[]={2,18,19};
+  int robotPins[] ={2,18,19};
+  int extPins[]   ={11,12};
 
-// Default controller settings
-  float pid_start[]={0.1,0.001,0}; 
+
+
+//Default controller settings
+  float pid_start[]={0.6,0.03,0}; 
   float deadzone_start=0.0;
   float setpoint_start=0;
   float integratorResetTime_start = -1;
   float minPressure_start = 0; //[psi]
-  float maxPressure_start = 28; //[psi]
+  float maxPressure_start = 7; //[psi]

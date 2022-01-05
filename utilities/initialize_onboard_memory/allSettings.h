@@ -52,8 +52,8 @@ class sensorSettings
 class valveSettings
 {
   public:
-    int valveOffset[2] = {220, 220};
-    int valveMax[2] = {255, 255};
+    uint8_t valveOffset[2] = {220, 220};
+    uint8_t valveMax[2] = {255, 255};
 };
 
 
@@ -73,6 +73,7 @@ class controlSettings
     float maxPressure;
     float minPressure;
     float settime;
+    bool reset = false;
 };
 
 

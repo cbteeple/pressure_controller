@@ -22,6 +22,7 @@ class CommandHandler
     byte out_buffer[64];   
     int numSensors;
     String command;
+    String commandStr;
     String bc_string = "_";
     bool newSettings = false;
     bool broadcast = false;
@@ -67,12 +68,19 @@ class CommandHandler
     void SetMasterMaxPressure();
 
     void SetUnits();
+    void GetCurrTime();
+    void SetValveOffsets();
+
+    void ResetControllers();
+    void GetFirmwareVersion();
+    void GetCmdSpecVersion();
+    void GetErrorState();
 
 
 
     
     // Define the map to refer to the worker functions
-    const static unsigned int num_commands= 32;
+    const static unsigned int num_commands= 38;
     String str_vec[num_commands]={"SET",
                                   "TRAJSTART",
                                   "TRAJSTOP",
@@ -107,7 +115,14 @@ class CommandHandler
                                   "MASTERP",
                                   "MASTERMAXP",
                                   //
-                                  "UNITS"};
+                                  "UNITS",
+                                  "CURRTIME",
+                                  "VOFFSET",
+                                  //
+                                  "RESET",
+                                  "FIRMWARE",
+                                  "CMDSPEC",
+                                  "ERROR",};
 
     FunctionPointer fun_vec[num_commands]={&SetSetpoint,
                                            &TrajStart,
@@ -143,7 +158,14 @@ class CommandHandler
                                            &SetMasterPressure,
                                            &SetMasterMaxPressure,
                                            //
-                                           &SetUnits};
+                                           &SetUnits,
+                                           &GetCurrTime,
+                                           &SetValveOffsets,
+                                           //
+                                           &ResetControllers,
+                                           &GetFirmwareVersion,
+                                           &GetCmdSpecVersion,
+                                           &GetErrorState};
     
     FunctionPointer fun_default = &Unrecognized;
 
@@ -157,6 +179,8 @@ class CommandHandler
     Trajectory *traj;
     TrajectoryControl *trajCtrl;
     UnitHandler *units;
+    valveSettings *valvePairSettings;
+    internalSettings *intSettings;
 
     int getCommandType();
     bool readCommand();
@@ -167,7 +191,7 @@ class CommandHandler
   
   public:
     CommandHandler(){};
-    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *, UnitHandler *);
+    void initialize(int, globalSettings *, controlSettings *, Trajectory *, TrajectoryControl *, UnitHandler *, valveSettings*, internalSettings *);
     bool go();
     void startBroadcast();
     void stopBroadcast();
