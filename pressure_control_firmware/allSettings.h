@@ -8,9 +8,10 @@
 class internalSettings
 {
   public:
-    const unsigned int firmware_version[3] = {2,3,4};
+    const unsigned int firmware_version[3] = {2,3,6};
     const unsigned int cmd_spec_version[3] = {2,4,0};
-    unsigned int error_state = 0;
+    bool master_error = 0;
+    bool channel_error = 0;
 };
 
 
@@ -24,6 +25,7 @@ class globalSettings
     bool masterPressureOutput=false;
     float maxPressure = 60;
     unsigned int watchdogSpikeTime = 100;
+    unsigned int channelWatchedogSpikeTime = 300;
     unsigned int units[2] = {0, 0};
     unsigned long currentTime = 0;
     unsigned long currentTimeOffset = 0;

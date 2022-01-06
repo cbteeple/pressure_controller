@@ -394,6 +394,20 @@ void CommandHandler::SetMinPressure() {
     }
   }
 
+void CommandHandler::SetPressureSpikeTime() {
+    if (getStringValue(command, ';', 1).length()) {
+      settings->channelWatchedogSpikeTime = getStringValue(command, ';', 1).toInt();
+      newSettings = true;
+      if (broadcast) {
+        bc_string += "NEW ";
+      }
+    }
+    if (broadcast) {
+      bc_string += ("SPIKE: ");
+      bc_string += String(settings->channelWatchedogSpikeTime);
+    }
+  }
+
 
 void CommandHandler::SetValves() {
     if (getStringValue(command, ';', numSensors).length()) {
@@ -981,9 +995,18 @@ void CommandHandler::GetCmdSpecVersion(){
 }
 
 void CommandHandler::GetErrorState(){
+  if (getStringValue(command, ';', 2).length()) {
+      intSettings->master_error = bool(getStringValue(command, ';', 1).toInt());
+      intSettings->channel_error = bool(getStringValue(command, ';', 2).toInt());      
+      if (broadcast) {
+          bc_string += "NEW ";
+      }
+  }
   if (broadcast) {
     bc_string += "ERROR: ";
-    bc_string += String(intSettings->error_state);
+    bc_string += String(intSettings->master_error);
+    bc_string += "\t";
+    bc_string += String(intSettings->channel_error);
     }
 }
 
