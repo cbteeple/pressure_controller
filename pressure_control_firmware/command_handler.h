@@ -43,6 +43,7 @@ class CommandHandler
     void StartIntegrator();
     void SetMaxPressure();
     void SetMinPressure();
+    void SetPressureSpikeTime();
     void SetValves();
     void SetWindow();
     void SetPID();
@@ -80,7 +81,7 @@ class CommandHandler
 
     
     // Define the map to refer to the worker functions
-    const static unsigned int num_commands= 38;
+    const static unsigned int num_commands= 39;
     String str_vec[num_commands]={"SET",
                                   "TRAJSTART",
                                   "TRAJSTOP",
@@ -94,6 +95,7 @@ class CommandHandler
                                   //
                                   "MAXP",
                                   "MINP",
+                                  "SPIKE",
                                   "VALVE",
                                   "WINDOW",
                                   "PID",
@@ -137,6 +139,7 @@ class CommandHandler
                                            //
                                            &SetMaxPressure,
                                            &SetMinPressure,
+                                           &SetPressureSpikeTime,
                                            &SetValves,
                                            &SetWindow,
                                            &SetPID,

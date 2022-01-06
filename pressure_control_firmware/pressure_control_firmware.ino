@@ -310,6 +310,8 @@ bool firstcall = true;
 
 unsigned long watchdog_start_time = 0;
 bool watchdog_triggered = false;
+unsigned long chan_watchdog_start_time[MAX_NUM_CHANNELS] = {0};
+bool chan_watchdog_triggered[MAX_NUM_CHANNELS] = {false};
 
 //______________________________________________________________________
 void loop() {
@@ -364,7 +366,7 @@ void loop() {
 
           // If the mode gets reset after a pressure watchdog is triggered, clear error
           if (ctrlSettings[i].controlMode!=0){
-            intSettings.channel_error = 0;
+            intSettings.channel_error=false;
           }
           
       }
@@ -415,34 +417,47 @@ void loop() {
         }
 
 
-        //Software Watchdog - If pressure exceeds max, vent forever until the mode gets reset.
+        //Software Watchdog - If pressure in any channel exceeds max, vent forever until the mode gets reset.
         if (pressures[i] > ctrlSettings[i].maxPressure){
-          ventUntilReset();
-          intSettings.channel_error = 1;
+          if (!intSettings.channel_error){
+            if (!chan_watchdog_triggered[i]){
+              chan_watchdog_triggered[i]=true;
+              chan_watchdog_start_time[i] = curr_time;
+            }
+            else if ((curr_time-chan_watchdog_start_time[i])>=settings.channelWatchedogSpikeTime*1000){
+              ventUntilReset();
+              intSettings.channel_error = true;
+              for (int j=0; j<MAX_NUM_CHANNELS; j++){
+                chan_watchdog_start_time[j] = 0;
+              }
+            }        
+          }
+          
+          
         }
 
         //Software Watchdog on input pressure line
         #if(MASTER_SENSOR)
           if (settings.useMasterPressure){
             if (masterPressure > settings.maxPressure){
-              if (!watchdog_triggered && !intSettings.master_error){
-                watchdog_triggered=true;
-                watchdog_start_time = curr_time;
-              }
-              else{
-                if ((curr_time-watchdog_start_time)>=settings.watchdogSpikeTime){
-                  watchdog_triggered=false;
-                  masterValve.pressureValveOff();
-                  intSettings.master_error = 1;
-                  watchdog_start_time = 0;
+              if (!intSettings.master_error){
+                if (!watchdog_triggered){
+                  watchdog_triggered=true;
+                  watchdog_start_time = curr_time;
                 }
-             }         
+                else if ((curr_time-watchdog_start_time)>=settings.watchdogSpikeTime*1000){
+                  masterValve.pressureValveOff();
+                  intSettings.master_error = true;
+                  watchdog_start_time = 0;
+                }        
+              }
             }
             else{
               watchdog_start_time=0;
               watchdog_triggered=false;
               masterValve.pressureValveOn();
-              intSettings.master_error = 0;
+              intSettings.master_error = false;
+              //Serial.println("Master Watchdog Reset");
             }
           }
         #endif
@@ -495,8 +510,7 @@ void loop() {
     printMessage(trajCtrl.current_message);
   }
 
-  handleLed();
-    
+  handleLed();    
 }
 
 
@@ -505,29 +519,29 @@ void loop() {
 // HANDLE LED
 void handleLed(){
   // If no errors, set LED on.
-  if (intSettings.channel_error == 0 && intSettings.master_error == 0){
+  if (!intSettings.channel_error && !intSettings.master_error){
     led_pin_state = HIGH;
     digitalWrite(LED_BUILTIN,led_pin_state);
-    return;
   }
-  // Flash 2x every second if overpressure is measured in the outputs
-  if (intSettings.channel_error == 1){
-    led_error_time=500;
-  }
+  // If errors, blink LEDs
+  else{
+    // Flash 1x every second if overpressure is measured in the input
+    if (intSettings.master_error){
+      led_error_time=1000;
+    }
+    
+    // Flash 2x every second if overpressure is measured in the outputs
+    else if (intSettings.channel_error){
+      led_error_time=500;
+    }
   
-  // Flash 1x every second if overpressure is measured in the input
-  else if (intSettings.master_error == 1){
-    led_error_time=1000;
+    // Set LED state  
+    if (currentTime-previousLEDTime>= led_error_time/2){
+      led_pin_state = !led_pin_state;
+      digitalWrite(LED_BUILTIN,led_pin_state);
+      previousLEDTime=currentTime;
+    }
   }
-
-  // Set LED state  
-  if (currentTime-previousLEDTime>= led_error_time/2){
-    led_pin_state = !led_pin_state;
-    digitalWrite(LED_BUILTIN,led_pin_state);
-    previousLEDTime=currentTime;
-    return;
-  }
-  
 }
 
 

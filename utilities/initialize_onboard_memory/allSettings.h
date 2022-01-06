@@ -11,12 +11,14 @@ class globalSettings
     unsigned int looptime = 0;
     bool outputsOn=false;
     unsigned int lcdLoopTime = 500;
-    bool useMasterPressure=false;
-    bool masterPressureOutput=false;
+    bool useMasterPressure=true;
+    bool masterPressureOutput=true;
     float maxPressure = 60;
     unsigned int watchdogSpikeTime = 100;
+    unsigned int channelWatchedogSpikeTime = 300;
     unsigned int units[2] = {0, 0};
-    
+    unsigned long currentTime = 0;
+    unsigned long currentTimeOffset = 0;    
 };
 
 
