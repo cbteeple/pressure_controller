@@ -30,11 +30,11 @@
 //Include the config file from the system you are using
 //#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_vacuum.h"
-#include "config/config_V_3_4_no_master.h"
+//#include "config/config_V_3_4_no_master.h"
 //#include "config/config_V_3_4_fivechannel.h"
 //#include "config/config_V_3_4_microprop.h"
 //#include "config/config_V_3_4.h"
-//#include "config/config_V_3_4_9chan.h"
+#include "config/config_V_3_4_9chan.h"
 //#include "config/config_hydraulic.h"
 
 
@@ -364,7 +364,7 @@ void loop() {
 
           // If the mode gets reset after a pressure watchdog is triggered, clear error
           if (ctrlSettings[i].controlMode!=0){
-            intSettings.error_state = 0;
+            intSettings.channel_error = 0;
           }
           
       }
@@ -418,14 +418,14 @@ void loop() {
         //Software Watchdog - If pressure exceeds max, vent forever until the mode gets reset.
         if (pressures[i] > ctrlSettings[i].maxPressure){
           ventUntilReset();
-          intSettings.error_state = 1;
+          intSettings.channel_error = 1;
         }
 
         //Software Watchdog on input pressure line
         #if(MASTER_SENSOR)
           if (settings.useMasterPressure){
             if (masterPressure > settings.maxPressure){
-              if (!watchdog_triggered){
+              if (!watchdog_triggered && !intSettings.master_error){
                 watchdog_triggered=true;
                 watchdog_start_time = curr_time;
               }
@@ -433,7 +433,7 @@ void loop() {
                 if ((curr_time-watchdog_start_time)>=settings.watchdogSpikeTime){
                   watchdog_triggered=false;
                   masterValve.pressureValveOff();
-                  intSettings.error_state = 2;
+                  intSettings.master_error = 1;
                   watchdog_start_time = 0;
                 }
              }         
@@ -442,7 +442,7 @@ void loop() {
               watchdog_start_time=0;
               watchdog_triggered=false;
               masterValve.pressureValveOn();
-              intSettings.error_state = 0;
+              intSettings.master_error = 0;
             }
           }
         #endif
@@ -505,18 +505,18 @@ void loop() {
 // HANDLE LED
 void handleLed(){
   // If no errors, set LED on.
-  if (intSettings.error_state == 0){
+  if (intSettings.channel_error == 0 && intSettings.master_error == 0){
     led_pin_state = HIGH;
     digitalWrite(LED_BUILTIN,led_pin_state);
     return;
   }
   // Flash 2x every second if overpressure is measured in the outputs
-  if (intSettings.error_state == 1){
+  if (intSettings.channel_error == 1){
     led_error_time=500;
   }
   
   // Flash 1x every second if overpressure is measured in the input
-  else if (intSettings.error_state == 2){
+  else if (intSettings.master_error == 1){
     led_error_time=1000;
   }
 

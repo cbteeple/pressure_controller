@@ -983,7 +983,9 @@ void CommandHandler::GetCmdSpecVersion(){
 void CommandHandler::GetErrorState(){
   if (broadcast) {
     bc_string += "ERROR: ";
-    bc_string += String(intSettings->error_state);
+    bc_string += String(intSettings->master_error);
+    bc_string += "\t";
+    bc_string += String(intSettings->channel_error);
     }
 }
 

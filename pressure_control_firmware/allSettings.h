@@ -8,9 +8,10 @@
 class internalSettings
 {
   public:
-    const unsigned int firmware_version[3] = {2,3,4};
+    const unsigned int firmware_version[3] = {2,3,5};
     const unsigned int cmd_spec_version[3] = {2,4,0};
-    unsigned int error_state = 0;
+    int master_error = 0;
+    int channel_error = 0;
 };
 
 
