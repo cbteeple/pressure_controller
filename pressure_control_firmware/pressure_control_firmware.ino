@@ -30,11 +30,11 @@
 //Include the config file from the system you are using
 //#include "config/config_pneumatic_teensy8.h"
 //#include "config/config_vacuum.h"
-//#include "config/config_V_3_4_no_master.h"
+#include "config/config_V_3_4_no_master.h"
 //#include "config/config_V_3_4_fivechannel.h"
 //#include "config/config_V_3_4_microprop.h"
 //#include "config/config_V_3_4.h"
-#include "config/config_V_3_4_9chan.h"
+//#include "config/config_V_3_4_9chan.h"
 //#include "config/config_hydraulic.h"
 
 
@@ -563,15 +563,15 @@ void handleLed(){
 
 
 // Set the data resolution based on the number of channels
-if (MAX_NUM_CHANNELS<=4){
+#if MAX_NUM_CHANNELS<=4
   const unsigned int data_resolution = 3;
-}
-else if (MAX_NUM_CHANNELS<=8){
-  const unsigned int data_resolution = 2;
-}
-else{
-  const unsigned int data_resolution = 1;
-}
+#else
+  #if MAX_NUM_CHANNELS<=8
+    const unsigned int data_resolution = 2;
+  #else
+    const unsigned int data_resolution = 1;
+  #endif
+#endif
   
 
 #else
